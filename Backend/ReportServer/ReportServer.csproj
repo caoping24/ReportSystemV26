@@ -1,0 +1,67 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ApplicationIcon>AppIco\SL_Icon_Color.ico</ApplicationIcon>
+		<PlatformTarget>AnyCPU</PlatformTarget>			
+	</PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="AppIco\SL_Icon_Color.ico" />
+    <None Remove="AppIco\SL_Icon_Gray.ico" />
+    <None Remove="AppIco\SL_Icon_Green.ico" />
+    <None Remove="MainPciture.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CenterBackend\CenterBackend.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="AppIco\SL_Icon_Color.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="AppIco\SL_Icon_Gray.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="AppIco\SL_Icon_Green.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Picture\MainPciture.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+	<Target Name="CopyWebRootToWpfPublish" AfterTargets="Publish">
+		<ItemGroup>
+			<WebRootSourceFiles  Include="$(ProjectDir)..\CenterBackend\wwwroot\**\*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(WebRootSourceFiles)" DestinationFolder="$(PublishDir)wwwroot\%(WebRootSourceFiles.RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true">
+			<Output TaskParameter="CopiedFiles" ItemName="WebRootCopiedFiles" />
+		</Copy>
+
+		<ItemGroup>
+			<ReportSourceFiles  Include="$(ProjectDir)..\CenterBackend\Report\**\*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(ReportSourceFiles)" DestinationFolder="$(PublishDir)Report\%(ReportSourceFiles.RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true">
+			<Output TaskParameter="CopiedFiles" ItemName="ReportSourceFiles" />
+		</Copy>
+	</Target>
+</Project>
