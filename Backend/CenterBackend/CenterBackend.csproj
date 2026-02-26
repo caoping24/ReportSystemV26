@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <Platforms>AnyCPU</Platforms>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="IServer\**" />
+    <Compile Remove="Server\**" />
+    <Compile Remove="wwwroot\Images\**" />
+    <Content Remove="IServer\**" />
+    <Content Remove="Server\**" />
+    <Content Remove="wwwroot\Images\**" />
+    <EmbeddedResource Remove="IServer\**" />
+    <EmbeddedResource Remove="Server\**" />
+    <EmbeddedResource Remove="wwwroot\Images\**" />
+    <None Remove="IServer\**" />
+    <None Remove="Server\**" />
+    <None Remove="wwwroot\Images\**" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DotSwashbuckle.AspNetCore" Version="3.0.11" />
+		<PackageReference Include="Mapster" Version="7.4.0" />
+		<PackageReference Include="Masuit.Tools.AspNetCore" Version="2025.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Session" Version="2.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+		<PackageReference Include="NPOI" Version="2.7.5" />
+		<PackageReference Include="SharpZipLib" Version="1.4.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\Model\" />
+	  <Folder Include="wwwroot\Log\" />
+	  <Folder Include="wwwroot\Temp\" />
+	</ItemGroup>
+	<ItemGroup>
+		<Content Update="wwwroot\**\*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Repository\ReportRepository\CenterReport.Repository.csproj" />
+	  <ProjectReference Include="..\Repository\UserRepository\CenterUser.Repository.csproj" />
+	</ItemGroup>
+</Project>
