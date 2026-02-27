@@ -1,9 +1,8 @@
 ﻿using CenterBackend.IServices;
 using CenterBackend.Logging;
-using CenterBackend.Models;
 using ICSharpCode.SharpZipLib.Zip;
-using Microsoft.AspNetCore.Mvc;
-using System.Web;
+
+
 namespace CenterBackend.Services
 {
     /// <summary>
@@ -19,7 +18,33 @@ namespace CenterBackend.Services
             this._webHostEnv = webHostEnv;
         }
 
-        // 文件夹压缩包下载(压缩指定文件夹内所有内容为Zip包含子文件夹+保持原结构)
+        // 下载单个文件
+        public (string FilePath, string ContentType, string DownloadFileName) DownloadFileInfo(string sourceFileDirectory, string downloadFileName)
+        {
+            // 检查参数是否为空
+            if (string.IsNullOrWhiteSpace(sourceFileDirectory))
+            {
+                throw new ArgumentNullException(nameof(sourceFileDirectory));
+            }
+            if (string.IsNullOrWhiteSpace(downloadFileName))
+            {
+                throw new ArgumentNullException(nameof(downloadFileName));
+            }
+
+            var filePath = Path.Combine(sourceFileDirectory, downloadFileName);
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException(nameof(filePath), "要下载的文件不存在");
+            }
+
+            return (
+                 FilePath: filePath,
+                 ContentType: GetMimeType(filePath),
+                 DownloadFileName: downloadFileName
+             );
+        }
+
+        // 将文件夹压缩为Zip包
         public bool CompressFolderToZip(string sourceFolderDirectory, string zipSaveDirectory, string zipFileName)
         {
             try
@@ -27,9 +52,9 @@ namespace CenterBackend.Services
                 if (!Directory.Exists(sourceFolderDirectory)) throw new DirectoryNotFoundException($"文件夹不存在：{sourceFolderDirectory}");//校验源文件夹
 
                 if (string.IsNullOrWhiteSpace(zipSaveDirectory))
-            {
+                {
                     return false;
-            }
+                }
                 CreateFolder(zipSaveDirectory);//自动创建存储目录
                 string zipSavePath = Path.Combine(zipSaveDirectory, zipFileName);
                 using (var fs = new FileStream(zipSavePath, FileMode.Create, FileAccess.Write))
@@ -39,7 +64,7 @@ namespace CenterBackend.Services
                     CompressDirectory(sourceFolderDirectory, zipStream, sourceFolderDirectory);//递归压缩文件/子文件夹
                     zipStream.Finish();
                 }
-                return File.Exists(zipSavePath);//校验压缩包是否生成
+                return File.Exists(zipSavePath);
             }
             catch
             {
@@ -47,7 +72,7 @@ namespace CenterBackend.Services
             }
         }
 
-        // 单个文件压缩包下载(压缩为独立Zip包)
+        // 将单个文件压缩为Zip包
         public bool CompressSingleFileToZip(string sourceFilePath, string zipSaveDirectory, string zipFileName)
         {
             try
@@ -79,27 +104,42 @@ namespace CenterBackend.Services
                     zipStream.CloseEntry();
                     zipStream.Finish();
                 }
-                return File.Exists(zipSavePath);//校验压缩包是否生成
+                return File.Exists(zipSavePath);
             }
             catch
             {
                 return false;
             }
         }
-        // 单个文件直接下载,不压缩
-        public (FileStream? stream, string? encodeFileName) DownloadSingleFile(string sourceFileDirectory, string fileName)
+
+        // 创建文件夹兼容单层/多层，路径存在则跳过，无异常抛出
+        public void CreateFolder(string folderDirectory)
+        {
+            if (!string.IsNullOrWhiteSpace(folderDirectory) && !Directory.Exists(folderDirectory))//判空+判存在
+            {
+                Directory.CreateDirectory(folderDirectory);
+            }
+        }
+
+        // 复制文件(自动创建目标文件夹)
+        public bool CopyFile(string sourceFilePath, string targetFilePath, bool overwrite = true)
         {
             try
             {
-                string filePath = Path.Combine(sourceFileDirectory, fileName);
-                if (!File.Exists(filePath)) return (null, null);
-                var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);// 只读方式打开文件流，共享读取（文件被占用也能下载），流式返回，不加载到内存
-                string encodeFileName = HttpUtility.UrlEncode(fileName, System.Text.Encoding.UTF8);     // 解决中文文件名下载乱码问题
-                return (fileStream, encodeFileName);
+                if (!File.Exists(sourceFilePath))
+                    return false;
+
+                string? targetFolder = Path.GetDirectoryName(targetFilePath);//提取目标文件夹路径
+                if (string.IsNullOrWhiteSpace(targetFolder))
+                    return false;
+
+                CreateFolder(targetFolder);//创建目标文件夹
+                File.Copy(sourceFilePath, targetFilePath, overwrite);
+                return true;
             }
             catch
             {
-                return (null, null);
+                return false;
             }
         }
 
@@ -131,36 +171,24 @@ namespace CenterBackend.Services
             }
         }
 
-        // 创建文件夹兼容单层/多层，路径存在则跳过，无异常抛出
-        public void CreateFolder(string folderDirectory)
+        private static string GetMimeType(string filePath)
         {
-            if (!string.IsNullOrWhiteSpace(folderDirectory) && !Directory.Exists(folderDirectory))//判空+判存在
-        {
-                Directory.CreateDirectory(folderDirectory);
-            }
-        }
-
-        // 复制文件(自动创建目标文件夹)
-        public bool CopyFile(string sourceFilePath, string targetFilePath, bool overwrite = true)
-        {
-            try
+            string extension = Path.GetExtension(filePath).ToLowerInvariant();
+            return extension switch
             {
-                if (!File.Exists(sourceFilePath)) throw new FileNotFoundException($"源文件不存在：{sourceFilePath}");//校验源文件
-
-                string? targetFolder = Path.GetDirectoryName(targetFilePath);//提取目标文件夹路径
-                if (string.IsNullOrWhiteSpace(targetFolder))
-                {
-                    return false;
-                }
-
-                CreateFolder(targetFolder);//创建目标文件夹
-                File.Copy(sourceFilePath, targetFilePath, overwrite);
-                return true;
-            }
-            catch
-            {
-                return false;//异常则返回失败
-            }
+                ".txt" => "text/plain",
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".xls" => "application/vnd.ms-excel",
+                ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".zip" => "application/zip",
+                ".rar" => "application/x-rar-compressed",
+                ".csv" => "text/csv",
+                _ => "application/octet-stream", // 默认二进制流
+            };
         }
 
     }

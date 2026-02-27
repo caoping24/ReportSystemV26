@@ -1,6 +1,7 @@
 using CenterBackend.IServices;
 using CenterBackend.Logging;
 using CenterBackend.Models;
+using CenterBackend.Services;
 using Masuit.Tools;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
@@ -79,48 +80,46 @@ namespace CenterBackend.Controllers
             return Ok(fileInfo);
         }
 
-        /// <summary>
-        /// 下载大文件压缩包测试
-        /// </summary>
-        /// <returns></returns>2026-01-26
-        /// <exception cref=""></exception>
-        [HttpGet("ZipDownloadFile")]
-        public async Task<IActionResult> DownloadZipFileBig(String timeStr, int type)
+        // 下载单个文件测试
+        [HttpGet("DownloadSingleFile")]
+        public async Task<IActionResult> DownloadSingleFile(String timeStr )
         {
-            string zipFileName = "default.zip";
             var filePathGenerator = new FilePathGenerator(_webHostEnv);
-            var fileInfo = filePathGenerator.GetDay(timeStr.ToDateTime());
 
-            var sourceFolder = fileInfo.Directory;
-            string tempFolder = filePathGenerator.TempDirectory;
-                    try
-                    {
-                if (Directory.Exists(tempFolder)) { Directory.Delete(tempFolder, recursive: true); }// 直接删除整个目录及所有内容
-                bool compressSuccess = _fileService.CompressFolderToZip(sourceFolder, tempFolder, zipFileName);//调用FileService 压缩文件夹为Zip包
-                if (!compressSuccess)
-                {
-                    var msg = "压缩失败，文件不存在或被占用.";
-                    await _logger.LogErrorAsync(msg);
-                    return BadRequest(msg);
-                }
+            PathAndName fileInfo = filePathGenerator.GetDay(timeStr.ToDateTime());
 
-                string tempZipFullPath = Path.Combine(tempFolder, zipFileName);//生成的压缩文件完整路径
-                if (!System.IO.File.Exists(tempZipFullPath))
-                {
-                    var msg = "压缩成功，但未生成下载文件";
-                    await _logger.LogErrorAsync(msg);
-                    return BadRequest(msg);
-                }
-                var fileStream = new FileStream(tempZipFullPath, FileMode.Open, FileAccess.Read, FileShare.Read,
-                    bufferSize: 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
-                await _logger.LogInfoAsync($"下载Zip文件成功.");
-                return File(fileStream, MediaTypeNames.Application.Zip, zipFileName);// 流式返回，ASP.NET Core自动管理流释放
+            try
+            {
+                var (filePath, contentType, downloadFileName) = _fileService.DownloadFileInfo(fileInfo.Directory, fileInfo.FileName);
+                return PhysicalFile(filePath, contentType, downloadFileName);//官方推荐：直接用 PhysicalFile 自动处理文件流、响应头、范围请求（大文件下载）
             }
             catch (Exception ex)
             {
-                var msg = $"下载失败：{ex.Message}";
-                await _logger.LogErrorAsync(msg);
-                return BadRequest(msg);
+                return new BadRequestObjectResult(new { success = false, msg = $"{ex}" });
+            }
+        }
+
+        // 下载单个ZIP文件测试
+        [HttpGet("DownloadZipFile")]
+        public async Task<IActionResult> DownloadZipFile(String timeStr)
+        {
+            var filePathGenerator = new FilePathGenerator(_webHostEnv);
+
+            PathAndName fileInfo = filePathGenerator.GetDay(timeStr.ToDateTime());
+
+            try
+            {
+                bool isSuccess = _fileService.CompressFolderToZip(fileInfo.Directory, filePathGenerator.TempDirectory, "测试.zip");
+                if (isSuccess)
+                {
+                    var (filePath, contentType, downloadFileName) = _fileService.DownloadFileInfo(filePathGenerator.TempDirectory, "测试.zip");
+                    return PhysicalFile(filePath, contentType, downloadFileName);//官方推荐：直接用 PhysicalFile 自动处理文件流、响应头、范围请求（大文件下载）
+                }
+                return new BadRequestObjectResult(new { success = false, msg = "下载失败" });
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new { success = false, msg = $"{ex}" });
             }
         }
     }
