@@ -1,4 +1,5 @@
-﻿using CenterBackend.IServices;
+﻿using CenterBackend.IReportServices;
+using CenterBackend.IServices;
 using CenterBackend.IUserServices;
 using CenterBackend.Logging;
 using CenterBackend.Middlewares;
