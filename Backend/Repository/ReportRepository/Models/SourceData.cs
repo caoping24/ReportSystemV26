@@ -3,6 +3,7 @@ using System;
 
 namespace CenterReport.Repository.Models
 {
+
     [Table("SourceData")]
     public class SourceData
     {
@@ -180,3 +181,4 @@ namespace CenterReport.Repository.Models
         public float? Cell150 { get; set; }
     }
 }
+

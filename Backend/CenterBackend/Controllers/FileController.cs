@@ -93,13 +93,14 @@ namespace CenterBackend.Controllers
 
             var sourceFolder = fileInfo.Directory;
             string tempFolder = filePathGenerator.TempDirectory;
-            try
-            {
+                    try
+                    {
                 if (Directory.Exists(tempFolder)) { Directory.Delete(tempFolder, recursive: true); }// 直接删除整个目录及所有内容
                 bool compressSuccess = _fileService.CompressFolderToZip(sourceFolder, tempFolder, zipFileName);//调用FileService 压缩文件夹为Zip包
                 if (!compressSuccess)
                 {
                     var msg = "压缩失败，文件不存在或被占用.";
+                    await _logger.LogErrorAsync(msg);
                     return BadRequest(msg);
                 }
 
@@ -107,15 +108,18 @@ namespace CenterBackend.Controllers
                 if (!System.IO.File.Exists(tempZipFullPath))
                 {
                     var msg = "压缩成功，但未生成下载文件";
+                    await _logger.LogErrorAsync(msg);
                     return BadRequest(msg);
                 }
                 var fileStream = new FileStream(tempZipFullPath, FileMode.Open, FileAccess.Read, FileShare.Read,
                     bufferSize: 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
+                await _logger.LogInfoAsync($"下载Zip文件成功.");
                 return File(fileStream, MediaTypeNames.Application.Zip, zipFileName);// 流式返回，ASP.NET Core自动管理流释放
             }
             catch (Exception ex)
             {
                 var msg = $"下载失败：{ex.Message}";
+                await _logger.LogErrorAsync(msg);
                 return BadRequest(msg);
             }
         }

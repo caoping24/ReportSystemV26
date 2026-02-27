@@ -2,6 +2,7 @@
 using CenterBackend.IServices;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CenterBackend.Services
 {
@@ -206,7 +207,7 @@ namespace CenterBackend.Services
             var StartTime = time.Date;
             StartTime = StartTime.AddHours(8).AddMinutes(30);
             var EndTime = time.Date;
-            EndTime = EndTime.AddHours(8).AddMinutes(40);
+                EndTime = EndTime.AddHours(8).AddMinutes(40);
 
             List<CalculatedData> dataList = await _calculatedData.GetByDateTimeRangeAsync(StartTime, EndTime, 1);
 

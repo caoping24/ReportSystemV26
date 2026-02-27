@@ -18,6 +18,17 @@ namespace CenterBackend.Services
             this._logger = IAppLogger;
             this._webHostEnv = webHostEnv;
         }
+        /// <summary>
+        /// 创建文件夹兼容单层/多层，路径存在则跳过，无异常抛出
+        /// </summary>
+        /// <param name="folderPath">待创建的文件夹完整路径</param>
+        public void CreateFolder(string folderPath)
+        {
+            if (!string.IsNullOrWhiteSpace(folderPath) && !Directory.Exists(folderPath))//判空+判存在
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+        }
 
 
         // 文件夹压缩包下载(压缩指定文件夹内所有内容为Zip包含子文件夹+保持原结构)
@@ -28,9 +39,9 @@ namespace CenterBackend.Services
                 if (!Directory.Exists(sourceFolderDirectory)) throw new DirectoryNotFoundException($"文件夹不存在：{sourceFolderDirectory}");//校验源文件夹
 
                 if (string.IsNullOrWhiteSpace(zipSaveDirectory))
-                {
+            {
                     return false;
-                }
+            }
                 CreateFolder(zipSaveDirectory);//自动创建存储目录
                 string zipSavePath = Path.Combine(zipSaveDirectory, zipFileName);
                 using (var fs = new FileStream(zipSavePath, FileMode.Create, FileAccess.Write))
@@ -67,6 +78,7 @@ namespace CenterBackend.Services
                     var fileInfo = new FileInfo(sourceFilePath);
                     var zipEntry = new ZipEntry(fileInfo.Name) { DateTime = DateTime.Now };//创建压缩项
                     zipStream.PutNextEntry(zipEntry);
+
                     byte[] buffer = new byte[4096];//4K缓冲区，平衡性能与内存
                     using (var fileStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read))
                     {
@@ -135,7 +147,7 @@ namespace CenterBackend.Services
         public void CreateFolder(string folderDirectory)
         {
             if (!string.IsNullOrWhiteSpace(folderDirectory) && !Directory.Exists(folderDirectory))//判空+判存在
-            {
+        {
                 Directory.CreateDirectory(folderDirectory);
             }
         }
@@ -151,17 +163,46 @@ namespace CenterBackend.Services
                 if (string.IsNullOrWhiteSpace(targetFolder))
                 {
                     return false;
-                }
+        }
 
                 CreateFolder(targetFolder);//创建目标文件夹
                 File.Copy(sourceFilePath, targetFilePath, overwrite);
                 return true;
             }
             catch
-            {
+        {
                 return false;//异常则返回失败
-            }
         }
+        #region 私有辅助方法
+        /// <summary>
+        /// 获取指定日期的本周第一天(周一为周首)
+        /// </summary>
+        /// <param name="dt">目标日期</param>
+        /// <returns>本周一日期</returns>
+        private DateTime GetWeekFirstDay(DateTime dt)
+        {
+            int diff = dt.DayOfWeek - DayOfWeek.Monday;//计算与周一的差值
+            if (diff < 0) diff += 7;//周日处理为-1，补7天
+            return dt.AddDays(-diff).Date;
+        }
+        /// <summary>
+        /// 根据目标日期，先获取该周第一天(周一)，再计算【该周是当年的第几周】
+        /// </summary>
+        /// <param name="dt">任意目标日期</param>
+        /// <returns>该周在当年的周序号 1~53</returns>
+        private int GetWeekNumberInYear(DateTime dt)
+        {
 
+            DateTime weekFirstDay = GetWeekFirstDay(dt);
+
+            DateTime yearFirstDay = new DateTime(weekFirstDay.Year, 1, 1);
+            // 当年的第一个周一= 当年元旦的本周一
+            DateTime yearFirstWeekDay = GetWeekFirstDay(yearFirstDay);
+            // 两个周一的间隔天数 / 7  = 周差，+1得到周序号（从1开始）
+            int daysDiff = (int)(weekFirstDay - yearFirstWeekDay).TotalDays;
+            int weekNumber = (daysDiff / 7) + 1;
+            return weekNumber;
+        }
+        #endregion
     }
 }
