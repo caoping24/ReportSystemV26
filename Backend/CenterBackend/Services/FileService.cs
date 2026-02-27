@@ -19,7 +19,6 @@ namespace CenterBackend.Services
             this._webHostEnv = webHostEnv;
         }
 
-
         // 文件夹压缩包下载(压缩指定文件夹内所有内容为Zip包含子文件夹+保持原结构)
         public bool CompressFolderToZip(string sourceFolderDirectory, string zipSaveDirectory, string zipFileName)
         {
@@ -28,9 +27,9 @@ namespace CenterBackend.Services
                 if (!Directory.Exists(sourceFolderDirectory)) throw new DirectoryNotFoundException($"文件夹不存在：{sourceFolderDirectory}");//校验源文件夹
 
                 if (string.IsNullOrWhiteSpace(zipSaveDirectory))
-                {
+            {
                     return false;
-                }
+            }
                 CreateFolder(zipSaveDirectory);//自动创建存储目录
                 string zipSavePath = Path.Combine(zipSaveDirectory, zipFileName);
                 using (var fs = new FileStream(zipSavePath, FileMode.Create, FileAccess.Write))
@@ -67,6 +66,7 @@ namespace CenterBackend.Services
                     var fileInfo = new FileInfo(sourceFilePath);
                     var zipEntry = new ZipEntry(fileInfo.Name) { DateTime = DateTime.Now };//创建压缩项
                     zipStream.PutNextEntry(zipEntry);
+
                     byte[] buffer = new byte[4096];//4K缓冲区，平衡性能与内存
                     using (var fileStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read))
                     {
@@ -135,7 +135,7 @@ namespace CenterBackend.Services
         public void CreateFolder(string folderDirectory)
         {
             if (!string.IsNullOrWhiteSpace(folderDirectory) && !Directory.Exists(folderDirectory))//判空+判存在
-            {
+        {
                 Directory.CreateDirectory(folderDirectory);
             }
         }

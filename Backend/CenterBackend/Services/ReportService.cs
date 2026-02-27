@@ -3,11 +3,13 @@ using CenterBackend.IServices;
 using CenterReport.Repository;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
+using Masuit.Tools.DateTimeExt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
+using Org.BouncyCastle.Asn1.X509;
 using System.Reflection;
 
 namespace CenterBackend.Services
@@ -666,7 +668,7 @@ namespace CenterBackend.Services
                 else { SetXlsxCellValue(srcSheet, Range1, 21, 0); }
                 if (data.Cell21 != null) { SetXlsxCellValue(srcSheet, Range1, 22, data.Cell21.Value); }
                 if (data.Cell22 != null) //摩尔比 大于0 小于2 
-                {
+                { 
                     if (data.Cell22.Value < 2)
                         SetXlsxCellValue(srcSheet, Range1, 23, data.Cell22.Value);
                 }
@@ -1047,16 +1049,16 @@ namespace CenterBackend.Services
                 if (data.Cell19 != null) { SetXlsxCellValue(srcSheet, Range1, 20, data.Cell19.Value * 1000); }
                 if (i != 12)// 每小时的差值
                 {
-                    var prevData = dataList.ElementAt(i - 1);
+                        var prevData = dataList.ElementAt(i - 1);
                     if (data.Cell20 != null && prevData != null && prevData.Cell20 != null)
-                    {
+                        {
                         float currentVal = Convert.ToSingle(data.Cell20);
                         float prevVal = Convert.ToSingle(prevData.Cell20);
-                        float result = (float)Math.Round((currentVal - prevVal) / 1000, 2);
-                        SetXlsxCellValue(srcSheet, Range1, 21, result);
+                            float result = (float)Math.Round((currentVal - prevVal) / 1000, 2);
+                            SetXlsxCellValue(srcSheet, Range1, 21, result);
+                        }
                     }
-                }
-                else { SetXlsxCellValue(srcSheet, Range1, 21, 0); }
+                    else { SetXlsxCellValue(srcSheet, Range1, 21, 0); }
                 if (data.Cell21 != null) { SetXlsxCellValue(srcSheet, Range1, 22, data.Cell21.Value); }
                 if (data.Cell22 != null) //摩尔比 大于0 小于2 
                 {

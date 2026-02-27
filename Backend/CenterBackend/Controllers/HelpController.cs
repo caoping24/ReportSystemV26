@@ -2,6 +2,8 @@
 using CenterBackend.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
+using System.IO;
 
 namespace CenterBackend.Controllers
 {
@@ -21,7 +23,7 @@ namespace CenterBackend.Controllers
         }
 
 
-        [HttpGet("Version")]
+        [HttpGet("Version")] 
         public async Task<IActionResult> Version()
         {
             return Ok(new
