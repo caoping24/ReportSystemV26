@@ -13,6 +13,7 @@ namespace CenterBackend.IServices
         /// <param name="request">分页参数</param>
         /// <returns>分页结果</returns>
         Task<PaginationResult<ReportRecord>> GetReportsByPageAsync(PaginationRequest request);
+        Task<bool> UpdateSourceDataFieldAsync(string dateStr, int hour, string prop, string valueStr);
 
     }
 }

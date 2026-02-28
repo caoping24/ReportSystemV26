@@ -1,15 +1,16 @@
-﻿using CenterBackend.Models;
-namespace CenterBackend.Models.ExcelDataView
+﻿namespace CenterBackend.Models.ExcelDataView
 {
-    //集合模型
-    public class DayReportCollection
+
+    public class DayWorkBook : BaseSheet
     {
-        public List<DayReportModel> ReportList { get; set; } = new List<DayReportModel>();
+        public DayWorkSheet?[] DaySheet { get; set; } = [];
+        public DayWorkSheet?[] NightSheet { get; set; } = [];
+
     }
 
-    public class DayReportModel
+    public class DayWorkSheet
     {
-        public string TimePoint { get; set; }
+        public int TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -160,11 +161,6 @@ namespace CenterBackend.Models.ExcelDataView
         public float? Cell148 { get; set; }
         public float? Cell149 { get; set; }
         public float? Cell150 { get; set; }
-
-
-
     }
-
-
 
 }

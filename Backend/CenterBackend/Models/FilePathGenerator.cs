@@ -129,6 +129,7 @@ namespace CenterBackend.Models
     public class PathAndName
     {
         public int Type { get; set; } = -1;//默认值表示未设置类型，调用方应检查此值以验证请求参数的有效性
+        public DateTime ReportedTime { get; set; }
         public string Directory { get; set; } = string.Empty;
         public string FileName { get; set; } = string.Empty;
         public string FullPath
@@ -143,6 +144,7 @@ namespace CenterBackend.Models
             }
         }
         public string ModFilePath { get; set; } = string.Empty;
+        
 
     }
 }

@@ -12,13 +12,11 @@ namespace CenterBackend.Controllers
     public class ReportRecordController : ControllerBase
     {
         private readonly IReportRecordService _reportRecordService;
-        private readonly IReportService _reportService;
 
-
-        public ReportRecordController(IReportRecordService reportRecordService, IReportService reportService)
+        public ReportRecordController(IReportRecordService reportRecordService)
         {
             this._reportRecordService = reportRecordService;
-            this._reportService = reportService;
+
         }
 
         /// <summary>
@@ -110,86 +108,86 @@ namespace CenterBackend.Controllers
 
             try
             {
-                // 当天
-                DateTime startTime = queryDate.Date.AddHours(0);
-                DateTime endTime = startTime.AddHours(23).AddMinutes(59);
+                //// 当天
+                //DateTime startTime = queryDate.Date.AddHours(0);
+                //DateTime endTime = startTime.AddHours(23).AddMinutes(59);
 
-                var calculatedDatas = await _reportService.GetSourceData(startTime, endTime);
+                //var calculatedDatas = new List a; //await _reportService.GetSourceData(startTime, endTime);
 
-                // 3.构建【带日期维度的分组键】
-                var dataWithKey = calculatedDatas.Select(cd => new
-                {
-                    Data = cd,
-                    GroupKey = cd.ReportedTime >= startTime && cd.ReportedTime < endTime
-                        ? cd.ReportedTime.Hour
-                        : cd.ReportedTime.Hour + 100
-                }).ToList();
+                //// 3.构建【带日期维度的分组键】
+                //var dataWithKey = calculatedDatas.Select(cd => new
+                //{
+                //    Data = cd,
+                //    GroupKey = cd.ReportedTime >= startTime && cd.ReportedTime < endTime
+                //        ? cd.ReportedTime.Hour
+                //        : cd.ReportedTime.Hour + 100
+                //}).ToList();
 
-                // 4. 按唯一分组键分组（保留原有逻辑）
-                var hourGroupDict = dataWithKey
-                    .GroupBy(item => item.GroupKey)
-                    .ToDictionary(g => g.Key, g => g.FirstOrDefault()?.Data);
+                //// 4. 按唯一分组键分组（保留原有逻辑）
+                //var hourGroupDict = dataWithKey
+                //    .GroupBy(item => item.GroupKey)
+                //    .ToDictionary(g => g.Key, g => g.FirstOrDefault()?.Data);
 
-                var hourList = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 };
+                //var hourList = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 };
 
-                var hourDataList = hourList.Select((hour, index) =>// 6. 构建返回数据（核心修改：计算真实时间+动态判定IsNextDay）
-                {
+                //var hourDataList = hourList.Select((hour, index) =>// 6. 构建返回数据（核心修改：计算真实时间+动态判定IsNextDay）
+                //{
 
-                    DateTime realHourTime;
-                    realHourTime = queryDate.Date.AddHours(hour);
-
-
-                    int targetKey = hour;
-                    hourGroupDict.TryGetValue(targetKey, out var targetData);
+                //    DateTime realHourTime;
+                //    realHourTime = queryDate.Date.AddHours(hour);
 
 
-                    // 未来时间：该时段的真实时间 大于 当前系统时间
-                    bool isFutureTime = realHourTime > DateTime.Now;
+                //    int targetKey = hour;
+                //    hourGroupDict.TryGetValue(targetKey, out var targetData);
 
-                    // IsNextDay=true（前端禁用）：未来时间 OR 无对应数据
-                    // IsNextDay=false（前端可编辑）：过去时间 AND 有对应数据
-                    bool isNextDay = isFutureTime || targetData == null;
 
-                    // 初始化返回DTO，赋值核心字段
-                    var hourData = new HourDataDto
-                    {
-                        Hour = hour,
-                        Date = date,
-                        IsNextDay = isNextDay, // 赋值修正后的禁用标识
-                        Cells = new Dictionary<string, string>() // 确保Cells初始化，避免空引用
-                    };
+                //    // 未来时间：该时段的真实时间 大于 当前系统时间
+                //    bool isFutureTime = realHourTime > DateTime.Now;
 
-                    // 7. 填充Cell字段（保留原有格式化逻辑，无数据为空字符串）
-                    hourData.Cells["Cell29"] = targetData?.Cell29?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell30"] = targetData?.Cell30?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell31"] = targetData?.Cell31?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell32"] = targetData?.Cell32?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell33"] = targetData?.Cell33?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell34"] = targetData?.Cell34?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell35"] = targetData?.Cell35?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell56"] = targetData?.Cell56?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell57"] = targetData?.Cell57?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell58"] = targetData?.Cell58?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell59"] = targetData?.Cell59?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell60"] = targetData?.Cell60?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell82"] = targetData?.Cell82?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell83"] = targetData?.Cell83?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell84"] = targetData?.Cell84?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell85"] = targetData?.Cell85?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell86"] = targetData?.Cell86?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell87"] = targetData?.Cell87?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell135"] = targetData?.Cell135?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell136"] = targetData?.Cell136?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell137"] = targetData?.Cell137?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell138"] = targetData?.Cell138?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell139"] = targetData?.Cell139?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell140"] = targetData?.Cell140?.ToString("0.00") ?? "";
-                    hourData.Cells["Cell141"] = targetData?.Cell141?.ToString("0.00") ?? "";
+                //    // IsNextDay=true（前端禁用）：未来时间 OR 无对应数据
+                //    // IsNextDay=false（前端可编辑）：过去时间 AND 有对应数据
+                //    bool isNextDay = isFutureTime || targetData == null;
 
-                    return hourData;
-                }).ToList();
+                //    // 初始化返回DTO，赋值核心字段
+                //    var hourData = new HourDataDto
+                //    {
+                //        Hour = hour,
+                //        Date = date,
+                //        IsNextDay = isNextDay, // 赋值修正后的禁用标识
+                //        Cells = new Dictionary<string, string>() // 确保Cells初始化，避免空引用
+                //    };
 
-                return Ok(hourDataList);
+                //    // 7. 填充Cell字段（保留原有格式化逻辑，无数据为空字符串）
+                //    hourData.Cells["Cell29"] = targetData?.Cell29?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell30"] = targetData?.Cell30?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell31"] = targetData?.Cell31?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell32"] = targetData?.Cell32?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell33"] = targetData?.Cell33?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell34"] = targetData?.Cell34?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell35"] = targetData?.Cell35?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell56"] = targetData?.Cell56?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell57"] = targetData?.Cell57?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell58"] = targetData?.Cell58?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell59"] = targetData?.Cell59?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell60"] = targetData?.Cell60?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell82"] = targetData?.Cell82?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell83"] = targetData?.Cell83?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell84"] = targetData?.Cell84?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell85"] = targetData?.Cell85?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell86"] = targetData?.Cell86?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell87"] = targetData?.Cell87?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell135"] = targetData?.Cell135?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell136"] = targetData?.Cell136?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell137"] = targetData?.Cell137?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell138"] = targetData?.Cell138?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell139"] = targetData?.Cell139?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell140"] = targetData?.Cell140?.ToString("0.00") ?? "";
+                //    hourData.Cells["Cell141"] = targetData?.Cell141?.ToString("0.00") ?? "";
+
+                //    return hourData;
+                //}).ToList();
+
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -217,7 +215,7 @@ namespace CenterBackend.Controllers
             }
             try
             {
-                await _reportService.UpdateSourceDataFieldAsync(
+                await _reportRecordService.UpdateSourceDataFieldAsync(
                         dateStr: request.Date,
                         hour: request.Hour,
                         prop: request.Prop,
