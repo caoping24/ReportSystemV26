@@ -3,7 +3,9 @@ using CenterBackend.Dto;
 using CenterBackend.Exceptions;
 using CenterBackend.IServices;
 using CenterBackend.Logging;
+using CenterBackend.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace CenterBackend.Controllers
 {
@@ -33,117 +35,72 @@ namespace CenterBackend.Controllers
         public async Task<BaseResponse<bool>> AnalysesInsert([FromBody] CalculateAndInsertDto _CalculateAndInsertDto)
         {
             await _logger.LogInfoAsync($"AnalysesInsert:CalculateAndInsertDto: {_CalculateAndInsertDto.Time},{_CalculateAndInsertDto.Time}");
-            if (_CalculateAndInsertDto.Type == 0)
+            if (_CalculateAndInsertDto.type == 0)
             {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "类型错误");
             }
             var result = await reportService.DataAnalyses(_CalculateAndInsertDto);
             return ResultUtils<bool>.Success(result);
         }
-        ///// <summary>
-        /////  根据传入时间查询数据库,生成报表 Type 表示不同的报表类型
-        ///// </summary>
-        ///// <param name="CreateReportDto"></param>
-        ///// <returns></returns>
-        //[HttpPost("BuildReport")]
-        //public async Task<IActionResult> CreateAndBuildReport([FromBody] CreateReportDto _CreateReportDto)
-        //{
-        //    await _logger.LogInfoAsync($"CreateAndBuildReport:CreateReportDto: {_CreateReportDto.Type},{_CreateReportDto.Time}");
 
-        //    var reportFileRoot = Path.Combine(_webHostEnv.ContentRootPath, "Report");//所有报表汇总文件夹
-        //    DateTime tempTime = _CreateReportDto.Time;
-        //    int reportType = _CreateReportDto.Type;
+        //  根据传入时间查询数据库,生成报表 Type 表示不同的报表类型
+        [HttpPost("BuildReport")]
+        public async Task<IActionResult> CreateAndBuildReport([FromBody] CreateReportDto createReportDto)
+        {
+            //await _logger.LogInfoAsync($"CreateAndBuildReport:CreateReportDto: {_CreateReportDto.type},{_CreateReportDto.Time}");
 
-        //    var filePathAndName = _fileService.GetDateFolderPathAndName(reportFileRoot, tempTime);
-        //    if (string.IsNullOrWhiteSpace(filePathAndName.DailyFileName)) return BadRequest("获取文件路径失败，请检查传入日期格式！");
-        //    string? XlsxFilesPath;
-        //    string? XlsxFilesFullPath;
-        //    string? modelFilePath;
-        //    try
-        //    {
-        //        switch (_CreateReportDto.Type)
-        //        {
-        //            case 1: //Daily
-        //                XlsxFilesPath = filePathAndName.DailyFilesPath;
-        //                XlsxFilesFullPath = filePathAndName.DailyFilesFullPath;
-        //                modelFilePath = Path.Combine(_webHostEnv.WebRootPath, "Model\\Model-20260116.xlsx");//日报表模板路径
-        //                break;
-        //            case 2: //Weekly
-        //                XlsxFilesPath = filePathAndName.WeeklyFilesPath;
-        //                XlsxFilesFullPath = filePathAndName.WeeklyFilesFullPath;
-        //                modelFilePath = Path.Combine(_webHostEnv.WebRootPath, "Model\\Model-20251208-Week.xlsx");
-        //                break;
-        //            case 3: //Monthly
-        //                XlsxFilesPath = filePathAndName.MonthlyFilesPath;
-        //                XlsxFilesFullPath = filePathAndName.MonthlyFilesFullPath;
-        //                modelFilePath = Path.Combine(_webHostEnv.WebRootPath, "Model\\Model-20260116.xlsx");
-        //                break;
-        //            case 4: //Yearly
-        //                XlsxFilesPath = filePathAndName.YearlyFilesPath;
-        //                XlsxFilesFullPath = filePathAndName.YearlyFilesFullPath;
-        //                modelFilePath = Path.Combine(_webHostEnv.WebRootPath, "Model\\Model-20260116.xlsx");
-        //                break;
-        //            default:
-        //                return new BadRequestObjectResult(new { success = false, msg = "ReportType不存在" });
-        //        }
-        //        _fileService.CreateFolder(XlsxFilesPath);//自动创建文件夹
-        //        return await reportService.WriteXlsxAndSave(modelFilePath, XlsxFilesFullPath, tempTime, reportType);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest($"操作异常：{ex.Message}");
-        //    }
-        //}
-        ///// <summary>
-        ///// 下载单个excle文件
-        ///// </summary>
-        ///// <param name="loginDto"></param>
-        ///// <returns></returns>
-        //[HttpGet("DownloadExcel")]
-        //public async Task<IActionResult> DownloadFile(String timeStr, int Type)
-        //{
-        //    await _logger.LogInfoAsync($"DownloadFile:timeStr:{timeStr},Type:{Type}");
 
-        //    var modelFilePath = Path.Combine(_webHostEnv.ContentRootPath, "Report");//日报表模板路径
+            var filePathGenerator = new FilePathGenerator(_webHostEnv);
+            PathAndName fileInfo = filePathGenerator.GetByType(createReportDto.Time, createReportDto.Type);
+            if (string.IsNullOrEmpty(fileInfo.FileName))//检查Type是否合法，是否能找到对应的文件路径和文件名
+            {
+                return new BadRequestObjectResult(new { success = false, msg = "无效的请求参数" });
+            }
+            try
+            {
+                _fileService.CreateFolder(fileInfo.Directory);//自动创建文件夹
+                return await reportService.WriteXlsxAndSave(fileInfo.ModFilePath, fileInfo.FullPath, createReportDto.Time, createReportDto.Type);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"操作异常：{ex.Message}");
+            }
+        }
+        /// <summary>
+        /// 下载单个Excel文件
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns></returns>
+        [HttpGet("DownloadExcel")]
+        public async Task<IActionResult> DownloadFile(String timeStr, int type)
+        {
+            //await _logger.LogInfoAsync($"DownloadFile:timeStr:{timeStr},Type:{type}");
+            bool isValid = DateTime.TryParseExact(
+                timeStr,
+                "yyyy-MM-dd HH:mm:ss",
+                CultureInfo.InvariantCulture, // 替代null，避免区域设置影响（比如中文/英文系统）
+                DateTimeStyles.None,
+                out DateTime fileDate);
+            if (!isValid)
+            {
+                return new BadRequestObjectResult(new { success = false, msg = "时间格式错误" });
+            }
+            var filePathGenerator = new FilePathGenerator(_webHostEnv);
+            PathAndName fileInfo = filePathGenerator.GetByType(fileDate, type);
+            if (string.IsNullOrEmpty(fileInfo.FileName))//检查Type是否合法，是否能找到对应的文件路径和文件名
+            {
+                return new BadRequestObjectResult(new { success = false, msg = "无效的请求参数" });
+            }
+            try
+            {
+                var (filePath, contentType, downloadFileName) = _fileService.DownloadFileInfo(fileInfo.Directory, fileInfo.FileName);
+                return PhysicalFile(filePath, contentType, downloadFileName);//官方推荐：直接用 PhysicalFile 自动处理文件流、响应头、范围请求（大文件下载）
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new { success = false, msg = $"{ex}" });
+            }
 
-        //    DateTime dateTime = DateTime.ParseExact(timeStr, "yyyy-MM-dd HH:mm:ss", null);
-        //    var PathAndFileName = _fileService.GetDateFolderPathAndName(modelFilePath, dateTime);
-        //    var DownloadfilePath = string.Empty;
-        //    var DownloadfileName = string.Empty;
-        //    string fileName;
-        //    switch (Type)
-        //    {
-        //        case 1: //Daily
-        //            DownloadfilePath = PathAndFileName.DailyFilesPath;
-        //            DownloadfileName = PathAndFileName.DailyFileName;
-        //            fileName = PathAndFileName.DailyFileName;
-        //            break;
-        //        case 2: //Weekly
-        //            DownloadfilePath = PathAndFileName.WeeklyFilesPath;
-        //            DownloadfileName = PathAndFileName.WeeklyFileName;
-        //            fileName = PathAndFileName.WeeklyFileName;
-        //            break;
-        //        case 3: //Monthly
-        //            DownloadfilePath = PathAndFileName.MonthlyFilesPath;
-        //            DownloadfileName = PathAndFileName.MonthlyFileName;
-        //            fileName = PathAndFileName.MonthlyFileName;
-        //            break;
-        //        case 4: //Yearly
-        //            DownloadfilePath = PathAndFileName.YearlyFilesPath;
-        //            DownloadfileName = PathAndFileName.YearlyFileName;
-        //            fileName = PathAndFileName.YearlyFileName;
-        //            break;
-        //        default:
-        //            return BadRequest("类型错误，请检查传入类型！");
-        //    }
-        //    var (fileStream, encodeFileName) = _fileService.DownloadSingleFile(DownloadfilePath, DownloadfileName);
-        //    if (fileStream == null)
-        //    {
-        //        return NotFound("文件不存在。");
-        //    }
-
-        //    Response.Headers.Append("Content-Disposition", $"attachment;filename={Uri.EscapeDataString(fileName)}");
-        //    return File(fileStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
-        //}
+        }
     }
 }

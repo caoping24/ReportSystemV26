@@ -30,7 +30,7 @@ namespace CenterBackend.Controllers
                 var result = await _dashboardService.getLineChartOne(DateTime.Now);
                 return ResultUtils<LineChartDataDto>.Success(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
                 return ResultUtils<LineChartDataDto>.error();
@@ -45,7 +45,7 @@ namespace CenterBackend.Controllers
                 var result = await _dashboardService.getLineCharTwo(DateTime.Now);
                 return ResultUtils<LineChartDataDto>.Success(result);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
                 return ResultUtils<LineChartDataDto>.error();
@@ -60,7 +60,7 @@ namespace CenterBackend.Controllers
                 var result = await _dashboardService.getLineCharThree(DateTime.Now);
                 return ResultUtils<LineChartDataDto>.Success(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
                 return ResultUtils<LineChartDataDto>.error();
@@ -77,7 +77,7 @@ namespace CenterBackend.Controllers
                 var result = await _dashboardService.getPieChart(DateTime.Now);
                 return ResultUtils<List<PieChartItemDto>>.Success(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
                 return ResultUtils<List<PieChartItemDto>>.error();
@@ -94,7 +94,7 @@ namespace CenterBackend.Controllers
                 var result = await _dashboardService.getCoreChart(DateTime.Now);
                 return ResultUtils<CoreChartDto>.Success(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
                 return ResultUtils<CoreChartDto>.error();

@@ -13,15 +13,19 @@
     <Compile Remove="IServer\**" />
     <Compile Remove="Server\**" />
     <Compile Remove="wwwroot\Images\**" />
+    <Compile Remove="wwwroot\Temp\**" />
     <Content Remove="IServer\**" />
     <Content Remove="Server\**" />
     <Content Remove="wwwroot\Images\**" />
+    <Content Remove="wwwroot\Temp\**" />
     <EmbeddedResource Remove="IServer\**" />
     <EmbeddedResource Remove="Server\**" />
     <EmbeddedResource Remove="wwwroot\Images\**" />
+    <EmbeddedResource Remove="wwwroot\Temp\**" />
     <None Remove="IServer\**" />
     <None Remove="Server\**" />
     <None Remove="wwwroot\Images\**" />
+    <None Remove="wwwroot\Temp\**" />
   </ItemGroup>
 
 	<ItemGroup>
@@ -38,7 +42,6 @@
 	<ItemGroup>
 	  <Folder Include="wwwroot\Model\" />
 	  <Folder Include="wwwroot\Log\" />
-	  <Folder Include="wwwroot\Temp\" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Update="wwwroot\**\*">

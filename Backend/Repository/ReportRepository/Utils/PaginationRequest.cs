@@ -13,7 +13,7 @@
         /// </summary>
         public int PageSize { get; set; } = 10;
 
-        public int Type { get; set; } = 1;
+        public int type { get; set; } = 1;
     }
 
     // 分页响应结果

@@ -21,7 +21,7 @@ namespace CenterReport.Repository.Models
         public DateTime LastChange { get; set; }
 
         // 类型（可空）
-        public int Type { get; set; } = 0;
+        public int type { get; set; } = 0;
         public string? Description { get; set; }
 
     }

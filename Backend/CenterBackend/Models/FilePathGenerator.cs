@@ -1,23 +1,42 @@
-﻿using CenterBackend.IServices;
-using CenterBackend.Logging;
-
+﻿using CenterBackend.Models;
 namespace CenterBackend.Models
 {
-
     public class FilePathGenerator
     {
-        private const string RootDirName = "Report";
-        private const string TempDirName = "Temp";
+        private const string RootDirName = "Report";//报表保存目录名称
+        private const string TempDirName = "Temp";//ZIP临时文件保存目录名称
+        private const string ModelDirName = "Model";//模板文件保存目录名称
+
+        private const string modelFileNameDay = "Model-20260116.xlsx";//各个模板文件的名称
+        private const string modelFileNameMonth = "Model-20251208-Week.xlsx";
+        private const string modelFileNameYear = "Temp";
+        private const string modelFileNameWeek = "Temp";
 
         private readonly IWebHostEnvironment _webHostEnv;
         private readonly string _rootDirectory;
+        private readonly string _modelFileDirectory;
 
-        public  string TempDirectory;
+        public readonly string TempDirectory;
+
         public FilePathGenerator(IWebHostEnvironment webHostEnv)
         {
             _webHostEnv = webHostEnv ?? throw new ArgumentNullException(nameof(webHostEnv), "Web主机环境不能为空");
             _rootDirectory = Path.Combine(_webHostEnv.ContentRootPath, RootDirName);
             TempDirectory = Path.Combine(_webHostEnv.ContentRootPath, TempDirName);
+            _modelFileDirectory = Path.Combine(_webHostEnv.WebRootPath, ModelDirName);
+        }
+
+        public PathAndName GetByType(DateTime fileDate, int type)
+        {
+            PathAndName fileInfo = type switch
+            {
+                1 => GetDay(fileDate),
+                2 => GetMonth(fileDate),
+                3 => GetYear(fileDate),
+                4 => GetWeek(fileDate),
+                _ => new PathAndName(),
+            };
+            return fileInfo;
         }
 
         public PathAndName GetDay(DateTime fileDate)
@@ -25,10 +44,13 @@ namespace CenterBackend.Models
             var date = fileDate.Date;
             var pathAndName = new PathAndName
             {
+                Type = 1,
                 Directory = Path.Combine(_rootDirectory, "日报表", $"{date.Year}-{date.Month:00}"),
                 FileName = $"日报表-{date.Year}-{date.Month:00}-{date.Day:00}.xlsx",
+
+                ModFilePath = Path.Combine(_modelFileDirectory, modelFileNameDay),
             };
-            return pathAndName; 
+            return pathAndName;
         }
 
         public PathAndName GetMonth(DateTime fileDate)
@@ -36,8 +58,11 @@ namespace CenterBackend.Models
             var date = fileDate.Date;
             var pathAndName = new PathAndName
             {
+                Type = 2,
                 Directory = Path.Combine(_rootDirectory, "月报表", $"{date.Year}"),
                 FileName = $"月报表-{date.Year}-{date.Month:00}.xlsx",
+
+                ModFilePath = Path.Combine(_modelFileDirectory, modelFileNameMonth),
             };
             return pathAndName;
         }
@@ -47,8 +72,11 @@ namespace CenterBackend.Models
             var date = fileDate.Date;
             var pathAndName = new PathAndName
             {
+                Type = 3,
                 Directory = Path.Combine(_rootDirectory, "年报表"),
                 FileName = $"年报表-{date.Year}.xlsx",
+
+                ModFilePath = Path.Combine(_modelFileDirectory, modelFileNameYear),
             };
             return pathAndName;
         }
@@ -63,8 +91,11 @@ namespace CenterBackend.Models
 
             var pathAndName = new PathAndName
             {
+                Type = 4,
                 Directory = Path.Combine(_rootDirectory, "周报表", $"{weekBelongYear}-{weekBelongMonth:00}"),
                 FileName = $"周报表-{weekBelongYear}年{weekNumberInYear:00}周.xlsx",
+
+                ModFilePath = Path.Combine(_modelFileDirectory, modelFileNameWeek),
             };
             return pathAndName;
         }
@@ -97,6 +128,7 @@ namespace CenterBackend.Models
 
     public class PathAndName
     {
+        public int Type { get; set; } = -1;//默认值表示未设置类型，调用方应检查此值以验证请求参数的有效性
         public string Directory { get; set; } = string.Empty;
         public string FileName { get; set; } = string.Empty;
         public string FullPath
@@ -110,5 +142,7 @@ namespace CenterBackend.Models
                 return Path.Combine(Directory, FileName);
             }
         }
+        public string ModFilePath { get; set; } = string.Empty;
+
     }
 }

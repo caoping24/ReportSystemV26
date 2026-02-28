@@ -35,7 +35,7 @@ namespace CenterReport.Repository.Services
                                .AsNoTracking(); // 只读场景提升性能
 
             // 第一步：执行过滤条件（先过滤，不影响排序类型）
-            query = query.Where(r => r.Type == request.Type);
+            query = query.Where(r => r.type == request.type);
 
             // 第二步：执行排序（此时 query 是 IQueryable，排序后转为 IOrderedQueryable）
             var orderedQuery = query.OrderByDescending(r => r.ReportedTime);

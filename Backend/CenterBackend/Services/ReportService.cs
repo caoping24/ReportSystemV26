@@ -3,13 +3,11 @@ using CenterBackend.IServices;
 using CenterReport.Repository;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
-using Masuit.Tools.DateTimeExt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
-using Org.BouncyCastle.Asn1.X509;
 using System.Reflection;
 
 namespace CenterBackend.Services
@@ -26,7 +24,7 @@ namespace CenterBackend.Services
                              IReportRecordRepository<ReportRecord> reportRecord,
                              IReportRepository<CalculatedData> CalculatedDatas,
                              IReportUnitOfWork reportUnitOfWork,
-                             //IHttpContextAccessor httpContextAccessor,
+                            //IHttpContextAccessor httpContextAccessor,
                             CenterReportDbContext _dbContext)
         {
             this._sourceData = SourceData;
@@ -35,17 +33,6 @@ namespace CenterBackend.Services
             this._reportUnitOfWork = reportUnitOfWork;
             this._dbContext = _dbContext;
         }
-
-
-        //public async Task<bool> DeleteReport(long id, DailyInsertDto _AddReportDailyDto)
-        //{
-        //    return true;
-        //}
-
-        //public async Task<bool> AddReport(DailyInsertDto _AddReportDailyDto)
-        //{
-        //    return true;
-        //}
 
         /// <summary>
         /// 根据传入的Type类型，计算对应维度的统计数据并插入到CalculatedData表中 注意传入的时间
@@ -57,7 +44,7 @@ namespace CenterBackend.Services
             DateTime StartTime;
             DateTime StopTime;
 
-            switch (_Dto.Type)
+            switch (_Dto.type)
             {
                 case 1: // 昨天
                     StartTime = _Dto.Time.Date.AddDays(-1).AddHours(8); // 开始时间等于昨天的8点0分
@@ -80,7 +67,7 @@ namespace CenterBackend.Services
                 default:
                     return false;
             }
-            return await CalculatedDataAndInsert(StartTime, StopTime, _Dto.Type);
+            return await CalculatedDataAndInsert(StartTime, StopTime, _Dto.type);
         }
 
         /// <summary>
@@ -90,7 +77,7 @@ namespace CenterBackend.Services
         {
             var ReportedTime = startTime.Date;//记录是那一天的数据
             var target = _calculatedDatas.Db.FirstOrDefault(r => r.Type == type && r.ReportedTime == ReportedTime);
-            bool isNewRecord = (target == null );
+            bool isNewRecord = (target == null);
             if (isNewRecord)
             {
                 target = new CalculatedData
@@ -361,7 +348,7 @@ namespace CenterBackend.Services
         /// <param name="TargetPullPath">生成文件的保存路径</param>
         /// <param name="ReportTime">报表日期</param>
         /// <returns></returns>
-        public async Task<IActionResult> WriteXlsxAndSave(string ModelFullPath, string TargetPullPath, DateTime ReportTime, int Type)
+        public async Task<IActionResult> WriteXlsxAndSave(string ModelFullPath, string TargetPullPath, DateTime ReportTime, int type)
         {
             DateTime StartTime;
             DateTime StopTime;
@@ -373,18 +360,18 @@ namespace CenterBackend.Services
                 using var templateStream = new FileStream(ModelFullPath, FileMode.Open, FileAccess.Read);
                 using var workbook = new XSSFWorkbook(templateStream);
 
-                switch (Type)
+                switch (type)
                 {
                     case 1: //本日
 
                         //if (ReportTime.AddMinutes(-1).Hour < 8)
                         //{
-                        //    return new OkObjectResult(new { success = false, msg = $"类型:{Type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 应大于8:00" });
+                        //    return new OkObjectResult(new { success = false, msg = $"类型:{type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 应大于8:00" });
                         //}
                         dataList = await _sourceData.GetByDateTimeRangeAsync(ReportTime, ReportTime);
                         if (dataList == null || dataList.Count == 0)
                         {
-                            return new OkObjectResult(new { success = false, msg = $"类型:{Type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 无数据" });
+                            return new OkObjectResult(new { success = false, msg = $"类型:{type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 无数据" });
                         }
                         SourceData?[] targetArray = MatchSourceDataDay(dataList, ReportTime);
 
@@ -401,7 +388,7 @@ namespace CenterBackend.Services
                         dataList2 = await _calculatedDatas.GetByDateTimeRangeAsync(StartTime, StopTime, 2);
                         if (dataList2 == null || dataList2.Count == 0)
                         {
-                            return new OkObjectResult(new { success = false, msg = $"类型:{Type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 无数据" });
+                            return new OkObjectResult(new { success = false, msg = $"类型:{type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 无数据" });
                         }
                         CalculatedData?[] targetArray2 = MatchSourceDataWeek(dataList2, StartTime);
                         WriteXlsxWeekly1(workbook, targetArray2, StartTime);
@@ -413,7 +400,7 @@ namespace CenterBackend.Services
                         dataList2 = await _calculatedDatas.GetByDateTimeRangeAsync(StartTime, StopTime, 3);
                         if (dataList2 == null || dataList2.Count == 0)
                         {
-                            return new OkObjectResult(new { success = false, msg = $"类型:{Type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 无数据" });
+                            return new OkObjectResult(new { success = false, msg = $"类型:{type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 无数据" });
                         }
                         targetArray2 = MatchSourceDataMonth(dataList2, StartTime);
                         WriteXlsxMonthly(workbook, targetArray2, ReportTime);
@@ -425,25 +412,25 @@ namespace CenterBackend.Services
                         dataList2 = await _calculatedDatas.GetByDateTimeRangeAsync(StartTime, StopTime, 4);
                         if (dataList2 == null || dataList2.Count == 0)
                         {
-                            return new OkObjectResult(new { success = false, msg = $"类型:{Type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 无数据" });
+                            return new OkObjectResult(new { success = false, msg = $"类型:{type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 无数据" });
                         }
                         targetArray2 = MatchSourceDataYear(dataList2, StartTime);
                         WriteXlsxYearly(workbook, targetArray2, ReportTime);
                         TempRepoetName = StartTime.Date;
                         break;
                     default:
-                        return new OkObjectResult(new { success = false, msg = $"类型:{Type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 类型无效" });
+                        return new OkObjectResult(new { success = false, msg = $"类型:{type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} 类型无效" });
                 }
 
                 using var outputStream = new FileStream(TargetPullPath, FileMode.Create, FileAccess.Write);// 保存文件到指定路径
                 workbook.Write(outputStream);
 
                 //插入build记录(只更新时间)
-                var existingRecord = _reportRecord.db.FirstOrDefault(r => r.Type == Type && r.ReportedTime == TempRepoetName);
+                var existingRecord = _reportRecord.db.FirstOrDefault(r => r.type == type && r.ReportedTime == TempRepoetName);
                 if (existingRecord == null)//无记录则新增，有记录则更新
                 {
                     var temp = new ReportRecord();
-                    temp.Type = Type;
+                    temp.type = type;
                     temp.ReportedTime = TempRepoetName;
                     temp.ReportedTime = DateTime.Now;
                     await _reportRecord.AddAsync(temp);
@@ -453,11 +440,11 @@ namespace CenterBackend.Services
                     existingRecord.ReportedTime = DateTime.Now;
                 }
                 await _reportUnitOfWork.SaveChangesAsync();
-                return new OkObjectResult(new { success = true, msg = $"类型:{Type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} Excel生成成功" });
+                return new OkObjectResult(new { success = true, msg = $"类型:{type} 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} Excel生成成功" });
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new { success = false, msg = $"生成Excel异常:类型:{Type}, 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} ，异常信息：{ex}" });
+                return new BadRequestObjectResult(new { success = false, msg = $"生成Excel异常:类型:{type}, 时间:{ReportTime:yyyy-MM-dd hh:mm:ss} ，异常信息：{ex}" });
             }
         }
 
@@ -668,7 +655,7 @@ namespace CenterBackend.Services
                 else { SetXlsxCellValue(srcSheet, Range1, 21, 0); }
                 if (data.Cell21 != null) { SetXlsxCellValue(srcSheet, Range1, 22, data.Cell21.Value); }
                 if (data.Cell22 != null) //摩尔比 大于0 小于2 
-                { 
+                {
                     if (data.Cell22.Value < 2)
                         SetXlsxCellValue(srcSheet, Range1, 23, data.Cell22.Value);
                 }
@@ -1049,16 +1036,16 @@ namespace CenterBackend.Services
                 if (data.Cell19 != null) { SetXlsxCellValue(srcSheet, Range1, 20, data.Cell19.Value * 1000); }
                 if (i != 12)// 每小时的差值
                 {
-                        var prevData = dataList.ElementAt(i - 1);
+                    var prevData = dataList.ElementAt(i - 1);
                     if (data.Cell20 != null && prevData != null && prevData.Cell20 != null)
-                        {
+                    {
                         float currentVal = Convert.ToSingle(data.Cell20);
                         float prevVal = Convert.ToSingle(prevData.Cell20);
-                            float result = (float)Math.Round((currentVal - prevVal) / 1000, 2);
-                            SetXlsxCellValue(srcSheet, Range1, 21, result);
-                        }
+                        float result = (float)Math.Round((currentVal - prevVal) / 1000, 2);
+                        SetXlsxCellValue(srcSheet, Range1, 21, result);
                     }
-                    else { SetXlsxCellValue(srcSheet, Range1, 21, 0); }
+                }
+                else { SetXlsxCellValue(srcSheet, Range1, 21, 0); }
                 if (data.Cell21 != null) { SetXlsxCellValue(srcSheet, Range1, 22, data.Cell21.Value); }
                 if (data.Cell22 != null) //摩尔比 大于0 小于2 
                 {

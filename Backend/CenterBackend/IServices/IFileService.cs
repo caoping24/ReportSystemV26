@@ -1,9 +1,4 @@
-﻿using CenterBackend.Logging;
-using CenterBackend.Models;
-using ICSharpCode.SharpZipLib.Zip;
-using System.Web;
-
-namespace CenterBackend.IServices
+﻿namespace CenterBackend.IServices
 {
     /// <summary>
     /// 文件操作服务接口

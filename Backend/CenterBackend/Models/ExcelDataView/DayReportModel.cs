@@ -1,32 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace CenterReport.Repository.Models
+﻿using CenterBackend.Models;
+namespace CenterBackend.Models.ExcelDataView
 {
-    [Table("CalculatedData")]
-    public class CalculatedData
+    //集合模型
+    public class DayReportCollection
     {
-        /// <summary>
-        /// 主键ID（自增）
-        /// </summary>
-        public long Id { get; set; }
+        public List<DayReportModel> ReportList { get; set; } = new List<DayReportModel>();
+    }
 
-        /// <summary>
-        /// 上报时间（对应SQL中的ReportedTime）
-        /// </summary>
-        public DateTime ReportedTime { get; set; }
-
-        /// <summary>
-        /// 最后修改时间（对应SQL中的LastChange，默认值由数据库设置）
-        /// </summary>
-        public DateTime LastChange { get; set; }
-
-        // 类型（可空）
-        public int? Type { get; set; } = 0;
-
-        // PH值（可空）
-        public int? PH { get; set; }
-
-        // Cell1 到 Cell150 字段（对应SQL中的real类型，映射为float）
+    public class DayReportModel
+    {
+        public string TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -177,5 +160,11 @@ namespace CenterReport.Repository.Models
         public float? Cell148 { get; set; }
         public float? Cell149 { get; set; }
         public float? Cell150 { get; set; }
+
+
+
     }
+
+
+
 }

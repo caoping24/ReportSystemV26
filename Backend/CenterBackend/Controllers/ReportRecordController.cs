@@ -51,7 +51,7 @@ namespace CenterBackend.Controllers
 
         private readonly List<TableHeaderDto> _mockHeaders = new()
         {
-            
+
             new TableHeaderDto { Prop = "hour", Label = "小时" },
             //反应液检测数据
             new TableHeaderDto { Prop = "Cell29", Label = "二乙腈含量-化分（%）" },
@@ -111,8 +111,8 @@ namespace CenterBackend.Controllers
             try
             {
                 // 当天
-                DateTime startTime = queryDate.Date.AddHours(0);   
-                DateTime endTime = startTime.AddHours(23).AddMinutes(59);         
+                DateTime startTime = queryDate.Date.AddHours(0);
+                DateTime endTime = startTime.AddHours(23).AddMinutes(59);
 
                 var calculatedDatas = await _reportService.GetSourceData(startTime, endTime);
 
@@ -138,7 +138,7 @@ namespace CenterBackend.Controllers
                     DateTime realHourTime;
                     realHourTime = queryDate.Date.AddHours(hour);
 
-          
+
                     int targetKey = hour;
                     hourGroupDict.TryGetValue(targetKey, out var targetData);
 
