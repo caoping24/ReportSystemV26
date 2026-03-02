@@ -1,6 +1,9 @@
 ﻿namespace CenterBackend.Models.ExcelDataView
 {
-    public class MonthWorkBook
+    public class MonthWorkBook : BaseSheet
     {
+
+
     }
+
 }

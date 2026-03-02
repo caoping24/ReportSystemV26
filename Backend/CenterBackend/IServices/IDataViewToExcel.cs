@@ -1,6 +1,9 @@
-﻿namespace CenterBackend.IServices
+﻿using CenterBackend.Models.ExcelDataView;
+
+namespace CenterBackend.IServices
 {
-    public class IDataViewToExcel
+    public interface IDataViewToExcel
     {
+        Task<bool> WriteXlsxAndSaveAsync<T>(T DataCollection) where T : BaseSheet;
     }
 }

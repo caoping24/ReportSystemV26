@@ -1,10 +1,13 @@
-﻿namespace CenterBackend.Models.ExcelDataView
+﻿using System.Collections.Generic;
+
+namespace CenterBackend.Models.ExcelDataView
 {
 
     public class DayWorkBook : BaseSheet
     {
-        public DayWorkSheet?[] DaySheet { get; set; } = [];
-        public DayWorkSheet?[] NightSheet { get; set; } = [];
+        // Use lists with pre-filled DayWorkSheet instances to avoid nullable element warnings
+        public List<DayWorkSheet> DaySheet { get; set; } = new();
+        public List<DayWorkSheet> NightSheet { get; set; } = new();
 
     }
 

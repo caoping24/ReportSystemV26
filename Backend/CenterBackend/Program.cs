@@ -48,11 +48,14 @@ namespace CenterBackend
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IReportUnitOfWork, ReportUnitOfWork>();
 
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IReportService, ReportService>();
-            builder.Services.AddScoped<IFileServices, FileService>();
-            builder.Services.AddScoped<IReportRecordService, ReportRecordService>();
             builder.Services.AddScoped<IDashboardService, DashboardService>();
+            builder.Services.AddScoped<IDataToViewService, DataToViewService>();
+            builder.Services.AddScoped<IDataViewToExcel, DataViewToExcel>();
+            builder.Services.AddScoped<IFileServices, FileService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
+            builder.Services.AddScoped<IReportRecordService, ReportRecordService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
             // 注册日志服务（单例），FileLogger 会使用 IWebHostEnvironment.ContentRootPath 定位到 wwwroot/log
             builder.Services.AddSingleton<IAppLogger, FileLogger>();
 

@@ -3,9 +3,10 @@
     public class BaseSheet
     {
         public required SheetType SheetType { get; set; } = SheetType.OtherReport;
-        public required string ReportedTime { get; set; } 
+        public required DateTime ReportedTime { get; set; } 
         public required string Directory { get; set; }
         public required string FileName { get; set; }
+        public required string ModFilePath { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
     }

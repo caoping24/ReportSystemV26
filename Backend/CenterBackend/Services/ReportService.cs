@@ -1,37 +1,56 @@
 ﻿using CenterBackend.Dto;
 using CenterBackend.IServices;
+using CenterBackend.Models;
+using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NPOI.HPSF;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
+using SixLabors.ImageSharp.Drawing;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace CenterBackend.Services
 {
     public class ReportService : IReportService
     {
         private readonly IReportRepository<SourceData> _sourceData;
-        private readonly IReportRecordRepository<ReportRecord> _reportRecord;
+        private readonly IReportRepository<OperatorInputData> _operatorInputData;
+        // private readonly IReportRecordRepository<ReportRecord> _reportRecord;
         private readonly IReportRepository<CalculatedData> _calculatedDatas;
         private readonly IReportUnitOfWork _reportUnitOfWork;
-        private readonly CenterReportDbContext _dbContext;
-        // 构造函数注入：按顺序注入5个SourceData仓储 + 原有依赖，一一对应赋值
-        public ReportService(IReportRepository<SourceData> SourceData,
-                             IReportRecordRepository<ReportRecord> reportRecord,
-                             IReportRepository<CalculatedData> CalculatedDatas,
-                             IReportUnitOfWork reportUnitOfWork,
-                            //IHttpContextAccessor httpContextAccessor,
-                            CenterReportDbContext _dbContext)
+        //private readonly CenterReportDbContext _dbContext
+        private readonly IDataViewToExcel _dataViewToExcel;
+        private readonly IDataToViewService _dataToViewService;
+        private readonly IFileServices _fileService;
+
+        public ReportService(IReportRepository<SourceData> sourceData,
+            IReportRepository<OperatorInputData> operatorInputData,
+            IReportRecordRepository<ReportRecord> reportRecord,
+            IReportRepository<CalculatedData> CalculatedDatas,
+            IReportUnitOfWork reportUnitOfWork,
+            //IHttpContextAccessor httpContextAccessor,
+            //CenterReportDbContext _dbContext,
+            IDataViewToExcel dataViewToExcel,
+            IDataToViewService dataToViewService,
+            IFileServices fileService
+            )
         {
-            this._sourceData = SourceData;
-            this._reportRecord = reportRecord;
+            this._sourceData = sourceData;
+            this._operatorInputData = operatorInputData;
+            //this._reportRecord = reportRecord;
             this._calculatedDatas = CalculatedDatas;
             this._reportUnitOfWork = reportUnitOfWork;
-            this._dbContext = _dbContext;
+            this._dataViewToExcel = dataViewToExcel;
+            //this._dbContext = _dbContext;
+            this._dataToViewService = dataToViewService;
+            this._fileService = fileService;
+
         }
 
         /// <summary>
@@ -343,8 +362,39 @@ namespace CenterBackend.Services
 
 
 
-        private bool RebuildReport()    
+        public async Task<bool> RebuildReport(PathAndName fileInfo)    
         {
+
+            switch (fileInfo.Type)
+            { 
+                case 1://日报表
+                    DayWorkBook datacollections = new()
+                    {
+                        SheetType = SheetType.DayReport,
+                        ReportedTime = fileInfo.ReportedTime,
+                        Directory = fileInfo.Directory,
+                        FileName = fileInfo.FileName,
+                        ModFilePath = fileInfo.ModFilePath,
+                    };
+                    var startTime = datacollections.ReportedTime.Date.AddHours(8);
+                    var endTime = datacollections.ReportedTime.Date.AddDays(1).AddHours(8);
+
+                    var dataPart1 = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
+                    var dataPart2 = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
+
+                    _dataToViewService.DayGetMapData(datacollections, dataPart1, dataPart2);
+                    return await _dataViewToExcel.WriteXlsxAndSaveAsync(datacollections);
+
+                case 2:
+
+
+
+                    break;
+                default:
+                    return false;
+            }
+            
+            
             return true;
         }
 
