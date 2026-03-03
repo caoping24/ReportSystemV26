@@ -47,13 +47,13 @@ namespace CenterBackend.Services
         // 写Xlsx数据
         private static bool DayWriteExcel(XSSFWorkbook srcWorkbook, DayWorkBook dayWorkBookData)
         {
-
-            var dataList = dayWorkBookData.DaySheet;
-            if (dataList.Count == 0)
-                return false;
             ISheet srcSheet;
 
             //白班
+            var dataList = dayWorkBookData.DaySheet;
+            if (dataList.Count == 0)
+                return false;
+            
             srcSheet = srcWorkbook.GetSheetAt(0);                                   //实际要写的表
             SetXlsxCellString(srcSheet, 51, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
             srcSheet.ForceFormulaRecalculation = false;                                 //关闭公式自动计算
@@ -73,6 +73,10 @@ namespace CenterBackend.Services
             }
 
             //夜班
+            dataList = dayWorkBookData.NightSheet;
+            if (dataList.Count == 0)
+                return false;
+
             srcSheet = srcWorkbook.GetSheetAt(2);                                       //实际要写的表
             SetXlsxCellString(srcSheet, 51, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
             srcSheet.ForceFormulaRecalculation = false;                                 //关闭公式自动计算
@@ -107,12 +111,13 @@ namespace CenterBackend.Services
             return true;
         }
 
-
         private static void BatchWriteDataToExcel(DayWorkSheet dataList, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
         {
             if (dataList == null) return;
+            int offset  = 0;
             for (int i = cellStart; i <= cellEnd; i++)
             {
+                offset++;
                 var cellProperty = dataList.GetType().GetProperty($"Cell{i}");
                 if (cellProperty == null) continue;
 
@@ -120,7 +125,7 @@ namespace CenterBackend.Services
                 if (value == null) continue;// 如果 data 为空则跳过
                 if (value is float floatValue) // 检查 value 是否可以转换为 float
                 {
-                    SetXlsxCellValue(sheet, rowIdx, colIdx + i, floatValue);
+                    SetXlsxCellValue(sheet, rowIdx, colIdx + offset, floatValue);
                 }
             }
         }

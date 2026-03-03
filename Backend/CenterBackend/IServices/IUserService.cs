@@ -1,6 +1,6 @@
 ﻿using CenterBackend.Dto;
 
-namespace CenterBackend.IUserServices
+namespace CenterBackend.IServices
 {
     public interface IUserService
     {

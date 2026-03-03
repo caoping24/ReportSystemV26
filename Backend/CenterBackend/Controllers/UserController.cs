@@ -2,7 +2,7 @@ using CenterBackend.common;
 using CenterBackend.Constant;
 using CenterBackend.Dto;
 using CenterBackend.Exceptions;
-using CenterBackend.IUserServices;
+using CenterBackend.IServices;
 using Masuit.Tools;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;

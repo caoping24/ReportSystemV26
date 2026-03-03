@@ -6,8 +6,8 @@ namespace CenterBackend.Models.ExcelDataView
     public class DayWorkBook : BaseSheet
     {
         // Use lists with pre-filled DayWorkSheet instances to avoid nullable element warnings
-        public List<DayWorkSheet> DaySheet { get; set; } = new();
-        public List<DayWorkSheet> NightSheet { get; set; } = new();
+        public List<DayWorkSheet> DaySheet { get; set; } = [];
+        public List<DayWorkSheet> NightSheet { get; set; } = [];
 
     }
 

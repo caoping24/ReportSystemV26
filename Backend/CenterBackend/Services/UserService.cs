@@ -2,7 +2,7 @@
 using CenterBackend.Constant;
 using CenterBackend.Dto;
 using CenterBackend.Exceptions;
-using CenterBackend.IUserServices;
+using CenterBackend.IServices;
 using CenterUser.Repository;
 using CenterUser.Repository.Models;
 using Mapster;

@@ -8,15 +8,10 @@ namespace CenterBackend.Services
     /// <summary>
     /// 文件操作服务实现类 - 实现所有文件相关的具体逻辑
     /// </summary>
-    public class FileService : IFileServices
+    public class FileService(IAppLogger IAppLogger, IWebHostEnvironment webHostEnv) : IFileServices
     {
-        private readonly IAppLogger _logger;
-        private readonly IWebHostEnvironment _webHostEnv;
-        public FileService(IAppLogger IAppLogger, IWebHostEnvironment webHostEnv)
-        {
-            this._logger = IAppLogger;
-            this._webHostEnv = webHostEnv;
-        }
+        private readonly IAppLogger _logger = IAppLogger;
+        private readonly IWebHostEnvironment _webHostEnv = webHostEnv;
 
         // 下载单个文件
         public (string FilePath, string ContentType, string DownloadFileName) DownloadFileInfo(string sourceFileDirectory, string downloadFileName)

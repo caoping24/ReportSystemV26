@@ -26,9 +26,6 @@ namespace CenterBackend.Services
         {
             return await _reportRecord.GetReportByPageAsync(request);
         }
-
-
-
         public async Task<bool> UpdateSourceDataFieldAsync(string dateStr, int hour, string prop, string valueStr)
         {
 
