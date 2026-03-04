@@ -26,21 +26,17 @@ namespace CenterBackend.Controllers
             this._webHostEnv = webHostEnv;
             this._logger = _IAppLogger;
         }
-        /// <summary>
-        /// 根据dto.Type 统计数据并且插入表中
-        /// </summary>
-        /// <param name="_AddReportDailyDto"></param>
-        /// <returns></returns>
-        /// <exception cref="BusinessException"></exception>
+
+        //统计数据并且插入表中
         [HttpPost("AnalysesInsert")]
         public async Task<BaseResponse<bool>> AnalysesInsert([FromBody] CalculateAndInsertDto _CalculateAndInsertDto)
         {
-            await _logger.LogInfoAsync($"AnalysesInsert:CalculateAndInsertDto: {_CalculateAndInsertDto.Time},{_CalculateAndInsertDto.Time}");
-            if (_CalculateAndInsertDto.type == 0)
+            //await _logger.LogInfoAsync($"AnalysesInsert:CalculateAndInsertDto: {_CalculateAndInsertDto.Time},{_CalculateAndInsertDto.Time}");
+            if (_CalculateAndInsertDto.Type == 0)
             {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "类型错误");
             }
-            var result = await reportService.DataAnalyses(_CalculateAndInsertDto);
+            var result = await reportService.ConfigDataAnalyses(_CalculateAndInsertDto);
             return ResultUtils<bool>.Success(result);
         }
 
@@ -65,7 +61,6 @@ namespace CenterBackend.Controllers
                 var isSuccess = await reportService.RebuildReport(fileInfo);
                 if (!isSuccess)
                     return new BadRequestObjectResult(new { success = false, msg = "生成文件失败" });
-
                 var (filePath, contentType, downloadFileName) = _fileService.DownloadFileInfo(fileInfo.Directory, fileInfo.FileName);
                 return PhysicalFile(filePath, contentType, downloadFileName);//官方推荐：直接用 PhysicalFile 自动处理文件流、响应头、范围请求（大文件下载）
             }

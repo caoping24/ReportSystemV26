@@ -407,13 +407,13 @@ namespace CenterBackend.Services
                 target[i].Cell86 = source2[i].Cell25;
                 target[i].Cell87 = source2[i].Cell26;
                 //人工检测数据
-                target[i].Cell135 = source2[i].Cell131;
-                target[i].Cell136 = source2[i].Cell132;
-                target[i].Cell137 = source2[i].Cell133;
-                target[i].Cell138 = source2[i].Cell134;
-                target[i].Cell139 = source2[i].Cell135;
-                target[i].Cell140 = source2[i].Cell136;
-                target[i].Cell141 = source2[i].Cell137;
+                target[i].Cell135 = source2[i].Cell31;
+                target[i].Cell136 = source2[i].Cell32;
+                target[i].Cell137 = source2[i].Cell33;
+                target[i].Cell138 = source2[i].Cell34;
+                target[i].Cell139 = source2[i].Cell35;
+                target[i].Cell140 = source2[i].Cell36;
+                target[i].Cell141 = source2[i].Cell37;
             }
         }
 
