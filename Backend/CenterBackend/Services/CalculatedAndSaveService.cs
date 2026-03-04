@@ -5,6 +5,7 @@ using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
 using CenterUser.Repository;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace CenterBackend.Services
 {
@@ -42,26 +43,37 @@ namespace CenterBackend.Services
 
         private async Task<bool> DayDataCalculateAsync( ReportInfo ReportInfo)
         {
-            if (ReportInfo == null|| ReportInfo.TimeStart == default)
+
+            if (ReportInfo == null || ReportInfo.TimeStart == default)
             {
                 return false;
             }
+            var target = await _calculatedDatas.Db.AsQueryable()
+                .Where(r => r.ReportedTime.Date == ReportInfo.TimeStart.Date && r.Type == 1)
+                .FirstOrDefaultAsync();
+            bool existRecord = false;
+            if (target != null)//更新记录
+            {
+                existRecord = true;
+                target.ReportedTime = ReportInfo.TimeStart.Date;
+                target.LastChange = DateTime.Now;
+                target.Type = 1;
+            }
+            else//插入记录
+            {
+                existRecord = false;
+                target = new CalculatedData()
+                {
+                    ReportedTime = ReportInfo.TimeStart.Date,
+                    LastChange = DateTime.Now,
+                    Type = 1,
+                };
+            }
+
             List<SourceData> rawDataPart1 = await _sourceData.GetByDateTimeRangeAsync(ReportInfo.TimeStart, ReportInfo.TimeEnd);
-            List<SourceData> dataListPart1 = SortDataByTime(rawDataPart1, ReportInfo.TimeStart);
-
-            CalculatedData target = new()
-            {
-                ReportedTime = ReportInfo.TimeStart,
-                LastChange = DateTime.Now,
-                Type = 1,
-                //PH = 80 // 业务临时值
-            };
-
-            //计算原始数据
-            if (dataListPart1 == null || dataListPart1.Count == 0)
-            {
+            if (rawDataPart1 == null || rawDataPart1.Count == 0)
                 return false;
-            }
+            List<SourceData> dataListPart1 = SortDataByTime(rawDataPart1, ReportInfo.TimeStart);
             {
                 // 平均值（使用通用方法）
                 target.Cell1 = AverageOf(dataListPart1, x => x?.Cell1);
@@ -222,12 +234,6 @@ namespace CenterBackend.Services
             }
             List<OperatorInputData> rawDataPart2 = await _operatorInputData.GetByDateTimeRangeAsync(ReportInfo.TimeStart, ReportInfo.TimeEnd);
             List<OperatorInputData> dataListPart2 = SortDataByTime(rawDataPart2, ReportInfo.TimeStart);
-
-            // 计算人工录入数据
-            if (dataListPart2 == null || dataListPart2.Count == 0)
-            {
-                return false;
-            }
             {
                 // 使用相同的通用方法（OperatorInputData 类型相同字段名）
                 target.Cell151 = AverageOf(dataListPart2, x => x?.Cell1);
@@ -282,8 +288,8 @@ namespace CenterBackend.Services
                 target.Cell200 = AverageOf(dataListPart2, x => x?.Cell50);
             }
 
-            // 保存计算结果
-            await _calculatedDatas.AddAsync(target);
+            if (!existRecord)//无记录则插入
+                await _calculatedDatas.AddAsync(target);
             await _reportUnitOfWork.SaveChangesAsync();
             return true;
         }

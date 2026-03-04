@@ -9,24 +9,28 @@ using NPOI.SS.UserModel;
 
 namespace CenterBackend.Services
 {
-    public class DataToViewService(IReportRepository<SourceData> SourceData, IReportRepository<OperatorInputData> rperatorInputData) : IDataToViewService
+    public class DataToViewService(IReportRepository<SourceData> sourceData, IReportRepository<OperatorInputData> rperatorInputData) : IDataToViewService
     {
 
-        private readonly IReportRepository<SourceData> _sourceData = SourceData;
+        private readonly IReportRepository<SourceData> _sourceData = sourceData;
         private readonly IReportRepository<OperatorInputData> _operatorInputData = rperatorInputData;
 
-        public bool DayGetMapData(DayWorkBook DayWorkBook, List<SourceData> sourceData, List<OperatorInputData> operatorInputData)
+        public async Task<bool> DayGetMapDataAsync(DayWorkBook DayWorkBook)
         {
-            var startTime = DayWorkBook.ReportedTime.Date;
+            var startTime = DayWorkBook.ReportedTime.Date.AddHours(8);
+            var endTime = DayWorkBook.ReportedTime.Date.AddDays(1).AddHours(8);
+
+            var sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
+            if (sourceData == null || sourceData.Count == 0)//未查到数据
+                return false;
+            var operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
+
             DayWorkBook.DaySheet = Enumerable.Range(0, 13).Select(_ => new DayWorkSheet()).ToList();
             DayWorkBook.NightSheet = Enumerable.Range(0, 13).Select(_ => new DayWorkSheet()).ToList();
 
-            if (sourceData == null || sourceData.Count == 0)
-                return false;
-
-            var baseDate = startTime.AddHours(8);
-            var dataPart1 = SortDataByTime(sourceData, baseDate, 25);
-            var dataPart2 = SortDataByTime(operatorInputData, baseDate, 25);
+            var baseTime = startTime;
+            var dataPart1 = SortDataByTime(sourceData, baseTime, 25);//原始数据
+            var dataPart2 = SortDataByTime(operatorInputData, baseTime, 25);//人工录入数据
 
             List<SourceData> source1 = dataPart1.Take(13).ToList();
             List<OperatorInputData> source2 = dataPart2.Take(13).ToList();

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CenterReport.Repository.Models
 {
@@ -8,6 +9,7 @@ namespace CenterReport.Repository.Models
         /// <summary>
         /// 主键ID（自增）
         /// </summary>
+        [Key]
         public long Id { get; set; }
 
         /// <summary>

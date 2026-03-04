@@ -61,7 +61,6 @@ namespace CenterBackend.Services
         public async Task<bool> RebuildReport(PathAndName fileInfo)
         {
             bool isBuildSuccess = false;
-
             switch (fileInfo.Type)
             {
                 case 1://日报表
@@ -73,15 +72,11 @@ namespace CenterBackend.Services
                         FileName = fileInfo.FileName,
                         ModFilePath = fileInfo.ModFilePath,
                     };
-                    var startTime = datacollections.ReportedTime.Date.AddHours(8);
-                    var endTime = datacollections.ReportedTime.Date.AddDays(1).AddHours(8);
-
-                    var dataPart1 = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
-                    var dataPart2 = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
-
-                    _dataToViewService.DayGetMapData(datacollections, dataPart1, dataPart2);
-                    isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(datacollections);
-                    break;
+                    if (await _dataToViewService.DayGetMapDataAsync(datacollections))
+                    {
+                        isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(datacollections);
+                    }
+                        break;
                 case 2:
                     break;
                 default:
@@ -98,7 +93,7 @@ namespace CenterBackend.Services
 
                 if (existingRecord != null)
                 {
-                    existingRecord.ReportedTime = fileInfo.ReportedTime;
+                    existingRecord.ReportedTime = fileInfo.ReportedTime.Date;
                     existingRecord.LastChange = DateTime.Now;
                 }
                 else
