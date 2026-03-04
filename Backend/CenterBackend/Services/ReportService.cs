@@ -6,6 +6,7 @@ using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
+using CenterReport.Repository.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NPOI.HPSF;
@@ -22,7 +23,7 @@ namespace CenterBackend.Services
     {
         private readonly IReportRepository<SourceData> _sourceData;
         private readonly IReportRepository<OperatorInputData> _operatorInputData;
-        // private readonly IReportRecordRepository<ReportRecord> _reportRecord;
+        private readonly IReportRecordRepository<ReportRecord> _reportRecord;
         private readonly IReportRepository<CalculatedData> _calculatedDatas;
         private readonly IReportUnitOfWork _reportUnitOfWork;
         //private readonly CenterReportDbContext _dbContext
@@ -46,7 +47,7 @@ namespace CenterBackend.Services
         {
             this._sourceData = sourceData;
             this._operatorInputData = operatorInputData;
-            //this._reportRecord = reportRecord;
+            this._reportRecord = reportRecord;
             this._calculatedDatas = CalculatedDatas;
             this._reportUnitOfWork = reportUnitOfWork;
             this._dataViewToExcel = dataViewToExcel;
@@ -59,6 +60,8 @@ namespace CenterBackend.Services
 
         public async Task<bool> RebuildReport(PathAndName fileInfo)
         {
+            bool isBuildSuccess = false;
+
             switch (fileInfo.Type)
             {
                 case 1://日报表
@@ -77,13 +80,39 @@ namespace CenterBackend.Services
                     var dataPart2 = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
 
                     _dataToViewService.DayGetMapData(datacollections, dataPart1, dataPart2);
-                    return await _dataViewToExcel.WriteXlsxAndSaveAsync(datacollections);
+                    isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(datacollections);
+                    break;
                 case 2:
                     break;
                 default:
-                    return false;
+                    break;
             }
+            if (!isBuildSuccess)
+                return false;
 
+            //更新或插入记录
+            {
+                var existingRecord = await _reportRecord.db.AsQueryable()
+                    .Where(r => r.ReportedTime.Date == fileInfo.ReportedTime.Date && r.Type == fileInfo.Type)
+                    .FirstOrDefaultAsync();
+
+                if (existingRecord != null)
+                {
+                    existingRecord.ReportedTime = fileInfo.ReportedTime;
+                    existingRecord.LastChange = DateTime.Now;
+                }
+                else
+                {
+                    ReportRecord reportRecord = new()//插入记录
+                    {
+                        ReportedTime = fileInfo.ReportedTime,
+                        LastChange = DateTime.Now,
+                        Type = fileInfo.Type
+                    };
+                    await _reportRecord.AddAsync(reportRecord);
+                }
+                await _reportUnitOfWork.SaveChangesAsync();
+            }
             return true;
         }
 
