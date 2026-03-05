@@ -24,7 +24,7 @@ namespace CenterReport.Repository.Services
             return await _entities
                 .Where(e =>
                     EF.Property<DateTime>(e, "ReportedTime") >= actualStartTime &&
-                    EF.Property<DateTime>(e, "ReportedTime") <= actualEndTime)
+                    EF.Property<DateTime>(e, "ReportedTime") < actualEndTime)
                 .OrderBy(e => EF.Property<DateTime>(e, "ReportedTime"))
                 .ToListAsync();
         }
@@ -100,7 +100,7 @@ namespace CenterReport.Repository.Services
             return await _entities
                 .Where(e =>
                     EF.Property<DateTime>(e, "ReportedTime") >= startDate &&
-                    EF.Property<DateTime>(e, "ReportedTime") <= endDate &&
+                    EF.Property<DateTime>(e, "ReportedTime") < endDate &&
                     EF.Property<int>(e, "Type") == dataType)
                 .OrderBy(e => EF.Property<DateTime>(e, "ReportedTime"))
                 .ToListAsync();

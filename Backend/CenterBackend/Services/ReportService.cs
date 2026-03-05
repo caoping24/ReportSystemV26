@@ -135,36 +135,12 @@ namespace CenterBackend.Services
         public async Task<bool> ConfigDataAnalyses(CalculateAndInsertDto dto)
         {
 
-            var reportInfo = new ReportInfo(); 
-            switch (dto.Type)
+            var reportInfo = new ReportInfo
             {
-                case 1: // 昨天
-                    reportInfo.TimeStart = dto.Time.Date.AddHours(8);//当日8点
-                    reportInfo.TimeEnd = reportInfo.TimeStart.AddDays(1);
-                    reportInfo.SheetType = SheetType.DayReport;
-                    break;
-                case 2: // 上月
-                    reportInfo.TimeStart = new DateTime(dto.Time.Year, dto.Time.Month, 1).AddMonths(-1);// 计算上月的开始时间（1号）
-                    reportInfo.TimeEnd = reportInfo.TimeStart.AddDays(7);
-                    reportInfo.SheetType = SheetType.MonthReport;
-                    break;
-                case 3: // 去年
-                    reportInfo.TimeStart = new DateTime(dto.Time.Year, 1, 1).AddYears(-1);// 计算去年的开始时间（1月1号）
-                    reportInfo.TimeEnd = new DateTime(dto.Time.Year, 1, 1).AddDays(-1); // 去年的结束时间（12月31号）
-                    reportInfo.SheetType = SheetType.YearReport;
-                    break;
-                case 4: // 上周
-                    DateTime currentDayOfWeek = dto.Time.Date;// 计算上周的开始时间（星期一）
-                    int daysToLastMonday = ((int)currentDayOfWeek.DayOfWeek + 6) % 7 + 7;
-
-                    reportInfo.TimeStart = currentDayOfWeek.AddDays(-daysToLastMonday);
-                    reportInfo.TimeEnd = reportInfo.TimeStart.AddDays(7);
-                    reportInfo.SheetType = SheetType.WeekReport;
-                    break;
-                default:
-                    return false;
-            }
-
+                TimeStart = dto.Time.Date.AddHours(8),//当日8点
+                TimeEnd = dto.Time.Date.AddHours(8).AddDays(1),
+                SheetType = SheetType.DayReport,
+            };
             return await _calculatedAndSaveService.DataAnalyses(reportInfo);
         }
 

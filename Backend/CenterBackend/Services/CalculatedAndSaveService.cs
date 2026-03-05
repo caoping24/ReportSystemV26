@@ -29,12 +29,6 @@ namespace CenterBackend.Services
             {
                 case SheetType.DayReport:
                     return await DayDataCalculateAsync(ReportInfo);
-                case SheetType.MonthReport:
-                    break;
-                case SheetType.YearReport:
-                    break;
-                case SheetType.WeekReport:
-                    break;
                 default:
                     break;
             }
@@ -292,22 +286,6 @@ namespace CenterBackend.Services
                 await _calculatedDatas.AddAsync(target);
             await _reportUnitOfWork.SaveChangesAsync();
             return true;
-        }
-
-        private static async Task WeekDataCalculate(CalculatedData target, List<CalculatedData> dataListPart1)
-        {
-            target.PH = 80;//暂时没有特殊意义
-            target.Cell1 = dataListPart1.Select(x => x.Cell1 ?? 0).Average();//平均值（保留原逻辑）
-        }
-        private static async Task MonthDataCalculate(CalculatedData target, List<CalculatedData> dataListPart1)
-        {
-            target.PH = 80;//暂时没有特殊意义
-            target.Cell1 = dataListPart1.Select(x => x.Cell1 ?? 0).Average();//平均值（保留原逻辑）
-        }
-        private static async Task YearDataCalculate(CalculatedData target, List<CalculatedData> dataListPart1)
-        {
-            target.PH = 80;//暂时没有特殊意义
-            target.Cell1 = dataListPart1.Select(x => x.Cell1 ?? 0).Average();//平均值（保留原逻辑）
         }
 
         //SourceData 按照时间顺序排序，确保每个小时的数据在正确的位置上  共25个小时的数据

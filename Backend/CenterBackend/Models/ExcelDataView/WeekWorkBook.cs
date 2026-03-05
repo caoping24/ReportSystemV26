@@ -3,23 +3,23 @@
 
     public class WeekWorkBook : BaseSheet
     {
-        public Page2Sheet?[] Page2Sheet { get; set; } = [];
-        public Page3Sheet?[] Page3Sheet { get; set; } = [];
-        public Page4Sheet?[] Page4Sheet { get; set; } = [];
-        public Page5Sheet?[] Page5Sheet { get; set; } = [];
-        public Page6Sheet?[] Page6Sheet { get; set; } = [];
-        public Page7Sheet?[] Page7Sheet { get; set; } = [];
-        public Page8Sheet?[] Page8Sheet { get; set; } = [];
-        public Page9Sheet?[] Page9Sheet { get; set; } = [];
-        public Page10Sheet?[] Page10Sheet { get; set; } = [];
-        public Page11Sheet?[] Page11Sheet { get; set; } = [];
-        public Page12Sheet?[] Page12Sheet { get; set; } = [];
-        public Page13Sheet?[] Page13Sheet { get; set; } = [];
+        public List<WorkSheet2> WorkSheet2 { get; set; } = [];
+        public List<WorkSheet3> WorkSheet3 { get; set; } = [];
+        public List<WorkSheet4> WorkSheet4 { get; set; } = [];
+        public List<WorkSheet5> WorkSheet5 { get; set; } = [];
+        public List<WorkSheet6> WorkSheet6 { get; set; } = [];
+        public List<WorkSheet7> WorkSheet7 { get; set; } = [];
+        public List<WorkSheet8> WorkSheet8 { get; set; } = [];
+        public List<WorkSheet9> WorkSheet9 { get; set; } = [];
+        public List<WorkSheet10> WorkSheet10 { get; set; } = [];
+        public List<WorkSheet11> WorkSheet11 { get; set; } = [];
+        public List<WorkSheet12> WorkSheet12 { get; set; } = [];
+        public List<WorkSheet13> WorkSheet13 { get; set; } = [];
     }
 
-    public class Page2Sheet
+    public class WorkSheet2
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -31,9 +31,9 @@
         public float? Cell9 { get; set; }
     }
 
-    public class Page3Sheet
+    public class WorkSheet3
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -41,9 +41,9 @@
         public float? Cell5 { get; set; }
     }
 
-    public class Page4Sheet
+    public class WorkSheet4
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -53,24 +53,26 @@
         public float? Cell7 { get; set; }
     }
 
-    public class Page5Sheet
+    public class WorkSheet5
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
+        public float? Cell3 { get; set; }
+        public float? Cell4 { get; set; }
 
     }
 
-    public class Page6Sheet
+    public class WorkSheet6
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
     }
 
-    public class Page7Sheet
+    public class WorkSheet7
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -87,9 +89,9 @@
 
     }
 
-    public class Page8Sheet
+    public class WorkSheet8
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -99,11 +101,13 @@
         public float? Cell7 { get; set; }
         public float? Cell8 { get; set; }
         public float? Cell9 { get; set; }
+        public float? Cell10 { get; set; }
+        public float? Cell11 { get; set; }
     }
 
-    public class Page9Sheet
+    public class WorkSheet9
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -113,9 +117,9 @@
         public float? Cell7 { get; set; }
     }
 
-    public class Page10Sheet
+    public class WorkSheet10
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -123,9 +127,9 @@
         public float? Cell5 { get; set; }
     }
 
-    public class Page11Sheet
+    public class WorkSheet11
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -133,9 +137,9 @@
         public float? Cell5 { get; set; }
     }
 
-    public class Page12Sheet
+    public class WorkSheet12
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
@@ -144,9 +148,9 @@
         public float? Cell6 { get; set; }
         public float? Cell7 { get; set; }
     }
-    public class Page13Sheet
+    public class WorkSheet13
     {
-        public int TimePoint { get; set; }
+        public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
