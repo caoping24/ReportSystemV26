@@ -27,6 +27,8 @@
         public float? Cell5 { get; set; }
         public float? Cell6 { get; set; }
         public float? Cell7 { get; set; }
+        public float? Cell8 { get; set; }
+        public float? Cell9 { get; set; }
     }
 
     public class Page3Sheet
@@ -37,8 +39,6 @@
         public float? Cell3 { get; set; }
         public float? Cell4 { get; set; }
         public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
     }
 
     public class Page4Sheet
@@ -58,11 +58,7 @@
         public int TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
+
     }
 
     public class Page6Sheet
@@ -70,11 +66,6 @@
         public int TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
     }
 
     public class Page7Sheet
@@ -87,6 +78,13 @@
         public float? Cell5 { get; set; }
         public float? Cell6 { get; set; }
         public float? Cell7 { get; set; }
+        public float? Cell8 { get; set; }
+        public float? Cell9 { get; set; }
+        public float? Cell10 { get; set; }
+        public float? Cell11 { get; set; }
+        public float? Cell12 { get; set; }
+        public float? Cell13 { get; set; }
+
     }
 
     public class Page8Sheet
@@ -99,6 +97,8 @@
         public float? Cell5 { get; set; }
         public float? Cell6 { get; set; }
         public float? Cell7 { get; set; }
+        public float? Cell8 { get; set; }
+        public float? Cell9 { get; set; }
     }
 
     public class Page9Sheet
@@ -121,8 +121,6 @@
         public float? Cell3 { get; set; }
         public float? Cell4 { get; set; }
         public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
     }
 
     public class Page11Sheet
@@ -133,8 +131,6 @@
         public float? Cell3 { get; set; }
         public float? Cell4 { get; set; }
         public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
     }
 
     public class Page12Sheet

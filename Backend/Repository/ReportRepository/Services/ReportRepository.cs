@@ -1,12 +1,13 @@
 ﻿using CenterReport.Repository.IServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace CenterReport.Repository.Services
 {
     public class ReportRepository<T> : IReportRepository<T> where T : class
     {
         protected readonly CenterReportDbContext _context;
-        private DbSet<T> _entities;
+        private readonly DbSet<T> _entities;
 
         public ReportRepository(CenterReportDbContext context)
         {
@@ -53,6 +54,34 @@ namespace CenterReport.Repository.Services
         public async Task<T?> GetByIdAsync(long id) => await _entities.FindAsync(id);
         public async Task AddAsync(T entity) => await _entities.AddAsync(entity);
         public async Task Update(T entity) => _context.Entry(entity).State = EntityState.Modified;
+        public async Task<T> UpsertByIdAsync(T entity, Action<T> updateAction)
+        {
+            // 校验入参
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
+            ArgumentNullException.ThrowIfNull(updateAction, nameof(updateAction));
+
+            var idValue = EF.Property<long>(entity, "Id");// 从实体中提取ID值
+            T? existingEntity;
+            if (idValue == 0)
+            {
+                await _entities.AddAsync(entity);
+                existingEntity = entity;
+            }
+            else
+            {
+                existingEntity = await _entities.FindAsync(idValue);
+                if (existingEntity != null)
+                {
+                    updateAction(existingEntity);//存在则执行自定义更新逻辑
+                }
+                else
+                {
+                    await _entities.AddAsync(entity);//不存在则插入新实体
+                    existingEntity = entity;
+                }
+            }
+            return existingEntity;
+        }
         public async Task DeleteByIdAsync(long id)
         {
             var entity = await _context.Set<T>().FindAsync(id);

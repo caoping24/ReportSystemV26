@@ -57,14 +57,13 @@ namespace CenterBackend.Services
             this._calculatedAndSaveService = calculatedAndSaveService;
 
         }
-
         public async Task<bool> RebuildReport(PathAndName fileInfo)
         {
             bool isBuildSuccess = false;
             switch (fileInfo.Type)
             {
                 case 1://日报表
-                    DayWorkBook datacollections = new()
+                    DayWorkBook dayCollections = new()
                     {
                         SheetType = SheetType.DayReport,
                         ReportedTime = fileInfo.ReportedTime,
@@ -72,12 +71,29 @@ namespace CenterBackend.Services
                         FileName = fileInfo.FileName,
                         ModFilePath = fileInfo.ModFilePath,
                     };
-                    if (await _dataToViewService.DayGetMapDataAsync(datacollections))
+                    if (await _dataToViewService.DayGetMapDataAsync(dayCollections))
                     {
-                        isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(datacollections);
+                        isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(dayCollections);
                     }
-                        break;
+                    break;
                 case 2:
+                    break;
+                case 3: 
+                    break;
+                case 4:
+                    WeekWorkBook weekDataCollections = new()
+                    {
+                        SheetType = SheetType.WeekReport,
+                        ReportedTime = fileInfo.ReportedTime,
+                        Directory = fileInfo.Directory,
+                        FileName = fileInfo.FileName,
+                        ModFilePath = fileInfo.ModFilePath,
+                    };
+                    if (await _dataToViewService.WeekGetMapDataAsync(weekDataCollections))
+                    {
+                        isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(weekDataCollections);
+                    }
+                    
                     break;
                 default:
                     break;
@@ -87,7 +103,7 @@ namespace CenterBackend.Services
 
             //更新或插入记录
             {
-                var existingRecord = await _reportRecord.db.AsQueryable()
+                var existingRecord = await _reportRecord.Db.AsQueryable()
                     .Where(r => r.ReportedTime.Date == fileInfo.ReportedTime.Date && r.Type == fileInfo.Type)
                     .FirstOrDefaultAsync();
 
@@ -98,13 +114,13 @@ namespace CenterBackend.Services
                 }
                 else
                 {
-                    ReportRecord reportRecord = new()//插入记录
+                    existingRecord = new ReportRecord()//插入记录
                     {
                         ReportedTime = fileInfo.ReportedTime,
                         LastChange = DateTime.Now,
                         Type = fileInfo.Type
                     };
-                    await _reportRecord.AddAsync(reportRecord);
+                    await _reportRecord.AddAsync(existingRecord);
                 }
                 await _reportUnitOfWork.SaveChangesAsync();
             }

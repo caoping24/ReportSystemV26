@@ -15,6 +15,8 @@ namespace CenterBackend.Services
         private readonly IReportRepository<SourceData> _sourceData = sourceData;
         private readonly IReportRepository<OperatorInputData> _operatorInputData = rperatorInputData;
 
+
+
         public async Task<bool> DayGetMapDataAsync(DayWorkBook DayWorkBook)
         {
             var startTime = DayWorkBook.ReportedTime.Date.AddHours(8);
@@ -43,30 +45,19 @@ namespace CenterBackend.Services
             return true;
         }
 
-        public bool MonthGetMapData(MonthWorkBook MonthWorkBook, List<SourceData> sourceData, List<OperatorInputData> operatorInputData)
+        public async Task<bool> MonthGetMapDataAsync(MonthWorkBook monthWorkBook)
         {
-            // var filteredData = sourceDataList.Where(data => data.Type == "SpecificType").ToList();
-
             return false;
-
         }
 
-        public bool YearGetMapData(YearWorkBook YearWorkBook, List<SourceData> sourceData, List<OperatorInputData> operatorInputData)
+        public async Task<bool> YearGetMapDataAsync(YearWorkBook yearWorkBook)
         {
-            // var filteredData = sourceDataList.Where(data => data.Type == "SpecificType").ToList();
-
-
-
             return false;
-
         }
 
-        public bool WeekGetMapData(WeekWorkBook WeekWorkBook, List<SourceData> sourceData, List<OperatorInputData> operatorInputData)
+        public async Task<bool>  WeekGetMapDataAsync(WeekWorkBook WeekWorkBook)
         {
-            // var filteredData = sourceDataList.Where(data => data.Type == "SpecificType").ToList();
-
             return false;
-
         }
 
         //根据时间排序数据-原始数据
