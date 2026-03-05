@@ -7,8 +7,8 @@ namespace CenterBackend.IServices
     {
 
         Task<bool> DayGetMapDataAsync(DayWorkBook DayWorkBook);
-        Task<bool> MonthGetMapDataAsync(WeekWorkBook WeekWorkBook);
-        Task<bool> YearGetMapDataAsync(WeekWorkBook WeekWorkBook);
+        Task<bool> MonthGetMapDataAsync(MonthWorkBook monthWorkBook);
+        Task<bool> YearGetMapDataAsync(YearWorkBook yearWorkBook);
         Task<bool> WeekGetMapDataAsync(WeekWorkBook WeekWorkBook);
 
     }
