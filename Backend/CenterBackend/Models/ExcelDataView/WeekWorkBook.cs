@@ -134,7 +134,6 @@
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
         public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
     }
 
     public class WorkSheet12
@@ -147,6 +146,7 @@
         public float? Cell5 { get; set; }
         public float? Cell6 { get; set; }
         public float? Cell7 { get; set; }
+        public float? Cell8 { get; set; }
     }
     public class WorkSheet13
     {
@@ -158,5 +158,7 @@
         public float? Cell5 { get; set; }
         public float? Cell6 { get; set; }
         public float? Cell7 { get; set; }
+        public float? Cell8 { get; set; }
+        public float? Cell9 { get; set; }
     }
 }
