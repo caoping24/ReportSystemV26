@@ -11,6 +11,7 @@ import UserRegisterPage from "@/pages/user/UserRegisterPage.vue";
 import BasicLayout from "@/layouts/BasicLayout.vue";
 //领导仓
 import LeaderDashboard from "@/components/LeaderDashboard.vue";
+import LeaderDashboardMain from"@/components/LeaderDashboardMain.vue"
 //手动table填写数据
 import TableEditable from "@/components/TableEditable.vue";
 // 路由规则
@@ -55,7 +56,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "components/leader-dashboard",
         name: "LeaderDashboard",
-        component: LeaderDashboard,
+        component: LeaderDashboardMain,
         meta: { title: "数据看板" },
       },
       {

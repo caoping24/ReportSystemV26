@@ -141,15 +141,16 @@ interface ReportTabItem {
 // ===================== 常量定义 =====================
 const reportTabs: ReportTabItem[] = [
   { key: "1", tab: "日报表" },
-  { key: "2", tab: "周报表" },
-  { key: "3", tab: "月报表" },
-  { key: "4", tab: "年报表" },
+  { key: "4", tab: "周报表" },
+  { key: "2", tab: "月报表" },
+  { key: "3", tab: "年报表" },
 ];
 
 const columns = [
   { title: "序号", key: "index", width: 80, align: "center" },
   { title: "报表日期", dataIndex: "reportedTime", key: "reportedTime" },
   { title: "创建时间", dataIndex: "createTime", key: "createTime" },
+  { title: "描述", dataIndex: "description", key: "description" },
   { title: "操作", key: "action", width: 120, align: "center" },
 ];
 
@@ -165,9 +166,9 @@ const paginationParams = reactive({
 
 const tableData: Record<string, TableDataItem> = reactive({
   "1": { list: [] },
+  "4": { list: [] },
   "2": { list: [] },
   "3": { list: [] },
-  "4": { list: [] },
 });
 
 const batchReportType = ref<string>("");
@@ -268,7 +269,10 @@ const handleFileDownload = (
 const downloadExcel = async (tabKey: string, reportedTime: string) => {
   if (!reportedTime) return message.warning("ID 不能为空");
   try {
-    const res = await downloadReport(reportedTime, Number(tabKey));
+    const res = await regenerateReports({
+      type: Number(tabKey),
+      time: reportedTime,
+    });
     // 从响应头解析文件名
     const contentDisposition = res.headers?.["content-disposition"];
     let fileName = `报表_${reportedTime.substring(0, 10)}.xlsx`;
