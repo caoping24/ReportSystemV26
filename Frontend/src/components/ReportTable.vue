@@ -20,9 +20,13 @@
       <template v-else-if="column.dataIndex === 'createTime'">
         {{ dayjs(record.createdtime).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
-
+      <template v-if="column.key === 'description'">
+        {{
+          record.description
+        }}
+      </template>
       <template v-else-if="column.key === 'action'">
-        <a-button @click="emitRegenerate(record.reportedTime)">重建</a-button>
+        <!-- 仅保留下载按钮 -->
         <a-button @click="handleDownload(record.reportedTime)">下载</a-button>
       </template>
     </template>
@@ -48,27 +52,20 @@ interface ReportTableProps {
 
 const props = defineProps<ReportTableProps>();
 
+// 移除了regenerate相关的emit事件
 const emit = defineEmits<{
   (e: "download", tabKey: string, reportedTime: string): void;
-  (e: "regenerate", tabKey: string, reportedTime: string): void;
 }>();
 
-//格式化并触发 regenerate 事件
-const emitRegenerate = (reportedTime: string | Date | undefined) => {
-  if (!reportedTime) {
-    emit("regenerate", props.tabKey, "");
-    return;
-  }
-  const formattedTime = dayjs(reportedTime).format("YYYY-MM-DD") + " 09:00:01";
-  emit("regenerate", props.tabKey, formattedTime);
-};
+// 移除了emitRegenerate函数
+
 //格式化并触发 download 事件
 const handleDownload = (reportedTime: string | Date | undefined) => {
   if (!reportedTime) {
     emit("download", props.tabKey, "");
     return;
   }
-  const formattedTime = dayjs(reportedTime).format("YYYY-MM-DD") + " 09:00:01";
+  const formattedTime = dayjs(reportedTime).format("YYYY-MM-DD");
   emit("download", props.tabKey, formattedTime);
 };
 </script>

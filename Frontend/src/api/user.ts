@@ -119,6 +119,7 @@ export const regenerateReports = async (params: {
   return myAxios.request({
     url: "/api/Report/BuildReport",
     method: "POST",
+    responseType: "blob", 
     data: params,
   });
 };
