@@ -196,20 +196,68 @@ namespace CenterBackend.Services
 
         private static void WeekWriteExcelSheet3(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(2);
+            srcSheet.ForceFormulaRecalculation = false;
 
+            var dataList = weekWorkBookData.WorkSheet3;
+            for (int i = 0; i < 3; i++)
+            {
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 1, 1, 5);
+                }
+            }
         }
         private static void WeekWriteExcelSheet4(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(3);
+            srcSheet.ForceFormulaRecalculation = false;
 
+            var dataList = weekWorkBookData.WorkSheet4;
+            for (int i = 0; i < 3; i++)
+            {
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 1, 1, 7);
+                }
+            }
         }
         private static void WeekWriteExcelSheet5(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(4);
+            srcSheet.ForceFormulaRecalculation = false;
 
+            var dataList = weekWorkBookData.WorkSheet5;
+            for (int i = 0; i < 3; i++)
+            {
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 1, 1, 8);
+                }
+            }
         }
 
         private static void WeekWriteExcelSheet6(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(5);
+            srcSheet.ForceFormulaRecalculation = false;
 
+            var dataList = weekWorkBookData.WorkSheet6;
+            for (int i = 0; i < 3; i++)
+            {
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 1, 1, 2);
+                }
+            }
         }
         private static void WeekWriteExcelSheet7(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
@@ -218,7 +266,19 @@ namespace CenterBackend.Services
         }
         private static void WeekWriteExcelSheet8(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(7);
+            srcSheet.ForceFormulaRecalculation = false;
 
+            var dataList = weekWorkBookData.WorkSheet8;
+            for (int i = 0; i < 9; i++)
+            {
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 1, 1, 10);
+                }
+            }
         }
 
         private static void WeekWriteExcelSheet9(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
