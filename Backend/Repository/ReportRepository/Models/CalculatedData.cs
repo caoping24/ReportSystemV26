@@ -234,5 +234,57 @@ namespace CenterReport.Repository.Models
         public float? Cell198 { get; set; }
         public float? Cell199 { get; set; }
         public float? Cell200 { get; set; }
+        //检测数据
+        // 从 Cell200 到 Cell250 的可空浮点型属性定义
+        public float? Cell201 { get; set; }
+        public float? Cell202 { get; set; }
+        public float? Cell203 { get; set; }
+        public float? Cell204 { get; set; }
+        public float? Cell205 { get; set; }
+        public float? Cell206 { get; set; }
+        public float? Cell207 { get; set; }
+        public float? Cell208 { get; set; }
+        public float? Cell209 { get; set; }
+        public float? Cell210 { get; set; }
+        public float? Cell211 { get; set; }
+        public float? Cell212 { get; set; }
+        public float? Cell213 { get; set; }
+        public float? Cell214 { get; set; }
+        public float? Cell215 { get; set; }
+        public float? Cell216 { get; set; }
+        public float? Cell217 { get; set; }
+        public float? Cell218 { get; set; }
+        public float? Cell219 { get; set; }
+        public float? Cell220 { get; set; }
+        public float? Cell221 { get; set; }
+        public float? Cell222 { get; set; }
+        public float? Cell223 { get; set; }
+        public float? Cell224 { get; set; }
+        public float? Cell225 { get; set; }
+        public float? Cell226 { get; set; }
+        public float? Cell227 { get; set; }
+        public float? Cell228 { get; set; }
+        public float? Cell229 { get; set; }
+        public float? Cell230 { get; set; }
+        public float? Cell231 { get; set; }
+        public float? Cell232 { get; set; }
+        public float? Cell233 { get; set; }
+        public float? Cell234 { get; set; }
+        public float? Cell235 { get; set; }
+        public float? Cell236 { get; set; }
+        public float? Cell237 { get; set; }
+        public float? Cell238 { get; set; }
+        public float? Cell239 { get; set; }
+        public float? Cell240 { get; set; }
+        public float? Cell241 { get; set; }
+        public float? Cell242 { get; set; }
+        public float? Cell243 { get; set; }
+        public float? Cell244 { get; set; }
+        public float? Cell245 { get; set; }
+        public float? Cell246 { get; set; }
+        public float? Cell247 { get; set; }
+        public float? Cell248 { get; set; }
+        public float? Cell249 { get; set; }
+        public float? Cell250 { get; set; }
     }
 }
