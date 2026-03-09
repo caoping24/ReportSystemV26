@@ -90,7 +90,6 @@ namespace CenterBackend.Controllers
         {
             try
             {
-
                 var result = await _dashboardService.getCoreChart(DateTime.Now);
                 return ResultUtils<CoreChartDto>.Success(result);
             }
