@@ -1,4 +1,6 @@
-﻿namespace CenterBackend.Dto
+﻿using CenterBackend.Dto;
+
+namespace CenterBackend.Dto
 {
     /// <summary>
     /// 表格表头DTO
@@ -10,6 +12,12 @@
         public string Unit { get; set; } = string.Empty;
     }
 
+    public class GetHourDatasDto
+    {
+        public string Date { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+
+    }
     /// <summary>
     /// 小时数据DTO
     /// </summary>

@@ -436,19 +436,14 @@ namespace CenterBackend.Services
 
         private static float? CalculateAverage<T>(IEnumerable<T> data, Func<T, float?> selector)
         {
-            // 空数据校验（避免空引用异常）：如果数据为null或没有元素，直接返回null
-            if (data == null || !data.Any())
+            if (data == null || !data.Any())// 空数据校验
                 return null;
-
-            // 筛选非null的float值并计算平均值
-            var nonNullValues = data
+            var nonNullValues = data// 筛选非null的float值并计算平均值
                 .Select(selector)
                 .Where(x => x.HasValue)
                 .Select(x => x.GetValueOrDefault())
                 .ToList();
-
-            // 计算平均值，如果没有有效数据则返回null
-            return nonNullValues.Count != 0 ? nonNullValues.Average() : (float?)null;
+            return nonNullValues.Count != 0 ? nonNullValues.Average() : (float?)null;// 计算平均值
         }
         private static float? CalculateFirstLastDifference<T>(IEnumerable<T> data, Func<T, float?> selector)
         {
@@ -460,12 +455,9 @@ namespace CenterBackend.Services
                 .Where(x => x.HasValue)
                 .Select(x => x.GetValueOrDefault())
                 .ToList();
-
             if (nonNullValues.Count < 2)
                 return null;
-
-            // 4. 计算最后一个值 - 第一个值的差值
-            float firstValue = nonNullValues.First();
+            float firstValue = nonNullValues.First();//计算差值
             float lastValue = nonNullValues.Last();
             float difference = lastValue - firstValue;
             return difference;
@@ -476,12 +468,9 @@ namespace CenterBackend.Services
         {
             var maxQualifiedValue = qualifiedValue + qualifiedValuediff;
             var minQualifiedValue = qualifiedValue - qualifiedValuediff;
-            // 空数据校验（避免空引用异常）：如果数据为null或没有元素，直接返回null
-            if (data == null || !data.Any())
+            if (data == null || !data.Any())// 空数据校验
                 return null;
-
-            // 筛选非null的float值并计算平均值
-            var nonNullValues = data
+            var nonNullValues = data// 筛选非null的float值并计算平均值
                 .Select(selector)
                 .Where(x => x.HasValue)
                 .Select(x => x.GetValueOrDefault())
@@ -494,9 +483,7 @@ namespace CenterBackend.Services
                 ? nonNullValues.Count(value => value >= minQualifiedValue && value <= maxQualifiedValue)
                 // mode=false：值 ≤ max 为合格
                 : nonNullValues.Count(value => value <= maxQualifiedValue);
-
-            // 6. 计算合格利率（合格数/总有效数 * 100%），保留3位小数
-            float qualifiedRate = (qualifiedCount / (float)nonNullValues.Count) * 100f;
+            float qualifiedRate = (qualifiedCount / (float)nonNullValues.Count) * 100f;// 计算合格利率（合格数/总有效数 * 100%），保留3位小数
             return (float)Math.Round(qualifiedRate, 3);
         }
         private async Task<bool> WeekMoveDataSheet2Async(WeekWorkBook WeekWorkBook)
@@ -505,40 +492,40 @@ namespace CenterBackend.Services
 
             DateTime startTime ;
             DateTime endTime ;
-
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
+            DateTime currentMonthFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
             for (var i = 0; i < 3; i++)
             {
                 if (i == 0)
                 {
-                    startTime = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddDays(-14);
-                    endTime = startTime.AddDays(1);
+                    startTime = currentMonthFirstDay.AddDays(-14);
+                    endTime = startTime.AddDays(7);
                 }
                 else if(i == 1)
                 {
-                    startTime = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddDays(-7);
-                    endTime = startTime.AddDays(1);
+                    startTime = currentMonthFirstDay.AddDays(-7);
+                    endTime = startTime.AddDays(7);
                 }
                 else
                 {
-                    startTime = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
-                    endTime = startTime.AddDays(1);
+                    startTime = currentMonthFirstDay;
+                    endTime = startTime.AddDays(7);
                 }
 
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if(i == 2 && calculatedData.Count == 0)//本周无数据则退出
-                    return false;
-                if (calculatedData != null && calculatedData.Count != 0)
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
+                if (sourceData.Count == 0)//无数据则跳过
+                    continue;
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet2[i].Cell1 = CalculateAverage(calculatedData, x => x.Cell13);
-                    WeekWorkBook.WorkSheet2[i].Cell2 = CalculateAverage(calculatedData, x => x.Cell15);
-                    WeekWorkBook.WorkSheet2[i].Cell3 = CalculateAverage(calculatedData, x => x.Cell19);
-                    WeekWorkBook.WorkSheet2[i].Cell4 = CalculateAverage(calculatedData, x => x.Cell22);
-                    WeekWorkBook.WorkSheet2[i].Cell5 = CalculateAverage(calculatedData, x => x.Cell24);
-                    WeekWorkBook.WorkSheet2[i].Cell6 = CalculateAverage(calculatedData, x => x.Cell25);
-                    WeekWorkBook.WorkSheet2[i].Cell7 = CalculateAverage(calculatedData, x => x.Cell26);
-                    WeekWorkBook.WorkSheet2[i].Cell8 = CalculateAverage(calculatedData, x => x.Cell27);
-                    WeekWorkBook.WorkSheet2[i].Cell9 = CalculateAverage(calculatedData, x => x.Cell28);
+                    WeekWorkBook.WorkSheet2[i].Cell1 = CalculateAverage(sourceData, x => x.Cell13);
+                    WeekWorkBook.WorkSheet2[i].Cell2 = CalculateAverage(sourceData, x => x.Cell15);
+                    WeekWorkBook.WorkSheet2[i].Cell3 = CalculateAverage(sourceData, x => x.Cell19);
+                    WeekWorkBook.WorkSheet2[i].Cell4 = CalculateAverage(sourceData, x => x.Cell22);
+                    WeekWorkBook.WorkSheet2[i].Cell5 = CalculateAverage(sourceData, x => x.Cell24);
+                    WeekWorkBook.WorkSheet2[i].Cell6 = CalculateAverage(sourceData, x => x.Cell25);
+                    WeekWorkBook.WorkSheet2[i].Cell7 = CalculateAverage(sourceData, x => x.Cell26);
+                    WeekWorkBook.WorkSheet2[i].Cell8 = CalculateAverage(sourceData, x => x.Cell27);
+                    WeekWorkBook.WorkSheet2[i].Cell9 = CalculateAverage(sourceData, x => x.Cell28);
                 }
             }
             return true;

@@ -1,4 +1,5 @@
 <template>
+  <!-- 原有模板代码不变 -->
   <div
     :style="{
       maxWidth: '100%',
@@ -8,9 +9,6 @@
     }"
   >
     <div class="table-container">
-      <!-- 移除原有日期选择器/按钮区域 -->
-
-      <!-- 调整表格容器高度（移除日期选择器后减少 marginTop） -->
       <div class="table-scroll-wrapper">
         <el-table
           :data="tableData"
@@ -66,7 +64,7 @@ import { ref, onMounted, computed, onUnmounted, nextTick, defineProps } from "vu
 import { ElMessage } from "element-plus";
 import { Headers, HourData, SaveCell, ReloadData } from "@/api/TableEdit";
 
-// 类型定义保持不变
+// 类型定义
 interface TableHeader {
   prop: string;
   label: string;
@@ -88,22 +86,27 @@ interface ReloadDataParams {
   time: string;
 }
 
-// 接收主组件传递的日期
+// 扩展props：新增type参数
 const props = defineProps({
   selectedDate: {
     type: String,
     required: true,
     default: () => new Date().toISOString().split('T')[0]
+  },
+  type: {  // 新增：接收主组件传递的type参数
+    type: Number,
+    required: true,
+    default: 1
   }
 });
 
-// 响应式数据：移除自身的selectedDate，改用props.selectedDate
+// 响应式数据
 const tableHeaders = ref<TableHeader[]>([]);
 const tableData = ref<TableRow[]>([]);
 const screenWidth = ref<number>(window.innerWidth);
 const screenHeight = ref<number>(window.innerHeight);
 
-// 保留原有逻辑，仅替换selectedDate为props.selectedDate
+// 原有工具方法保持不变
 const handleResize = () => {
   screenWidth.value = window.innerWidth;
   screenHeight.value = window.innerHeight;
@@ -125,8 +128,6 @@ const getComponentSize = () => {
 const getTabGutter = () => {
   return screenGrade.value === "small" ? 8 : 16;
 };
-
-// 移除getDatePickerStyle（主组件已实现）
 
 const getColumnWidth = (prop: string) => {
   if (prop === "hour") {
@@ -207,7 +208,7 @@ const cellClassName = ({
 
 const fetchTableHeaders = async (): Promise<void> => {
   try {
-    const res = await Headers();
+    const res = await Headers({ type: props.type });
     if (res?.data) {
       tableHeaders.value = res.data;
       const hourHeader = tableHeaders.value.find(
@@ -226,7 +227,7 @@ const fetchTableHeaders = async (): Promise<void> => {
   }
 };
 
-// 核心修改：使用props.selectedDate替代自身的selectedDate
+// 修改fetchTableData：调用HourData时添加type参数
 const fetchTableData = async (): Promise<void> => {
   if (!props.selectedDate) {
     ElMessage.warning("请先选择查询日期");
@@ -234,7 +235,11 @@ const fetchTableData = async (): Promise<void> => {
   }
 
   try {
-    const res = await HourData({ date: props.selectedDate });
+    // 新增：传递type参数给HourData接口
+    const res = await HourData({ 
+      date: props.selectedDate,
+      type: props.type  // 新增type参数
+    });
     const originData = res?.data || [];
 
     if (originData.length === 0) {
@@ -271,6 +276,7 @@ const handleCellEdit = async (row: TableRow, prop: string): Promise<void> => {
     hour: row.hour,
     prop: prop,
     value: row[prop] || "",
+    type: props.type,  // 可选：如果保存接口也需要type，这里添加
   };
 
   try {
@@ -282,7 +288,7 @@ const handleCellEdit = async (row: TableRow, prop: string): Promise<void> => {
   }
 };
 
-// 核心修改：使用props.selectedDate替代自身的selectedDate
+// 修改reloadTableData：type参数使用props.type
 const reloadTableData = async (): Promise<void> => {
   if (!props.selectedDate) {
     ElMessage.warning("请先选择查询日期");
@@ -294,7 +300,7 @@ const reloadTableData = async (): Promise<void> => {
     const nextDay = new Date(props.selectedDate);
     nextDay.setDate(nextDay.getDate() + 1);
     const reloadParams: ReloadDataParams = {
-      type: 1,
+      type: props.type,  // 修改：使用主组件传递的type，替代原有固定值1
       time: nextDay.toISOString().split("T")[0],
     };
     await ReloadData(reloadParams);
@@ -306,11 +312,10 @@ const reloadTableData = async (): Promise<void> => {
   }
 };
 
-// 初始化逻辑：移除自身selectedDate的赋值，改为监听props变化
+// 初始化逻辑
 onMounted(async () => {
   window.addEventListener("resize", handleResize);
   await fetchTableHeaders();
-  // 初始化时调用查询（使用主组件传递的日期）
   if (props.selectedDate) {
     await fetchTableData();
   }
@@ -321,34 +326,30 @@ onMounted(async () => {
   });
 });
 
-// 监听主组件传递的日期变化，自动刷新数据
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
   document.documentElement.style.overflowY = "auto";
   document.body.style.overflowY = "auto";
 });
 
-// 暴露方法给主组件调用
 defineExpose({
   fetchTableData,
   reloadTableData,
 });
 </script>
 
+<!-- 原有样式代码不变 -->
 <style scoped>
-/* 核心修改：调整表格容器高度（移除日期选择器后减少顶部间距） */
 .table-scroll-wrapper {
   width: 100%;
   overflow: hidden;
   box-sizing: border-box;
   padding: 0 1px;
-  margin: 0; /* 移除原有margin-top */
-  /* 调整高度：移除日期选择器后减少偏移量 */
+  margin: 0;
   height: calc(100vh - 80px);
   scrollbar-gutter: stable;
 }
 
-/* 其他样式保持不变，仅调整媒体查询中的高度 */
 :deep(html),
 :deep(body) {
   margin: 0;
@@ -378,7 +379,6 @@ defineExpose({
   height: calc(100% - 40px) !important;
 }
 
-/* 小屏适配 */
 @media screen and (max-width: 1366px) {
   .table-scroll-wrapper {
     height: calc(100vh - 70px);
@@ -388,14 +388,12 @@ defineExpose({
   }
 }
 
-/* 1080p适配 */
 @media screen and (min-width: 1367px) and (max-width: 1919px) {
   .table-scroll-wrapper {
     height: calc(100vh - 80px);
   }
 }
 
-/* 大屏适配 */
 @media screen and (min-width: 1920px) {
   .table-scroll-wrapper {
     height: calc(100vh - 90px);
@@ -405,7 +403,6 @@ defineExpose({
   }
 }
 
-/* 其余样式保持不变 */
 :deep(.el-table__body-wrapper::-webkit-scrollbar) {
   height: 12px;
   width: 8px;

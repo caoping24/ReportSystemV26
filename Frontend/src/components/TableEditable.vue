@@ -18,7 +18,7 @@
         </a-tabs>
       </div>
 
-      <!-- 替换原有刷新按钮：日期选择器 + 查询 + 重载按钮 -->
+      <!-- 日期选择器 + 查询 + 重载按钮 -->
       <div class="date-actions">
         <el-date-picker
           v-model="selectedDate"
@@ -57,13 +57,14 @@
       </div>
     </div>
 
-    <!-- 动态渲染子组件：传递主组件的selectedDate -->
+    <!-- 动态渲染子组件：新增传递type参数 -->
     <component 
       :is="currentComponent" 
       ref="tableEditableRef"
       :key="currentPage" 
       class="table-editable-content"
       :selected-date="selectedDate"
+      :type="tabTypeMap[activeKey]"  
     />
   </div>
 </template>
@@ -72,8 +73,6 @@
 import { ref, computed, defineAsyncComponent, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { message } from "ant-design-vue";
 import { ElMessage } from "element-plus";
-
-// 导入Element Plus组件（全局注册可省略，非全局需导入）
 import { ElDatePicker, ElButton } from "element-plus";
 
 // 1. 异步导入子组件
@@ -83,12 +82,17 @@ const loadTableEditableComponent = (page: number) => {
   );
 };
 
-// 2. 分页状态管理（核心优化：确保选中状态持久化）
-const totalPages = ref(2); // 总标签页数，可根据实际需求调整
+// 2. 分页状态管理 + 新增标签页与type的映射
+const totalPages = ref(2); 
 const currentPage = ref(1);
-const activeKey = ref<string>("1"); // 改为ref直接管理，初始选中第一个标签
+const activeKey = ref<string>("1"); 
+// 新增：标签页key对应接口type参数（可根据实际业务调整）
+const tabTypeMap = ref<Record<string, number>>({
+  '1': 1,  // 第一个标签对应type=1
+  '2': 2   // 第二个标签对应type=2
+});
 
-// 监听activeKey变化，同步更新currentPage，确保状态一致
+// 监听activeKey变化，同步更新currentPage
 watch(activeKey, (newKey) => {
   const page = Number(newKey);
   if (page >= 1 && page <= totalPages.value) {
@@ -105,7 +109,7 @@ const currentComponent = computed(() => {
 const handleTabChange = (key: string) => {
   const page = Number(key);
   if (page < 1 || page > totalPages.value) return;
-  activeKey.value = key; // 直接更新选中的标签key
+  activeKey.value = key; 
   message.success(`切换到第 ${page} 个可编辑表格`);
 };
 
@@ -113,24 +117,20 @@ const handleTabChange = (key: string) => {
 const selectedDate = ref<string>(new Date().toISOString().split('T')[0]);
 const screenWidth = ref<number>(window.innerWidth);
 
-// 监听窗口大小变化
 const handleResize = () => {
   screenWidth.value = window.innerWidth;
 };
 
-// 屏幕尺寸分级
 const screenGrade = computed(() => {
   if (screenWidth.value < 1366) return "small";
   if (screenWidth.value < 1920) return "normal";
   return "large";
 });
 
-// 动态计算组件尺寸
 const getComponentSize = () => {
   return screenGrade.value === "small" ? "small" : "default";
 };
 
-// 动态设置日期选择器样式
 const getDatePickerStyle = () => {
   const styles: Record<string, string> = {
     flexShrink: "0",
@@ -150,7 +150,6 @@ const getDatePickerStyle = () => {
   return styles;
 };
 
-// 禁用未来日期
 const disabledFutureDate = (date: Date): boolean => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -162,7 +161,7 @@ const disabledFutureDate = (date: Date): boolean => {
 // 4. 子组件引用
 const tableEditableRef = ref<any>(null);
 
-// 5. 查询按钮逻辑：调用子组件的查询方法
+// 5. 查询按钮逻辑
 const handleQuery = async () => {
   if (!selectedDate.value) {
     ElMessage.warning("请先选择查询日期");
@@ -185,7 +184,7 @@ const handleQuery = async () => {
   }
 };
 
-// 6. 重载按钮逻辑：调用子组件的重载方法
+// 6. 重载按钮逻辑
 const handleReload = async () => {
   if (!selectedDate.value) {
     ElMessage.warning("请先选择查询日期");
@@ -216,10 +215,10 @@ watch(currentPage, () => {
   nextTick(() => handleQuery());
 });
 
-// 8. 生命周期：监听窗口大小 + 初始化查询
+// 8. 生命周期
 onMounted(() => {
   window.addEventListener("resize", handleResize);
-  handleQuery(); // 初始化时自动查询今日数据
+  handleQuery();
 });
 
 onUnmounted(() => {
@@ -227,8 +226,9 @@ onUnmounted(() => {
 });
 </script>
 
+<!-- 样式部分保持不变 -->
 <style scoped>
-/* 主容器样式 */
+/* 原有样式代码不变 */
 #tableEditableMain {
   width: 100%;
   box-sizing: border-box;
@@ -237,7 +237,6 @@ onUnmounted(() => {
   min-height: calc(100vh - 40px);
 }
 
-/* 标签栏+日期按钮容器 */
 .tabs-header {
   display: flex;
   align-items: center;
@@ -247,13 +246,11 @@ onUnmounted(() => {
   margin-bottom: 16px;
 }
 
-/* 标签容器 */
 .tabs-container {
-  width: calc(100% - 380px); /* 预留日期选择器+按钮宽度 */
+  width: calc(100% - 380px);
   box-sizing: border-box;
 }
 
-/* 日期选择器+按钮容器 */
 .date-actions {
   display: flex;
   gap: 10px;
@@ -263,20 +260,17 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-/* 子组件容器 */
 .table-editable-content {
   width: 100%;
   box-sizing: border-box;
 }
 
-/* 核心：强化Antd标签选中样式，确保选中状态持久且明显 */
 :deep(.ant-tabs-card) {
   border: none;
   --ant-tabs-card-head-background: #f5f8fa;
   --ant-tabs-nav-item-active-color: #1890ff;
 }
 
-/* 选中标签的核心样式（强制生效） */
 :deep(.ant-tabs-tab-active) {
   background-color: #fff !important;
   color: #1890ff !important;
@@ -284,18 +278,15 @@ onUnmounted(() => {
   border-bottom: 2px solid #1890ff !important;
 }
 
-/* 卡片式标签选中时的边框样式 */
 :deep(.ant-tabs-card .ant-tabs-tab-active) {
   border-color: #1890ff #1890ff #fff !important;
   box-shadow: 0 2px 4px rgba(24, 144, 255, 0.1) !important;
 }
 
-/* 标签悬浮样式（增强交互） */
 :deep(.ant-tabs-tab:hover) {
   color: #096dd9 !important;
 }
 
-/* 小屏幕适配 */
 @media screen and (max-width: 1366px) {
   .tabs-container {
     width: calc(100% - 320px);

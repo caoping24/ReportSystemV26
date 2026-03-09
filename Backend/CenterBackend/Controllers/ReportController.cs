@@ -70,41 +70,5 @@ namespace CenterBackend.Controllers
             }
         }
 
-        //预留
-        ///// <summary>
-        ///// 下载单个Excel文件
-        ///// </summary>
-        ///// <param name="loginDto"></param>
-        ///// <returns></returns>
-        //[HttpGet("DownloadExcel")]
-        //public async Task<IActionResult> DownloadFile(String timeStr, int type)
-        //{
-        //    //await _logger.LogInfoAsync($"DownloadFile:timeStr:{timeStr},Type:{type}");
-        //    bool isValid = DateTime.TryParseExact(
-        //        timeStr,
-        //        "yyyy-MM-dd HH:mm:ss",
-        //        CultureInfo.InvariantCulture, // 替代null，避免区域设置影响（比如中文/英文系统）
-        //        DateTimeStyles.None,
-        //        out DateTime fileDate);
-        //    if (!isValid)
-        //    {
-        //        return new BadRequestObjectResult(new { success = false, msg = "时间格式错误" });
-        //    }
-        //        var filePathGenerator = new FilePathGenerator(_webHostEnv);
-        //        PathAndName fileInfo = filePathGenerator.GetByType(fileDate, type);
-        //            if (string.IsNullOrEmpty(fileInfo.FileName))//检查Type是否合法，是否能找到对应的文件路径和文件名
-        //            {
-        //                return new BadRequestObjectResult(new { success = false, msg = "无效的请求参数" });
-        //            }
-        //            try
-        //            {
-        //                var(filePath, contentType, downloadFileName) = _fileService.DownloadFileInfo(fileInfo.Directory, fileInfo.FileName);
-        //                return PhysicalFile(filePath, contentType, downloadFileName);//官方推荐：直接用 PhysicalFile 自动处理文件流、响应头、范围请求（大文件下载）
-        //}
-        //            catch (Exception ex)
-        //            {
-        //    return new BadRequestObjectResult(new { success = false, msg = $"{ex}" });
-        //}
-        //}
     }
 }
