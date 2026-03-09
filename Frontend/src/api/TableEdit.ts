@@ -1,14 +1,15 @@
 import myAxios from "@/request";
 //表头
-export const Headers = async () => {
+export const Headers = async (params: { type:string }) => {
   return myAxios.request({
     url: "/api/ReportRecord/Headers",
     method: "GET",
+    params: params,
   });
 };
 
 //列表
-export const HourData = async (params: { date: string,page:number }) => {
+export const HourData = async (params: { date: string,type:string }) => {
   return myAxios.request({
     url: "/api/ReportRecord/HourData", // 对应后端接口地址
     method: "GET",
