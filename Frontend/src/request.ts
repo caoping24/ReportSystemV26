@@ -61,24 +61,24 @@ myAxios.interceptors.response.use(
 
     // blob文件下载处理
     if (response.config.responseType === "blob") {
-      let fileName = "导出文件.xlsx";
-      if (
-        response.headers["content-disposition"] ||
-        response.headers["Content-Disposition"]
-      ) {
-        try {
-          const disposition =
-            response.headers["content-disposition"] ||
-            response.headers["Content-Disposition"];
-          fileName = decodeURI(disposition.split("filename=")[1]);
-          fileName = fileName.replace(/"/g, "");
-        } catch (err) {
-          fileName = "导出文件.xlsx";
+            let fileName = "导出文件.xlsx";
+        // 兼容 Content-Disposition 的标准格式（支持 filename*=UTF-8''xxx 格式）
+        const disposition = response.headers["content-disposition"] || response.headers["Content-Disposition"];
+        if (disposition) {
+          try {
+            // 正则匹配 filename 字段（兼容带引号/不带引号的情况）
+            const filenameMatch = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            if (filenameMatch && filenameMatch[1]) {
+              fileName = filenameMatch[1].replace(/['"]/g, ""); // 移除引号
+              fileName = decodeURIComponent(fileName); // 优先用 decodeURIComponent（比 decodeURI 更兼容）
+            }
+          } catch (err) {
+            fileName = "导出文件.xlsx";
+          }
         }
-      }
-      response.fileBlobData = response.data as Blob;
-      response.fileDownloadName = fileName;
-      return response;
+        response.fileBlobData = response.data as Blob;
+        response.fileDownloadName = fileName;
+        return response; // 提前返回，避免进入后续 JSON 处理逻辑
     }
 
     // 常规JSON响应处理
