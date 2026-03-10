@@ -5,6 +5,7 @@ using CenterReport.Repository.Models;
 using Microsoft.Identity.Client;
 using NPOI.SS.Formula.Functions;
 using System.Collections;
+using System.Security.Cryptography.Xml;
 
 
 namespace CenterBackend.Services
@@ -270,26 +271,26 @@ namespace CenterBackend.Services
                         target[i].Cell105 = (currentVal - prevData) / 1000;
                 }
                 target[i].Cell106 = source1[i].Cell106;
-                target[i].Cell107 = source1[i].Cell107;
+                if (i != 0)// 每小时的差值
+                {
+                    var currentVal = source1[i].Cell107;
+                    var prevData = source1[i - 1]?.Cell107;
+                    if (currentVal != null && prevData != null)
+                        target[i].Cell107 = (currentVal - prevData);
+                }
                 target[i].Cell108 = source1[i].Cell108;
                 target[i].Cell109 = source1[i].Cell109;
-                if (i != 0)// 每小时的差值
-                {
-                    var currentVal = source1[i].Cell110;
-                    var prevData = source1[i - 1]?.Cell110;
-                    if (currentVal != null && prevData != null)
-                        target[i].Cell110 = (currentVal - prevData) / 1000;
-                }
+                target[i].Cell110 = source1[i].Cell110;
                 target[i].Cell111 = source1[i].Cell111;
-                target[i].Cell112 = source1[i].Cell112;
-                target[i].Cell113 = source1[i].Cell113;
                 if (i != 0)// 每小时的差值
                 {
-                    var currentVal = source1[i].Cell114;
-                    var prevData = source1[i - 1]?.Cell114;
+                    var currentVal = source1[i].Cell112;
+                    var prevData = source1[i - 1]?.Cell112;
                     if (currentVal != null && prevData != null)
-                        target[i].Cell114 = (currentVal - prevData) / 1000;
+                        target[i].Cell112 = (currentVal - prevData) / 1000;
                 }
+                target[i].Cell113 = source1[i].Cell113;
+                target[i].Cell114 = source1[i].Cell114;
                 target[i].Cell115 = source1[i].Cell115;
                 if (i != 0)// 每小时的差值
                 {
@@ -307,7 +308,13 @@ namespace CenterBackend.Services
                         target[i].Cell118 = (currentVal - prevData) / 1000;
                 }
                 target[i].Cell119 = source1[i].Cell119;
-                target[i].Cell120 = source1[i].Cell120;
+                if (i != 0)// 每小时的差值
+                {
+                    var currentVal = source1[i].Cell120;
+                    var prevData = source1[i - 1]?.Cell120;
+                    if (currentVal != null && prevData != null)
+                        target[i].Cell120 = (currentVal - prevData) / 1000;
+                }
                 target[i].Cell121 = source1[i].Cell121;
                 target[i].Cell122 = source1[i].Cell122;
                 target[i].Cell123 = source1[i].Cell123;
@@ -316,27 +323,21 @@ namespace CenterBackend.Services
                 target[i].Cell126 = source1[i].Cell126;
                 target[i].Cell127 = source1[i].Cell127;
                 target[i].Cell128 = source1[i].Cell128;
-                if (i != 0)// 每小时的差值
-                {
-                    var currentVal = source1[i].Cell129;
-                    var prevData = source1[i - 1]?.Cell129;
-                    if (currentVal != null && prevData != null)
-                        target[i].Cell129 = (currentVal - prevData) / 1000;
-                }
+                target[i].Cell129 = source1[i].Cell129;
                 target[i].Cell130 = source1[i].Cell130;
-                target[i].Cell131 = source1[i].Cell131;
+                //target[i].Cell131人工录入
+                target[i].Cell132 = source1[i].Cell132;
+                target[i].Cell133 = source1[i].Cell133;
                 if (i != 0)// 每小时的差值
                 {
-                    var currentVal = source1[i].Cell132;
-                    var prevData = source1[i - 1]?.Cell132;
+                    var currentVal = source1[i].Cell134;
+                    var prevData = source1[i - 1]?.Cell134;
                     if (currentVal != null && prevData != null)
-                        target[i].Cell132 = (currentVal - prevData) / 1000;
+                        target[i].Cell134 = (currentVal - prevData) / 1000;
                 }
-                target[i].Cell133 = source1[i].Cell133;
-                target[i].Cell134 = source1[i].Cell134;
+                target[i].Cell135 = source1[i].Cell135;
+                target[i].Cell136 = source1[i].Cell136;
                 //人工检测数据
-                //target[i].Cell135 = source1[i].Cell135;
-                //target[i].Cell136 = source1[i].Cell136;
                 //target[i].Cell137 = source1[i].Cell137;
                 //target[i].Cell138 = source1[i].Cell138;
                 //target[i].Cell139 = source1[i].Cell139;
@@ -357,35 +358,32 @@ namespace CenterBackend.Services
             for (int i = 0; i < 13; i++) {
                 if (source2 == null || source2[i] == null)
                     continue;
-                //人工检测数据
-                target[i].Cell29 = source2[i].Cell1;
-                target[i].Cell30 = source2[i].Cell2;
-                target[i].Cell31 = source2[i].Cell3;
-                target[i].Cell32 = source2[i].Cell4;
-                target[i].Cell33 = source2[i].Cell5;
-                target[i].Cell34 = source2[i].Cell6;
-                target[i].Cell35 = source2[i].Cell7;
-                //人工检测数据
-                target[i].Cell56 = source2[i].Cell11;
-                target[i].Cell57 = source2[i].Cell12;
-                target[i].Cell58 = source2[i].Cell13;
-                target[i].Cell59 = source2[i].Cell14;
-                target[i].Cell60 = source2[i].Cell15;
-                //人工检测数据
-                target[i].Cell82 = source2[i].Cell21;
-                target[i].Cell83 = source2[i].Cell22;
-                target[i].Cell84 = source2[i].Cell23;
-                target[i].Cell85 = source2[i].Cell24;
-                target[i].Cell86 = source2[i].Cell25;
-                target[i].Cell87 = source2[i].Cell26;
-                //人工检测数据
-                target[i].Cell135 = source2[i].Cell31;
-                target[i].Cell136 = source2[i].Cell32;
-                target[i].Cell137 = source2[i].Cell33;
-                target[i].Cell138 = source2[i].Cell34;
-                target[i].Cell139 = source2[i].Cell35;
-                target[i].Cell140 = source2[i].Cell36;
-                target[i].Cell141 = source2[i].Cell37;
+                //表2
+                target[i].Cell29 = source2[i].Cell11;
+                target[i].Cell30 = source2[i].Cell12;
+                target[i].Cell31 = source2[i].Cell13;
+                target[i].Cell32 = source2[i].Cell14;
+                target[i].Cell33 = source2[i].Cell15;
+                target[i].Cell34 = source2[i].Cell16;
+                target[i].Cell35 = source2[i].Cell17;
+                //表1
+                target[i].Cell56 = source2[i].Cell1;
+                target[i].Cell57 = source2[i].Cell2;
+                target[i].Cell58 = source2[i].Cell3;
+                target[i].Cell59 = source2[i].Cell4;
+                target[i].Cell60 = source2[i].Cell5;
+                //表4
+                target[i].Cell82 = source2[i].Cell26;
+                target[i].Cell83 = source2[i].Cell41;
+                target[i].Cell84 = source2[i].Cell42;
+                target[i].Cell85 = source2[i].Cell43;
+                target[i].Cell86 = source2[i].Cell44;
+                target[i].Cell87 = source2[i].Cell45;
+                //表5
+                target[i].Cell131 = source2[i].Cell36;
+                target[i].Cell137 = source2[i].Cell56;
+                target[i].Cell138 = source2[i].Cell62;
+
             }
         }
         private async Task<bool> WeekMoveDataSheet2Async(WeekWorkBook WeekWorkBook)
@@ -623,7 +621,43 @@ namespace CenterBackend.Services
         }
         private async Task<bool> WeekMoveDataSheet9Async(WeekWorkBook WeekWorkBook)
         {
-            //表不明确，暂时不处理
+            WeekWorkBook.WorkSheet9 = Enumerable.Range(1, 2).Select(_ => new WorkSheet9()).ToList();
+
+            DateTime startTime;
+            DateTime endTime;
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            List<OperatorInputData> operatorInputData = [];
+            List<SourceData> sourceData = [];
+            for (var i = 0; i < 2; i++)
+            {
+                if (i == 0)
+                {
+                    startTime = currentWeekFirstDay.AddDays(-7);
+                    endTime = startTime.AddDays(7);
+                }
+                else
+                {
+                    startTime = currentWeekFirstDay;
+                    endTime = startTime.AddDays(7);
+                }
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
+                if (sourceData != null && sourceData.Count != 0)
+                {
+                    WeekWorkBook.WorkSheet9[i].Cell1 = CalculateFirstLastDifference(sourceData, x => x.Cell107);
+                    WeekWorkBook.WorkSheet9[i].Cell2 = CalculateAverage(sourceData, x => x.Cell114);
+                    WeekWorkBook.WorkSheet9[i].Cell3 = CalculateAverage(sourceData, x => x.Cell112);
+                    WeekWorkBook.WorkSheet9[i].Cell4 = CalculateAverage(sourceData, x => x.Cell110);
+                }
+                operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
+                if (operatorInputData.Count == 0)//无数据则跳过
+                    continue;
+                if (operatorInputData != null && operatorInputData.Count != 0)
+                {
+                    WeekWorkBook.WorkSheet9[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell41);
+                    WeekWorkBook.WorkSheet9[i].Cell6 = CalculateAverage(operatorInputData, x => x.Cell43);
+                    WeekWorkBook.WorkSheet9[i].Cell7 = CalculateAverage(operatorInputData, x => x.Cell45);
+                }
+            }
             return true;
         }
         private async Task<bool> WeekMoveDataSheet10Async(WeekWorkBook WeekWorkBook)
@@ -660,7 +694,7 @@ namespace CenterBackend.Services
                 {
                     if (total != null)
                     {
-                        var difference = CalculateFirstLastDifference(operatorInputData, x => x.Cell63);
+                        var difference = CalculateFirstLastDifference(operatorInputData, x => x.Cell64);
                         if (difference != null)
                             WeekWorkBook.WorkSheet10[i].Cell1 = total / difference;//活性炭单耗
                     }
@@ -675,7 +709,6 @@ namespace CenterBackend.Services
                         WeekWorkBook.WorkSheet10[i].Cell8 = CalculateAverage(operatorInputData, x => x.Cell61);
                     }
                 }
-    
             }
             return true;
         }
@@ -705,8 +738,6 @@ namespace CenterBackend.Services
                     startTime = currentWeekFirstDay;
                     endTime = startTime.AddDays(7);
                 }
-
-                
                 operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
                 if (operatorInputData != null && operatorInputData.Count != 0)
                 {
@@ -718,10 +749,10 @@ namespace CenterBackend.Services
                             WeekWorkBook.WorkSheet11[i].Cell1 = CalculateFirstLastDifference(sourceData, x => x.Cell132);//废液外排累计
                         }
                     }
-                    //WeekWorkBook.WorkSheet11[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell211);//还不明确使用那个表
-                    //WeekWorkBook.WorkSheet11[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell213);
-                    //WeekWorkBook.WorkSheet11[i].Cell4 = CalculateAverage(operatorInputData, x => x.Cell215);
-                    //WeekWorkBook.WorkSheet11[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell215);
+                    WeekWorkBook.WorkSheet11[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell52);
+                    WeekWorkBook.WorkSheet11[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell53);
+                    WeekWorkBook.WorkSheet11[i].Cell4 = CalculateAverage(operatorInputData, x => x.Cell55);
+                    //WeekWorkBook.WorkSheet11[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell215);//待定  需要取产量
                 }
             }
             return true;
@@ -845,5 +876,34 @@ namespace CenterBackend.Services
             // 3. 计算总和：有有效数据则返回和，无则返回null
             return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;
         }
+        /***********************Excel计算逻辑***********************/
+        //private static float? CalculateForSheet3<T>(IEnumerable<T> data)
+        //{
+        //    float?  E5 = null, F5 = null, G5 = null, H5 = null, I5 = null, J5 = null,
+        //            L5 = null, M5 = null, N5 = null, O5 = null, P5 = null, Q5 = null;
+
+        //    //K5 = E5 * J5 / 100
+        //    //R5 = L5 * Q5 / 100
+
+        //    //S5 = (E5 * J5 + L5 * Q5) / (J5 + Q5)  
+        //    //T5 = (F5 * J5 + M5 * Q5) / (J5 + Q5)
+        //    //U5 = (G5 * J5 + N5 * Q5) / (J5 + Q5)
+        //    //V5 = (H5 * J5 + O5 * Q5) / (J5 + Q5)
+        //    //W5 = (I5 * J5 + P5 * Q5) / (J5 + Q5)
+
+        //    //X5 = J5 + Q5
+        //    //Y5 = K5 + R5
+
+        //    if (data == null || !data.Any())// 1.空数据校验
+        //        return null;
+
+            
+        //    //var nonNullValues = data// 筛选非null的float值
+        //    //    .Select(x=>x.cell3)          // 提取float?字段
+        //    //    .Where(x => x.HasValue)    // 过滤掉null值
+        //    //    .Select(x => x.GetValueOrDefault())      // 转换为float（非可空）
+        //    //    .ToList();
+        //    return E5;
+        //}
     }
 }

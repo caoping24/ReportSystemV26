@@ -65,9 +65,12 @@ namespace CenterBackend.Services
                         FileName = fileInfo.FileName,
                         ModFilePath = fileInfo.ModFilePath,
                     };
+
                     if (await _dataToViewService.DayGetMapDataAsync(dayCollections))
                     {
-                        isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(dayCollections);
+                        var FilePath = System.IO.Path.Combine(dayCollections.Directory, dayCollections.FileName);
+                        if ( _fileService.CopyFile(dayCollections.ModFilePath, FilePath))
+                            isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(dayCollections);
                     }
                     break;
                 case 2:
