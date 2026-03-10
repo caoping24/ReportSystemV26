@@ -16,6 +16,9 @@ namespace CenterReport.Repository
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<OperatorInputData>()
+       .ToTable(tb => tb.HasTrigger("TR_OperatorInputData_UpdateLastChange"));
+      
         }
     }
 }
