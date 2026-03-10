@@ -29,7 +29,6 @@ namespace CenterBackend.Services
         private readonly IDataViewToExcel _dataViewToExcel;
         private readonly IDataToViewService _dataToViewService;
         private readonly IFileServices _fileService;
-        private readonly ICalculatedAndSaveService _calculatedAndSaveService;
 
         public ReportService(IReportRepository<SourceData> sourceData,
             IReportRepository<OperatorInputData> operatorInputData,
@@ -39,8 +38,7 @@ namespace CenterBackend.Services
             //CenterReportDbContext _dbContext,
             IDataViewToExcel dataViewToExcel,
             IDataToViewService dataToViewService,
-            IFileServices fileService,
-            ICalculatedAndSaveService calculatedAndSaveService
+            IFileServices fileService
             )
         {
             this._sourceData = sourceData;
@@ -51,7 +49,6 @@ namespace CenterBackend.Services
             //this._dbContext = _dbContext;
             this._dataToViewService = dataToViewService;
             this._fileService = fileService;
-            this._calculatedAndSaveService = calculatedAndSaveService;
 
         }
         public async Task<bool> RebuildReport(PathAndName fileInfo)
@@ -124,22 +121,7 @@ namespace CenterBackend.Services
             return true;
         }
 
-        /// <summary>
-        /// 根据传入的Type类型，计算对应维度的统计数据并插入到CalculatedData表中 注意传入的时间
-        /// </summary>
-        /// <param name="_Dto"></param>
-        /// <returns></returns>
-        public async Task<bool> ConfigDataAnalyses(CalculateAndInsertDto dto)
-        {
 
-            var reportInfo = new ReportInfo
-            {
-                TimeStart = dto.Time.Date.AddHours(8),//当日8点
-                TimeEnd = dto.Time.Date.AddHours(8).AddDays(1),
-                SheetType = SheetType.DayReport,
-            };
-            return await _calculatedAndSaveService.DataAnalyses(reportInfo);
-        }
 
 
     }
