@@ -24,7 +24,6 @@ namespace CenterBackend.Services
         private readonly IReportRepository<SourceData> _sourceData;
         private readonly IReportRepository<OperatorInputData> _operatorInputData;
         private readonly IReportRecordRepository<ReportRecord> _reportRecord;
-        private readonly IReportRepository<CalculatedData> _calculatedDatas;
         private readonly IReportUnitOfWork _reportUnitOfWork;
         //private readonly CenterReportDbContext _dbContext
         private readonly IDataViewToExcel _dataViewToExcel;
@@ -35,7 +34,6 @@ namespace CenterBackend.Services
         public ReportService(IReportRepository<SourceData> sourceData,
             IReportRepository<OperatorInputData> operatorInputData,
             IReportRecordRepository<ReportRecord> reportRecord,
-            IReportRepository<CalculatedData> CalculatedDatas,
             IReportUnitOfWork reportUnitOfWork,
             //IHttpContextAccessor httpContextAccessor,
             //CenterReportDbContext _dbContext,
@@ -48,7 +46,6 @@ namespace CenterBackend.Services
             this._sourceData = sourceData;
             this._operatorInputData = operatorInputData;
             this._reportRecord = reportRecord;
-            this._calculatedDatas = CalculatedDatas;
             this._reportUnitOfWork = reportUnitOfWork;
             this._dataViewToExcel = dataViewToExcel;
             //this._dbContext = _dbContext;

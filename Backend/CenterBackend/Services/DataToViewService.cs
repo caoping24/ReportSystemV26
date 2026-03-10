@@ -12,13 +12,11 @@ using NPOI.XSSF.Streaming.Values;
 namespace CenterBackend.Services
 {
     public class DataToViewService( IReportRepository<SourceData> sourceData,
-                                    IReportRepository<OperatorInputData> operatorInputData,
-                                    IReportRepository<CalculatedData> calculatedData) : IDataToViewService
+                                    IReportRepository<OperatorInputData> operatorInputData) : IDataToViewService
     {
 
         private readonly IReportRepository<SourceData> _sourceData = sourceData;
         private readonly IReportRepository<OperatorInputData> _operatorInputData = operatorInputData;
-        private readonly IReportRepository<CalculatedData> _calculatedData = calculatedData;
 
         public async Task<bool> DayGetMapDataAsync(DayWorkBook DayWorkBook)
         {
@@ -517,8 +515,8 @@ namespace CenterBackend.Services
                     continue;
                 if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet2[i].Cell1 = CalculateAverage(sourceData, x => x.Cell13);
-                    WeekWorkBook.WorkSheet2[i].Cell2 = CalculateAverage(sourceData, x => x.Cell15);
+                    WeekWorkBook.WorkSheet2[i].Cell1 = CalculateFirstLastDifference(sourceData, x => x.Cell13);
+                    WeekWorkBook.WorkSheet2[i].Cell2 = CalculateFirstLastDifference(sourceData, x => x.Cell15);
                     WeekWorkBook.WorkSheet2[i].Cell3 = CalculateAverage(sourceData, x => x.Cell19);
                     WeekWorkBook.WorkSheet2[i].Cell4 = CalculateAverage(sourceData, x => x.Cell22);
                     WeekWorkBook.WorkSheet2[i].Cell5 = CalculateAverage(sourceData, x => x.Cell24);
@@ -537,7 +535,7 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
 
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
             for (var i = 0; i < 3; i++)
             {
                 if (i == 0)
@@ -556,16 +554,16 @@ namespace CenterBackend.Services
                     endTime = startTime.AddMonths(1).AddDays(-1);
                 }
 
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if (i == 1 && calculatedData.Count == 0)//本周无数据则退出
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime, 1);
+                if (i == 1 && sourceData.Count == 0)//本周无数据则退出
                     return false;
-                if (calculatedData != null && calculatedData.Count != 0)
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet3[i].Cell1 = CalculateAverage(calculatedData, x => x.Cell151);
-                    WeekWorkBook.WorkSheet3[i].Cell2 = CalculateAverage(calculatedData, x => x.Cell152);
-                    WeekWorkBook.WorkSheet3[i].Cell3 = CalculateAverage(calculatedData, x => x.Cell153);
-                    WeekWorkBook.WorkSheet3[i].Cell4 = CalculateAverage(calculatedData, x => x.Cell154);
-                    WeekWorkBook.WorkSheet3[i].Cell5 = CalculateAverage(calculatedData, x => x.Cell156);
+                    //WeekWorkBook.WorkSheet3[i].Cell1 = CalculateAverage(sourceData, x => x.Cell151);
+                    //WeekWorkBook.WorkSheet3[i].Cell2 = CalculateAverage(sourceData, x => x.Cell152);
+                    //WeekWorkBook.WorkSheet3[i].Cell3 = CalculateAverage(sourceData, x => x.Cell153);
+                    //WeekWorkBook.WorkSheet3[i].Cell4 = CalculateAverage(sourceData, x => x.Cell154);
+                    //WeekWorkBook.WorkSheet3[i].Cell5 = CalculateAverage(sourceData, x => x.Cell156);
                 }
             }
             return true;
@@ -577,7 +575,7 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
 
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
             for (var i = 0; i < 3; i++)
             {
                 if (i == 0)
@@ -596,19 +594,19 @@ namespace CenterBackend.Services
                     endTime = startTime.AddDays(1);
                 }
 
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if (i == 2 && calculatedData.Count == 0)//本周无数据则退出
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime, 1);
+                if (i == 2 && sourceData.Count == 0)//本周无数据则退出
                     return false;
-                if (calculatedData != null && calculatedData.Count != 0)
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet4[i].Cell1 = CalculateAverage(calculatedData, x => x.Cell161);
-                    WeekWorkBook.WorkSheet4[i].Cell2 = CalculateAverage(calculatedData, x => x.Cell162);
-                    WeekWorkBook.WorkSheet4[i].Cell3 = CalculateAverage(calculatedData, x => x.Cell163);
-                    WeekWorkBook.WorkSheet4[i].Cell4 = CalculateAverage(calculatedData, x => x.Cell164);
-                    WeekWorkBook.WorkSheet4[i].Cell5 = CalculateAverage(calculatedData, x => x.Cell165);
+                    //WeekWorkBook.WorkSheet4[i].Cell1 = CalculateAverage(sourceData, x => x.Cell161);
+                    //WeekWorkBook.WorkSheet4[i].Cell2 = CalculateAverage(sourceData, x => x.Cell162);
+                    //WeekWorkBook.WorkSheet4[i].Cell3 = CalculateAverage(sourceData, x => x.Cell163);
+                    //WeekWorkBook.WorkSheet4[i].Cell4 = CalculateAverage(sourceData, x => x.Cell164);
+                    //WeekWorkBook.WorkSheet4[i].Cell5 = CalculateAverage(sourceData, x => x.Cell165);
 
-                    WeekWorkBook.WorkSheet4[i].Cell6 = CalculateAverage(calculatedData, x => x.Cell92);
-                    WeekWorkBook.WorkSheet4[i].Cell7 = CalculateAverage(calculatedData, x => x.Cell106);
+                    WeekWorkBook.WorkSheet4[i].Cell6 = CalculateAverage(sourceData, x => x.Cell92);
+                    WeekWorkBook.WorkSheet4[i].Cell7 = CalculateAverage(sourceData, x => x.Cell106);
                 }
             }
             return true;
@@ -620,7 +618,7 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
 
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
             for (var i = 0; i < 3; i++)
             {
                 if (i == 0)
@@ -639,15 +637,15 @@ namespace CenterBackend.Services
                     endTime = startTime.AddYears(1).AddDays(-1);
                 }
 
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if (i == 1 && calculatedData.Count == 0)//本周无数据则退出
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime, 1);
+                if (i == 1 && sourceData.Count == 0)//本周无数据则退出
                     return false;
-                if (calculatedData != null && calculatedData.Count != 0)
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet5[i].Cell1 = CalculateAverage(calculatedData, x => x.Cell121);
-                    WeekWorkBook.WorkSheet5[i].Cell2 = CalculateAverage(calculatedData, x => x.Cell122);
-                    WeekWorkBook.WorkSheet5[i].Cell3 = CalculateAverage(calculatedData, x => x.Cell127);
-                    WeekWorkBook.WorkSheet5[i].Cell4 = CalculateAverage(calculatedData, x => x.Cell128);
+                    WeekWorkBook.WorkSheet5[i].Cell1 = CalculateAverage(sourceData, x => x.Cell121);
+                    WeekWorkBook.WorkSheet5[i].Cell2 = CalculateAverage(sourceData, x => x.Cell122);
+                    WeekWorkBook.WorkSheet5[i].Cell3 = CalculateAverage(sourceData, x => x.Cell127);
+                    WeekWorkBook.WorkSheet5[i].Cell4 = CalculateAverage(sourceData, x => x.Cell128);
 
                 }
             }
@@ -660,7 +658,7 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
 
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
             for (var i = 0; i < 3; i++)
             {
                 if (i == 0)
@@ -679,13 +677,13 @@ namespace CenterBackend.Services
                     endTime = startTime.AddDays(1);
                 }
 
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if (i == 2 && calculatedData.Count == 0)//本周无数据则退出
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime, 1);
+                if (i == 2 && sourceData.Count == 0)//本周无数据则退出
                     return false;
-                if (calculatedData != null && calculatedData.Count != 0)
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet6[i].Cell1 = CalculateAverage(calculatedData, x => x.Cell83);
-                    WeekWorkBook.WorkSheet6[i].Cell2 = CalculateAverage(calculatedData, x => x.Cell84);
+                    WeekWorkBook.WorkSheet6[i].Cell1 = CalculateAverage(sourceData, x => x.Cell83);
+                    WeekWorkBook.WorkSheet6[i].Cell2 = CalculateAverage(sourceData, x => x.Cell84);
                 }
             }
             return true;
@@ -701,26 +699,26 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
 
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
             for (var i = 0; i < 7; i++)
             {
                 startTime = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddDays(i);
                 endTime = startTime.AddDays(1);
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if (calculatedData.Count != 0)
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime, 1);
+                if (sourceData.Count != 0)
                 {
                     WeekWorkBook.WorkSheet8[i].TimePoint = startTime;
-                    WeekWorkBook.WorkSheet8[i].Cell1 = calculatedData[0].Cell161;
-                    WeekWorkBook.WorkSheet8[i].Cell2 = calculatedData[0].Cell164;
-                    WeekWorkBook.WorkSheet8[i].Cell3 = calculatedData[0].Cell167;
-                    WeekWorkBook.WorkSheet8[i].Cell4 = calculatedData[0].Cell191;
-                    WeekWorkBook.WorkSheet8[i].Cell5 = calculatedData[0].Cell193;
-                    WeekWorkBook.WorkSheet8[i].Cell6 = calculatedData[0].Cell194;
-                    WeekWorkBook.WorkSheet8[i].Cell7 = calculatedData[0].Cell195;
-                    WeekWorkBook.WorkSheet8[i].Cell8 = calculatedData[0].Cell161;//转化率？？
-                    WeekWorkBook.WorkSheet8[i].Cell9 = calculatedData[0].Cell161;//收率？？
-                    WeekWorkBook.WorkSheet8[i].Cell10 = calculatedData[0].Cell197;
-                    WeekWorkBook.WorkSheet8[i].Cell11 = calculatedData[0].Cell197;//废液二睛含量？？
+                    //WeekWorkBook.WorkSheet8[i].Cell1 = sourceData[0].Cell161;
+                    //WeekWorkBook.WorkSheet8[i].Cell2 = sourceData[0].Cell164;
+                    //WeekWorkBook.WorkSheet8[i].Cell3 = sourceData[0].Cell167;
+                    //WeekWorkBook.WorkSheet8[i].Cell4 = sourceData[0].Cell191;
+                    //WeekWorkBook.WorkSheet8[i].Cell5 = sourceData[0].Cell193;
+                    //WeekWorkBook.WorkSheet8[i].Cell6 = sourceData[0].Cell194;
+                    //WeekWorkBook.WorkSheet8[i].Cell7 = sourceData[0].Cell195;
+                    //WeekWorkBook.WorkSheet8[i].Cell8 = sourceData[0].Cell161;//转化率？？
+                    //WeekWorkBook.WorkSheet8[i].Cell9 = sourceData[0].Cell161;//收率？？
+                    //WeekWorkBook.WorkSheet8[i].Cell10 = sourceData[0].Cell197;
+                    //WeekWorkBook.WorkSheet8[i].Cell11 = sourceData[0].Cell197;//废液二睛含量？？
                 }
             }
             for (var i = 7; i < 9; i++)
@@ -735,21 +733,21 @@ namespace CenterBackend.Services
                     startTime = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
                     endTime = startTime.AddDays(1);
                 }
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if (i == 8 && calculatedData.Count == 0)//本周无数据则退出
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime, 1);
+                if (i == 8 && sourceData.Count == 0)//本周无数据则退出
                     return false;
-                if (calculatedData != null && calculatedData.Count != 0)
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet8[i].Cell1 = CalculateAverage(calculatedData, x => x.Cell13);
-                    WeekWorkBook.WorkSheet8[i].Cell2 = CalculateAverage(calculatedData, x => x.Cell15);
-                    WeekWorkBook.WorkSheet8[i].Cell3 = CalculateAverage(calculatedData, x => x.Cell19);
-                    WeekWorkBook.WorkSheet8[i].Cell4 = CalculateAverage(calculatedData, x => x.Cell22);
-                    WeekWorkBook.WorkSheet8[i].Cell5 = CalculateAverage(calculatedData, x => x.Cell24);
-                    WeekWorkBook.WorkSheet8[i].Cell6 = CalculateAverage(calculatedData, x => x.Cell25);
-                    WeekWorkBook.WorkSheet8[i].Cell7 = CalculateAverage(calculatedData, x => x.Cell26);
-                    WeekWorkBook.WorkSheet8[i].Cell8 = CalculateAverage(calculatedData, x => x.Cell27);
-                    WeekWorkBook.WorkSheet8[i].Cell9 = CalculateAverage(calculatedData, x => x.Cell28);
-                    WeekWorkBook.WorkSheet8[i].Cell10 = CalculateAverage(calculatedData, x => x.Cell28);
+                    WeekWorkBook.WorkSheet8[i].Cell1 = CalculateAverage(sourceData, x => x.Cell13);
+                    WeekWorkBook.WorkSheet8[i].Cell2 = CalculateAverage(sourceData, x => x.Cell15);
+                    WeekWorkBook.WorkSheet8[i].Cell3 = CalculateAverage(sourceData, x => x.Cell19);
+                    WeekWorkBook.WorkSheet8[i].Cell4 = CalculateAverage(sourceData, x => x.Cell22);
+                    WeekWorkBook.WorkSheet8[i].Cell5 = CalculateAverage(sourceData, x => x.Cell24);
+                    WeekWorkBook.WorkSheet8[i].Cell6 = CalculateAverage(sourceData, x => x.Cell25);
+                    WeekWorkBook.WorkSheet8[i].Cell7 = CalculateAverage(sourceData, x => x.Cell26);
+                    WeekWorkBook.WorkSheet8[i].Cell8 = CalculateAverage(sourceData, x => x.Cell27);
+                    WeekWorkBook.WorkSheet8[i].Cell9 = CalculateAverage(sourceData, x => x.Cell28);
+                    WeekWorkBook.WorkSheet8[i].Cell10 = CalculateAverage(sourceData, x => x.Cell28);
                 }
             }
             return true;
@@ -761,7 +759,7 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
 
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
             for (var i = 0; i < 2; i++)
             {
                 if (i == 0)
@@ -775,18 +773,18 @@ namespace CenterBackend.Services
                     endTime = startTime.AddDays(1);
                 }
 
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if (i == 1 && calculatedData.Count == 0)//本周无数据则退出
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime, 1);
+                if (i == 1 && sourceData.Count == 0)//本周无数据则退出
                     return false;
-                if (calculatedData != null && calculatedData.Count != 0)
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet9[i].Cell1 = CalculateFirstLastDifference(calculatedData, x => x.Cell102);//差值
-                    WeekWorkBook.WorkSheet9[i].Cell2 = CalculateFirstLastDifference(calculatedData, x => x.Cell114);
-                    WeekWorkBook.WorkSheet9[i].Cell3 = CalculateFirstLastDifference(calculatedData, x => x.Cell112);
-                    WeekWorkBook.WorkSheet9[i].Cell4 = CalculateFirstLastDifference(calculatedData, x => x.Cell110);
-                    //WeekWorkBook.WorkSheet9[i].Cell5 = CalculateAverage(calculatedData, x => x.Cell211);//低温蒸发没有检测数据
-                    //WeekWorkBook.WorkSheet9[i].Cell6 = CalculateAverage(calculatedData, x => x.Cell213);
-                    //WeekWorkBook.WorkSheet9[i].Cell7 = CalculateAverage(calculatedData, x => x.Cell215);
+                    WeekWorkBook.WorkSheet9[i].Cell1 = CalculateFirstLastDifference(sourceData, x => x.Cell102);//差值
+                    WeekWorkBook.WorkSheet9[i].Cell2 = CalculateFirstLastDifference(sourceData, x => x.Cell114);
+                    WeekWorkBook.WorkSheet9[i].Cell3 = CalculateFirstLastDifference(sourceData, x => x.Cell112);
+                    WeekWorkBook.WorkSheet9[i].Cell4 = CalculateFirstLastDifference(sourceData, x => x.Cell110);
+                    //WeekWorkBook.WorkSheet9[i].Cell5 = CalculateAverage(sourceData, x => x.Cell211);//低温蒸发没有检测数据
+                    //WeekWorkBook.WorkSheet9[i].Cell6 = CalculateAverage(sourceData, x => x.Cell213);
+                    //WeekWorkBook.WorkSheet9[i].Cell7 = CalculateAverage(sourceData, x => x.Cell215);
                 }
             }
             return true;
@@ -798,7 +796,7 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
 
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
             for (var i = 0; i < 2; i++)
             {
                 if (i == 0)
@@ -812,16 +810,16 @@ namespace CenterBackend.Services
                     endTime = startTime.AddDays(1);
                 }
 
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if (i == 1 && calculatedData.Count == 0)//本周无数据则退出
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime, 1);
+                if (i == 1 && sourceData.Count == 0)//本周无数据则退出
                     return false;
-                if (calculatedData != null && calculatedData.Count != 0)
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet10[i].Cell1 = CalculateFirstLastDifference(calculatedData, x => x.Cell104);//差值
-                    WeekWorkBook.WorkSheet10[i].Cell2 = CalculateAverage(calculatedData, x => x.Cell226);
-                    WeekWorkBook.WorkSheet10[i].Cell3 = CalculateAverage(calculatedData, x => x.Cell221);
-                    WeekWorkBook.WorkSheet10[i].Cell4 = CalculateAverage(calculatedData, x => x.Cell223);
-                    WeekWorkBook.WorkSheet10[i].Cell5 = CalculateAverage(calculatedData, x => x.Cell225);
+                    WeekWorkBook.WorkSheet10[i].Cell1 = CalculateFirstLastDifference(sourceData, x => x.Cell104);//差值
+                    //WeekWorkBook.WorkSheet10[i].Cell2 = CalculateAverage(sourceData, x => x.Cell226);
+                    //WeekWorkBook.WorkSheet10[i].Cell3 = CalculateAverage(sourceData, x => x.Cell221);
+                    //WeekWorkBook.WorkSheet10[i].Cell4 = CalculateAverage(sourceData, x => x.Cell223);
+                    //WeekWorkBook.WorkSheet10[i].Cell5 = CalculateAverage(sourceData, x => x.Cell225);
                 }
             }
             return true;
@@ -833,7 +831,7 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
 
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
             for (var i = 0; i < 3; i++)
             {
                 if (i == 0)
@@ -852,15 +850,15 @@ namespace CenterBackend.Services
                     endTime = startTime.AddDays(1);
                 }
 
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime, 1);
-                if (i == 2 && calculatedData.Count == 0)//本周无数据则退出
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime, 1);
+                if (i == 2 && sourceData.Count == 0)//本周无数据则退出
                     return false;
-                if (calculatedData != null && calculatedData.Count != 0)
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet11[i].Cell1 = CalculateFirstLastDifference(calculatedData, x => x.Cell132);//差值
-                    WeekWorkBook.WorkSheet11[i].Cell2 = CalculateAverage(calculatedData, x => x.Cell211);
-                    WeekWorkBook.WorkSheet11[i].Cell3 = CalculateAverage(calculatedData, x => x.Cell213);
-                    WeekWorkBook.WorkSheet11[i].Cell4 = CalculateAverage(calculatedData, x => x.Cell215);
+                    WeekWorkBook.WorkSheet11[i].Cell1 = CalculateFirstLastDifference(sourceData, x => x.Cell132);//差值
+                    //WeekWorkBook.WorkSheet11[i].Cell2 = CalculateAverage(sourceData, x => x.Cell211);
+                    //WeekWorkBook.WorkSheet11[i].Cell3 = CalculateAverage(sourceData, x => x.Cell213);
+                    //WeekWorkBook.WorkSheet11[i].Cell4 = CalculateAverage(sourceData, x => x.Cell215);
                 }
             }
             return true;
@@ -872,7 +870,7 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
 
-            List<CalculatedData> calculatedData = [];
+            List<SourceData> sourceData = [];
             for (var i = 0; i < 3; i++)
             {
                 if (i == 0)
@@ -891,41 +889,41 @@ namespace CenterBackend.Services
                     endTime = startTime.AddDays(1);
                 }
 
-                calculatedData = await _calculatedData.GetByDateTimeRangeAsync(startTime, endTime);
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
                 float? temp1, temp2;
-                if (calculatedData != null && calculatedData.Count != 0)
+                if (sourceData != null && sourceData.Count != 0)
                 {
-                    temp1 = CalculateFirstLastDifference(calculatedData, x => x.Cell20);
-                    temp2 = CalculateFirstLastDifference(calculatedData, x => x.Cell197);
-                    WeekWorkBook.WorkSheet12[i].Cell1 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
+                    //temp1 = CalculateFirstLastDifference(sourceData, x => x.Cell20);
+                    //temp2 = CalculateFirstLastDifference(sourceData, x => x.Cell197);
+                    //WeekWorkBook.WorkSheet12[i].Cell1 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
 
-                    temp1 = CalculateFirstLastDifference(calculatedData, x => x.Cell4);
-                    temp2 = CalculateFirstLastDifference(calculatedData, x => x.Cell197);
-                    WeekWorkBook.WorkSheet12[i].Cell2 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
+                    //temp1 = CalculateFirstLastDifference(sourceData, x => x.Cell4);
+                    //temp2 = CalculateFirstLastDifference(sourceData, x => x.Cell197);
+                    //WeekWorkBook.WorkSheet12[i].Cell2 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
 
-                    temp1 = CalculateFirstLastDifference(calculatedData, x => x.Cell37);
-                    temp2 = CalculateFirstLastDifference(calculatedData, x => x.Cell197);
-                    WeekWorkBook.WorkSheet12[i].Cell3 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
+                    //temp1 = CalculateFirstLastDifference(sourceData, x => x.Cell37);
+                    //temp2 = CalculateFirstLastDifference(sourceData, x => x.Cell197);
+                    //WeekWorkBook.WorkSheet12[i].Cell3 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
 
-                    temp1 = CalculateFirstLastDifference(calculatedData, x => x.Cell230);
-                    temp2 = CalculateFirstLastDifference(calculatedData, x => x.Cell197);
-                    WeekWorkBook.WorkSheet12[i].Cell4 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
+                    //temp1 = CalculateFirstLastDifference(sourceData, x => x.Cell230);
+                    //temp2 = CalculateFirstLastDifference(sourceData, x => x.Cell197);
+                    //WeekWorkBook.WorkSheet12[i].Cell4 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
 
-                    temp1 = CalculateFirstLastDifference(calculatedData, x => x.Cell16) * 0.180218f / 1000;
-                    temp2 = CalculateFirstLastDifference(calculatedData, x => x.Cell197);
-                    WeekWorkBook.WorkSheet12[i].Cell5 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
+                    //temp1 = CalculateFirstLastDifference(sourceData, x => x.Cell16) * 0.180218f / 1000;
+                    //temp2 = CalculateFirstLastDifference(sourceData, x => x.Cell197);
+                    //WeekWorkBook.WorkSheet12[i].Cell5 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
 
-                    temp1 = CalculateFirstLastDifference(calculatedData, x => x.Cell110);
-                    temp2 = CalculateFirstLastDifference(calculatedData, x => x.Cell197);
-                    WeekWorkBook.WorkSheet12[i].Cell6 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
+                    //temp1 = CalculateFirstLastDifference(sourceData, x => x.Cell110);
+                    //temp2 = CalculateFirstLastDifference(sourceData, x => x.Cell197);
+                    //WeekWorkBook.WorkSheet12[i].Cell6 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
 
-                    temp1 = CalculateFirstLastDifference(calculatedData, x => x.Cell55)+ CalculateFirstLastDifference(calculatedData, x => x.Cell114);
-                    temp2 = CalculateFirstLastDifference(calculatedData, x => x.Cell197);
-                    WeekWorkBook.WorkSheet12[i].Cell7 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
+                    //temp1 = CalculateFirstLastDifference(sourceData, x => x.Cell55)+ CalculateFirstLastDifference(sourceData, x => x.Cell114);
+                    //temp2 = CalculateFirstLastDifference(sourceData, x => x.Cell197);
+                    //WeekWorkBook.WorkSheet12[i].Cell7 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
 
-                    temp1 = CalculateFirstLastDifference(calculatedData, x => x.Cell130);
-                    temp2 = CalculateFirstLastDifference(calculatedData, x => x.Cell197);
-                    WeekWorkBook.WorkSheet12[i].Cell8 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
+                    //temp1 = CalculateFirstLastDifference(sourceData, x => x.Cell130);
+                    //temp2 = CalculateFirstLastDifference(sourceData, x => x.Cell197);
+                    //WeekWorkBook.WorkSheet12[i].Cell8 = temp2 != 0 ? temp1 * temp1 / temp2 : null;
 
                 }
             }

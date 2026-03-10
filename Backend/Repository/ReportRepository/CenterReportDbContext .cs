@@ -8,7 +8,6 @@ namespace CenterReport.Repository
 
         public DbSet<SourceData> SourceDatas => Set<SourceData>();
         public DbSet<OperatorInputData> OperatorInputDatas => Set<OperatorInputData>();
-        public DbSet<CalculatedData> CalculatedDatas => Set<CalculatedData>();
         public DbSet<ReportRecord> ReportRecords => Set<ReportRecord>();
         public CenterReportDbContext(DbContextOptions<CenterReportDbContext> options)
                : base(options)

@@ -8,11 +8,9 @@ namespace CenterBackend.Services
     public class DashboardService : IDashboardService
     {
         private readonly IReportRepository<SourceData> _sourceData;
-        private readonly IReportRepository<CalculatedData> _calculatedData;
-        public DashboardService(IReportRepository<SourceData> _SourceData, IReportRepository<CalculatedData> _CalculatedData)
+        public DashboardService(IReportRepository<SourceData> _SourceData )
         {
             this._sourceData = _SourceData;
-            this._calculatedData = _CalculatedData;
         }
         public async Task<LineChartDataDto> getLineChartOne(DateTime time)
         {
@@ -208,8 +206,7 @@ namespace CenterBackend.Services
             var EndTime = time.Date;
             EndTime = EndTime.AddHours(8).AddMinutes(40);
 
-            List<CalculatedData> dataList = await _calculatedData.GetByDateTimeRangeAsync(StartTime, EndTime, 1);
-
+            List<SourceData> dataList = new();
             var coreChartDto = new CoreChartDto
             {
                 Yesterday = 0,

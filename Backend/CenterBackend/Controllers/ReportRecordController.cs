@@ -71,32 +71,31 @@ namespace CenterBackend.Controllers
         [HttpGet("HourData")]
         public async Task<ActionResult<List<HourDataDto>>> GetHourData(GetHourDatasDto getHourDatasDto)
         {
-            // 1. 校验日期格式
-            if (!DateTime.TryParseExact(getHourDatasDto.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var queryDate))
-            {
-                return BadRequest(new { message = "日期格式错误，请传入YYYY-MM-DD格式" });
-            }
+            //// 1. 校验日期格式
+            //if (!DateTime.TryParseExact(getHourDatasDto.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var queryDate))
+            //{
+            //    return BadRequest(new { message = "日期格式错误，请传入YYYY-MM-DD格式" });
+            //}
 
-            try
-            {
-
-                
-                var hourList = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 };
-                var hourData = new HourDataDto
-                {
-                    Hour = 1,
-                    Date = getHourDatasDto.date,
-                    IsNextDay = false ,//isNextDay, // 赋值修正后的禁用标识
-                    Cells = new Dictionary<string, string>() // 确保Cells初始化，避免空引用
-                };
-                return new List<hourData>[];
-            }
-            catch (Exception ex)
-            {
-                // 生产环境建议添加日志记录
-                // _logger.LogError(ex, "查询小时数据失败，日期：{QueryDate}", date);
-                return StatusCode(500, new { message = "查询失败", detail = ex.Message });
-            }
+            //try
+            //{
+            //    var hourList = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 };
+            //    var hourData = new HourDataDto
+            //    {
+            //        Hour = 1,
+            //        Date = getHourDatasDto.date,
+            //        IsNextDay = false ,//isNextDay, // 赋值修正后的禁用标识
+            //        Cells = new Dictionary<string, string>() // 确保Cells初始化，避免空引用
+            //    };
+            //    return new List<hourData>[];
+            //}
+            //catch (Exception ex)
+            //{
+            //    // 生产环境建议添加日志记录
+            //    // _logger.LogError(ex, "查询小时数据失败，日期：{QueryDate}", date);
+            //    return StatusCode(500, new { message = "查询失败", detail = ex.Message });
+            //}
+            return StatusCode(500, new { message = "查询失败"});
         }
 
 

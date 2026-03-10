@@ -79,6 +79,36 @@ namespace CenterReport.Repository.Models
         public float? Cell48 { get; set; }
         public float? Cell49 { get; set; }
         public float? Cell50 { get; set; }
-        
+        public float? Cell51 { get; set; }
+        public float? Cell52 { get; set; }
+        public float? Cell53 { get; set; }
+        public float? Cell54 { get; set; }
+        public float? Cell55 { get; set; }
+        public float? Cell56 { get; set; }
+        public float? Cell57 { get; set; }
+        public float? Cell58 { get; set; }
+        public float? Cell59 { get; set; }
+        public float? Cell60 { get; set; }
+        public float? Cell61 { get; set; }
+        public float? Cell62 { get; set; }
+        public float? Cell63 { get; set; }
+        public float? Cell64 { get; set; }
+        public float? Cell65 { get; set; }
+        public float? Cell66 { get; set; }
+        public float? Cell67 { get; set; }
+        public float? Cell68 { get; set; }
+        public float? Cell69 { get; set; }
+        public float? Cell70 { get; set; }
+        public float? Cell71 { get; set; }
+        public float? Cell72 { get; set; }
+        public float? Cell73 { get; set; }
+        public float? Cell74 { get; set; }
+        public float? Cell75 { get; set; }
+        public float? Cell76 { get; set; }
+        public float? Cell77 { get; set; }
+        public float? Cell78 { get; set; }
+        public float? Cell79 { get; set; }
+        public float? Cell80 { get; set; }
+
     }
 }
