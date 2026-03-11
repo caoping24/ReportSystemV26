@@ -2,15 +2,17 @@
 using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
+using CenterBackend.Models.SheetCalculateData;
 using Microsoft.Identity.Client;
 using NPOI.SS.Formula.Functions;
+using NPOI.Util;
 using System.Collections;
 using System.Security.Cryptography.Xml;
 
 
 namespace CenterBackend.Services
 {
-    public class DataToViewService( IReportRepository<SourceData> sourceData,
+    public class DataToViewService(IReportRepository<SourceData> sourceData,
                                     IReportRepository<OperatorInputData> operatorInputData) : IDataToViewService
     {
 
@@ -355,7 +357,8 @@ namespace CenterBackend.Services
                 //target[i].Cell150 = source1[i].Cell150;
             }
             //人工输入数据的映射
-            for (int i = 0; i < 13; i++) {
+            for (int i = 0; i < 13; i++)
+            {
                 if (source2 == null || source2[i] == null)
                     continue;
                 //表2
@@ -390,8 +393,8 @@ namespace CenterBackend.Services
         {
             WeekWorkBook.WorkSheet2 = Enumerable.Range(1, 3).Select(_ => new WorkSheet2()).ToList();
 
-            DateTime startTime ;
-            DateTime endTime ;
+            DateTime startTime;
+            DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
             List<SourceData> sourceData = [];
             for (var i = 0; i < 3; i++)
@@ -401,7 +404,7 @@ namespace CenterBackend.Services
                     startTime = currentWeekFirstDay.AddDays(-14);
                     endTime = startTime.AddDays(7);
                 }
-                else if(i == 1)
+                else if (i == 1)
                 {
                     startTime = currentWeekFirstDay.AddDays(-7);
                     endTime = startTime.AddDays(7);
@@ -765,6 +768,18 @@ namespace CenterBackend.Services
         private async Task<bool> WeekMoveDataSheet13Async(WeekWorkBook WeekWorkBook)
         {
 
+            WeekWorkBook.WorkSheet11 = Enumerable.Range(1, 3).Select(_ => new WorkSheet11()).ToList();
+
+            DateTime startTime;
+            DateTime endTime;
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            List<OperatorInputData> operatorInputData = [];
+
+            startTime = currentWeekFirstDay;
+            endTime = startTime.AddDays(7);
+            operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
+
+            CalculateForSheet3(operatorInputData);
             return true;
         }
         /***********************辅助方法***********************/
@@ -877,33 +892,64 @@ namespace CenterBackend.Services
             return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;
         }
         /***********************Excel计算逻辑***********************/
-        //private static float? CalculateForSheet3<T>(IEnumerable<T> data)
-        //{
-        //    float?  E5 = null, F5 = null, G5 = null, H5 = null, I5 = null, J5 = null,
-        //            L5 = null, M5 = null, N5 = null, O5 = null, P5 = null, Q5 = null;
 
-        //    //K5 = E5 * J5 / 100
-        //    //R5 = L5 * Q5 / 100
+        //K5 = E5 * J5 / 100
+        //R5 = L5 * Q5 / 100
 
-        //    //S5 = (E5 * J5 + L5 * Q5) / (J5 + Q5)  
-        //    //T5 = (F5 * J5 + M5 * Q5) / (J5 + Q5)
-        //    //U5 = (G5 * J5 + N5 * Q5) / (J5 + Q5)
-        //    //V5 = (H5 * J5 + O5 * Q5) / (J5 + Q5)
-        //    //W5 = (I5 * J5 + P5 * Q5) / (J5 + Q5)
+        //S5 = (E5 * J5 + L5 * Q5) / (J5 + Q5)  
+        //T5 = (F5 * J5 + M5 * Q5) / (J5 + Q5)
+        //U5 = (G5 * J5 + N5 * Q5) / (J5 + Q5)
+        //V5 = (H5 * J5 + O5 * Q5) / (J5 + Q5)
+        //W5 = (I5 * J5 + P5 * Q5) / (J5 + Q5)
 
-        //    //X5 = J5 + Q5
-        //    //Y5 = K5 + R5
+        //X5 = J5 + Q5
+        //Y5 = K5 + R5
+        private static ProductionDataCollection CalculateForSheet3(List<OperatorInputData> data)
+        {
 
-        //    if (data == null || !data.Any())// 1.空数据校验
-        //        return null;
 
-            
-        //    //var nonNullValues = data// 筛选非null的float值
-        //    //    .Select(x=>x.cell3)          // 提取float?字段
-        //    //    .Where(x => x.HasValue)    // 过滤掉null值
-        //    //    .Select(x => x.GetValueOrDefault())      // 转换为float（非可空）
-        //    //    .ToList();
-        //    return E5;
-        //}
+            if (data == null || data.Count == 0)// 1.空数据校验
+                return new ProductionDataCollection();
+            //白班数据
+            ProductionDataCollection dataCellection = new();
+            var DayShiftData = FilterDayShiftData(data, true);
+            dataCellection.DayShiftData = DayShiftData.Select(ProductionData.FromOperatorInput).ToList();
+
+            var NightShiftData = FilterDayShiftData(data, false);
+            dataCellection.NightShiftData = NightShiftData.Select(ProductionData.FromOperatorInput).ToList();
+
+            //计算逻辑...
+            CalculateProductions(dataCellection);
+
+            return dataCellection;
+        }
+
+        private static List<OperatorInputData> FilterDayShiftData(List<OperatorInputData> inputList, bool isDayShift)
+        {
+            if (inputList==null || inputList.Count == 0)
+                return [];
+
+            var firstData = inputList.FirstOrDefault();
+            if (firstData == null) return [];
+
+            var dateStart = firstData.ReportedTime.Date;
+            var dayShiftEndTime = dateStart.AddHours(20);//换班时间
+
+            var sortedList = SortDataByTime(inputList, dateStart, 25);//从基准日期 8点开始排序，取前25条数据
+            var filteredList = isDayShift
+                ? sortedList.Where(data => data.ReportedTime < dayShiftEndTime).ToList()
+                : sortedList.Where(data => data.ReportedTime >= dayShiftEndTime).ToList();
+
+            return filteredList;
+        }
+
+        private static void CalculateProductions(ProductionDataCollection collection)
+        { 
+            if (collection == null) return;
+            if (collection.DayShiftData==null || collection.DayShiftData.Count==0) return;
+            collection.CalculateSingleCells();
+            collection.CalculateTotalCells();
+        }
+
     }
 }
