@@ -1,7 +1,7 @@
 ﻿using CenterBackend.Dto;
 using CenterBackend.IServices;
 using CenterBackend.Models;
-using CenterBackend.Models.CalculateData;
+using CenterBackend.Models.SheetCalculateData;
 using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository;
 using CenterReport.Repository.IServices;
@@ -88,7 +88,9 @@ namespace CenterBackend.Services
                     };
                     if (await _dataToViewService.WeekGetMapDataAsync(weekDataCollections))
                     {
-                        isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(weekDataCollections);
+                        var FilePath = System.IO.Path.Combine(weekDataCollections.Directory, weekDataCollections.FileName);
+                        if (_fileService.CopyFile(weekDataCollections.ModFilePath, FilePath))
+                            isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(weekDataCollections);
                     }
                     
                     break;

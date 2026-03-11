@@ -935,12 +935,16 @@ namespace CenterBackend.Services
             var dateStart = firstData.ReportedTime.Date;
             var dayShiftEndTime = dateStart.AddHours(20);//换班时间
 
-            var sortedList = SortDataByTime(inputList, dateStart, 25);//从基准日期 8点开始排序，取前25条数据
+            //var sortedList = SortDataByTime(inputList, dateStart, 25);//从基准日期 8点开始排序，取前25条数据
             var filteredList = isDayShift
-                ? sortedList.Where(data => data.ReportedTime < dayShiftEndTime).ToList()
-                : sortedList.Where(data => data.ReportedTime >= dayShiftEndTime).ToList();
+                ? inputList.Where(data => data.ReportedTime < dayShiftEndTime)
+                : inputList.Where(data => data.ReportedTime >= dayShiftEndTime);
 
-            return filteredList;
+            if (filteredList != null)
+            {
+                return filteredList.ToList();
+            }
+            return [];
         }
 
         private static void CalculateProductions(ProductionDataCollection collection)

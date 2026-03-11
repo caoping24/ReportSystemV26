@@ -1,5 +1,6 @@
 using CenterBackend.Dto;
 using CenterBackend.IServices;
+using CenterBackend.Services;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
 using CenterReport.Repository.Utils;
@@ -69,33 +70,27 @@ namespace CenterBackend.Controllers
         }
 
         [HttpGet("HourData")]
-        public async Task<ActionResult<List<HourDataDto>>> GetHourData(GetHourDatasDto getHourDatasDto)
+        public async Task<ActionResult<List<HourDataDto>>> GetHourData(string date, string type)
         {
-            //// 1. 校验日期格式
+            // 1. 校验日期格式
             //if (!DateTime.TryParseExact(getHourDatasDto.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var queryDate))
             //{
             //    return BadRequest(new { message = "日期格式错误，请传入YYYY-MM-DD格式" });
             //}
+            try
+            {
 
-            //try
-            //{
-            //    var hourList = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 };
-            //    var hourData = new HourDataDto
-            //    {
-            //        Hour = 1,
-            //        Date = getHourDatasDto.date,
-            //        IsNextDay = false ,//isNextDay, // 赋值修正后的禁用标识
-            //        Cells = new Dictionary<string, string>() // 确保Cells初始化，避免空引用
-            //    };
-            //    return new List<hourData>[];
-            //}
-            //catch (Exception ex)
-            //{
-            //    // 生产环境建议添加日志记录
-            //    // _logger.LogError(ex, "查询小时数据失败，日期：{QueryDate}", date);
-            //    return StatusCode(500, new { message = "查询失败", detail = ex.Message });
-            //}
-            return StatusCode(500, new { message = "查询失败"});
+                var resultList = await _reportRecordService.getHourDataTableOne(date, type);
+
+                // 直接返回结果列表
+                return Ok(resultList);
+            }
+            catch (Exception ex)
+            {
+                // 生产环境建议添加日志记录
+                // _logger.LogError(ex, "查询小时数据失败，日期：{QueryDate}", getHourDatasDto.Date);
+                return StatusCode(500, new { message = "查询失败", detail = ex.Message });
+            }
         }
 
 
@@ -136,79 +131,77 @@ namespace CenterBackend.Controllers
             {
                 new TableHeaderDto { Prop = "hour", Label = "小时" },
                 
-                new TableHeaderDto { Prop = "Cell151", Label = "COD(mg/L)"  },
-                new TableHeaderDto { Prop = "Cell152", Label = "TCN/总腈(mg/L)" },
-                new TableHeaderDto { Prop = "Cell153", Label = "NH3-N氨氮(mg/L)" },
-                new TableHeaderDto { Prop = "Cell154", Label = "HCHO甲醛(mg/L)" },
-                new TableHeaderDto { Prop = "Cell155", Label = "闪发器冷凝液ph" },
+                new TableHeaderDto { Prop = "Cell1", Label = "COD(mg/L)"  },
+                new TableHeaderDto { Prop = "Cell2", Label = "TCN/总腈(mg/L)" },
+                new TableHeaderDto { Prop = "Cell3", Label = "NH3-N氨氮(mg/L)" },
+                new TableHeaderDto { Prop = "Cell4", Label = "HCHO甲醛(mg/L)" },
+                new TableHeaderDto { Prop = "Cell5", Label = "闪发器冷凝液ph" },
             },
             new List<TableHeaderDto>//表2-反应液检测数据
             {
                 new TableHeaderDto { Prop = "hour", Label = "小时" },
-                new TableHeaderDto { Prop = "Cell161", Label = "二乙腈含量-化分（%）" },
-                new TableHeaderDto { Prop = "Cell162", Label = "二乙腈含量-色谱（%）" },
-                new TableHeaderDto { Prop = "Cell163", Label = "羟基乙腈残余（%）" },
-                new TableHeaderDto { Prop = "Cell164", Label = "羟基乙腈残余（g/L）" },
-                new TableHeaderDto { Prop = "Cell165", Label = "甘氨腈（g/L）" },
-                new TableHeaderDto { Prop = "Cell166", Label = "三乙腈（g/L）" },
-                new TableHeaderDto { Prop = "Cell167", Label = "反应液检测数据pH" },
-                new TableHeaderDto { Prop = "Cell168", Label = "反应液检测数据pH" },
+                new TableHeaderDto { Prop = "Cell11", Label = "二乙腈含量-化分（%）" },
+                new TableHeaderDto { Prop = "Cell12", Label = "二乙腈含量-色谱（%）" },
+                new TableHeaderDto { Prop = "Cell13", Label = "羟基乙腈残余（%）" },
+                new TableHeaderDto { Prop = "Cell14", Label = "羟基乙腈残余（g/L）" },
+                new TableHeaderDto { Prop = "Cell15", Label = "甘氨腈（g/L）" },
+                new TableHeaderDto { Prop = "Cell16", Label = "三乙腈（g/L）" },
+                new TableHeaderDto { Prop = "Cell17", Label = "反应液检测数据pH" },
+                new TableHeaderDto { Prop = "Cell18", Label = "反应液检测数据pH" },
             },
             new List<TableHeaderDto>//表3-结晶检测数据
             {
-                new TableHeaderDto { Prop = "Cell171", Label = "二乙腈含量-化分 (%)" },
-                new TableHeaderDto { Prop = "Cell172", Label = "二乙腈含量-色谱 (%)" },
-                new TableHeaderDto { Prop = "Cell173", Label = "水分含量 (%)" },
-                new TableHeaderDto { Prop = "Cell174", Label = "二乙腈 + 水 (%)" },
-                new TableHeaderDto { Prop = "Cell175", Label = "未知物含量 (%)" },
-                new TableHeaderDto { Prop = "Cell176", Label = "产量 (kg)" },
-                new TableHeaderDto { Prop = "Cell177", Label = "折百产量 (kg)" },
-                new TableHeaderDto { Prop = "Cell181", Label = "二乙腈含量-化分 (%)" },
-                new TableHeaderDto { Prop = "Cell182", Label = "二乙腈含量-色谱 (%)" },
-                new TableHeaderDto { Prop = "Cell183", Label = "水分含量 (%)" },
-                new TableHeaderDto { Prop = "Cell184", Label = "二乙腈 + 水 (%)" },
-                new TableHeaderDto { Prop = "Cell185", Label = "未知物含量 (%)" },
-                new TableHeaderDto { Prop = "Cell186", Label = "产量 (kg)" },
-                new TableHeaderDto { Prop = "Cell187", Label = "折百产量 (kg)" },
-                new TableHeaderDto { Prop = "Cell191", Label = "二乙腈含量-化分 (%)" },
-                new TableHeaderDto { Prop = "Cell192", Label = "二乙腈含量-色谱 (%)" },
-                new TableHeaderDto { Prop = "Cell193", Label = "水分含量 (%)" },
-                new TableHeaderDto { Prop = "Cell194", Label = "二乙腈 + 水 (%)" },
-                new TableHeaderDto { Prop = "Cell195", Label = "未知物含量 (%)" },
-                new TableHeaderDto { Prop = "Cell196", Label = "产量 (kg)" },
-                new TableHeaderDto { Prop = "Cell197", Label = "折百产量 (kg)" },
-                new TableHeaderDto { Prop = "Cell198", Label = "班产 (kg)" },
+                new TableHeaderDto { Prop = "hour", Label = "小时" },
+                new TableHeaderDto { Prop = "Cell21", Label = "二乙腈含量-化分 (%)" },
+                new TableHeaderDto { Prop = "Cell22", Label = "二乙腈含量-色谱 (%)" },
+                new TableHeaderDto { Prop = "Cell23", Label = "水分含量 (%)" },
+                new TableHeaderDto { Prop = "Cell24", Label = "二乙腈 + 水 (%)" },
+                new TableHeaderDto { Prop = "Cell25", Label = "未知物含量 (%)" },
+                new TableHeaderDto { Prop = "Cell26", Label = "产量 (kg)" },
+                new TableHeaderDto { Prop = "Cell27", Label = "折百产量 (kg)" },
+                new TableHeaderDto { Prop = "Cell131", Label = "二乙腈含量-化分 (%)" },
+                new TableHeaderDto { Prop = "Cell32", Label = "二乙腈含量-色谱 (%)" },
+                new TableHeaderDto { Prop = "Cell33", Label = "水分含量 (%)" },
+                new TableHeaderDto { Prop = "Cell34", Label = "二乙腈 + 水 (%)" },
+                new TableHeaderDto { Prop = "Cell35", Label = "未知物含量 (%)" },
+                new TableHeaderDto { Prop = "Cell36", Label = "产量 (kg)" },
+                new TableHeaderDto { Prop = "Cell37", Label = "折百产量 (kg)" },
+            
             },
             new List<TableHeaderDto>//表4-一次母液分析数据
             {
-                new TableHeaderDto { Prop = "Cell201", Label = "二乙腈含量-化分 (%)" },
-                new TableHeaderDto { Prop = "Cell202", Label = "二乙腈含量-色谱 (%)" },
-                new TableHeaderDto { Prop = "Cell203", Label = "羟基乙睛残余-化分 (%)" },
-                new TableHeaderDto { Prop = "Cell204", Label = "羟基乙睛残余-色谱 (g/L)" },
-                new TableHeaderDto { Prop = "Cell205", Label = "硫铵 (g/L)" },
+                new TableHeaderDto { Prop = "hour", Label = "小时" },
+                new TableHeaderDto { Prop = "Cell41", Label = "二乙腈含量-化分 (%)" },
+                new TableHeaderDto { Prop = "Cell42", Label = "二乙腈含量-色谱 (%)" },
+                new TableHeaderDto { Prop = "Cell43", Label = "羟基乙睛残余-化分 (%)" },
+                new TableHeaderDto { Prop = "Cell44", Label = "羟基乙睛残余-色谱 (g/L)" },
+                new TableHeaderDto { Prop = "Cell45", Label = "硫铵 (g/L)" },
             },
             new List<TableHeaderDto>//表5-母液驼色检测数据
             {
-                new TableHeaderDto {Prop =  "Cell211", Label = "二乙腈含量 (化分（%）)" },
-                new TableHeaderDto { Prop = "Cell212", Label = "二乙腈含量 (色谱（%）)" },
-                new TableHeaderDto { Prop = "Cell213", Label = "羟基乙腈残余 (%)" },
-                new TableHeaderDto { Prop = "Cell214", Label = "羟基乙腈残余 (g/L)" },
-                new TableHeaderDto { Prop = "Cell215", Label = "硫铵 (g/L)" },
-                new TableHeaderDto { Prop = "Cell216", Label = "透光率 (%)" },
-                new TableHeaderDto { Prop = "Cell221", Label = "二乙腈含量 (化分（%）)" },
-                new TableHeaderDto { Prop = "Cell222", Label = "二乙腈含量 (色谱（%）)" },
-                new TableHeaderDto { Prop = "Cell223", Label = "羟基乙腈残余 (%)" },
-                new TableHeaderDto { Prop = "Cell224", Label = "羟基乙腈残余 (g/L)" },
-                new TableHeaderDto { Prop = "Cell225", Label = "硫铵 (g/L)" },
-                new TableHeaderDto { Prop = "Cell226", Label = "透光率 (%)" },
-                new TableHeaderDto { Prop = "Cell227", Label = "活性炭消耗 (kg)" },
+                new TableHeaderDto { Prop = "hour", Label = "小时" },
+                new TableHeaderDto {Prop =  "Cell51", Label = "二乙腈含量 (化分（%）)" },
+                new TableHeaderDto { Prop = "Cell52", Label = "二乙腈含量 (色谱（%）)" },
+                new TableHeaderDto { Prop = "Cell53", Label = "羟基乙腈残余 (%)" },
+                new TableHeaderDto { Prop = "Cell54", Label = "羟基乙腈残余 (g/L)" },
+                new TableHeaderDto { Prop = "Cell55", Label = "硫铵 (g/L)" },
+                new TableHeaderDto { Prop = "Cell56", Label = "透光率 (%)" },
+                new TableHeaderDto { Prop = "Cell57", Label = "二乙腈含量 (化分（%）)" },
+                new TableHeaderDto { Prop = "Cell58", Label = "二乙腈含量 (色谱（%）)" },
+                new TableHeaderDto { Prop = "Cell59", Label = "羟基乙腈残余 (%)" },
+                new TableHeaderDto { Prop = "Cell60", Label = "羟基乙腈残余 (g/L)" },
+                new TableHeaderDto { Prop = "Cell61", Label = "硫铵 (g/L)" },
+                new TableHeaderDto { Prop = "Cell62", Label = "透光率 (%)" },
+                new TableHeaderDto { Prop = "Cell63", Label = "废液中二乙睛含量 %" },
+                new TableHeaderDto { Prop = "Cell64", Label = "活性炭消耗 (kg)" },
             },
             new List<TableHeaderDto>//表6-日常消耗
             {
                 new TableHeaderDto { Prop = "hour", Label = "小时" },
-                new TableHeaderDto { Prop = "Cell230", Label = "蒸汽总消耗（t）" },
-                new TableHeaderDto { Prop = "Cell231", Label = "脱盐水消耗（t）" },
-                new TableHeaderDto { Prop = "Cell232", Label = "电消耗（KWh）" },
+                new TableHeaderDto { Prop = "hour", Label = "小时" },
+                new TableHeaderDto { Prop = "Cell71", Label = "蒸汽总消耗（t）" },
+                new TableHeaderDto { Prop = "Cell72", Label = "脱盐水消耗（t）" },
+                new TableHeaderDto { Prop = "Cell73", Label = "电消耗（KWh）" },
 
 
             },
