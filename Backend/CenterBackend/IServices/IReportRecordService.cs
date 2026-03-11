@@ -1,4 +1,5 @@
 ﻿
+using CenterBackend.Dto;
 using CenterReport.Repository.Models;
 using CenterReport.Repository.Utils;
 
@@ -14,6 +15,8 @@ namespace CenterBackend.IServices
         /// <returns>分页结果</returns>
         Task<PaginationResult<ReportRecord>> GetReportsByPageAsync(PaginationRequest request);
         Task<bool> UpdateSourceDataFieldAsync(string dateStr, int hour, string prop, string valueStr);
+
+        Task< List<HourDataDto>> getHourDataTableOne(String date,String type);
 
     }
 }

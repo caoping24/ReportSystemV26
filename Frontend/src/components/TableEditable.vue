@@ -18,7 +18,7 @@
         </a-tabs>
       </div>
 
-      <!-- 日期选择器 + 查询 + 重载按钮 -->
+      <!-- 日期选择器 + 查询按钮（删除了重载按钮） -->
       <div class="date-actions">
         <el-date-picker
           v-model="selectedDate"
@@ -46,13 +46,6 @@
           :size="getComponentSize()"
         >
           查询
-        </el-button>
-        <el-button
-          type="primary"
-          @click="handleReload"
-          :size="getComponentSize()"
-        >
-          重载
         </el-button>
       </div>
     </div>
@@ -82,14 +75,18 @@ const loadTableEditableComponent = (page: number) => {
   );
 };
 
-// 2. 分页状态管理 + 新增标签页与type的映射
-const totalPages = ref(2); 
+// 2. 分页状态管理 + 标签页与type的映射
+const totalPages = ref(6); 
 const currentPage = ref(1);
 const activeKey = ref<string>("1"); 
-// 新增：标签页key对应接口type参数（可根据实际业务调整）
+// 标签页key对应接口type参数（可根据实际业务调整）
 const tabTypeMap = ref<Record<string, number>>({
   '1': 1,  // 第一个标签对应type=1
-  '2': 2   // 第二个标签对应type=2
+  '2': 2, 
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  '6': 6
 });
 
 // 监听activeKey变化，同步更新currentPage
@@ -184,38 +181,12 @@ const handleQuery = async () => {
   }
 };
 
-// 6. 重载按钮逻辑
-const handleReload = async () => {
-  if (!selectedDate.value) {
-    ElMessage.warning("请先选择查询日期");
-    return;
-  }
-
-  try {
-    const currentInstance = tableEditableRef.value;
-    if (!currentInstance) {
-      ElMessage.warning("当前表格未加载完成，无法重载");
-      return;
-    }
-
-    if (typeof currentInstance.reloadTableData === "function") {
-      await currentInstance.reloadTableData();
-      ElMessage.success(`第 ${currentPage.value} 个表格【${selectedDate.value}】数据重载完成`);
-    } else {
-      ElMessage.error("当前表格无重载方法");
-    }
-  } catch (error) {
-    console.error("表格重载失败：", error);
-    ElMessage.error(`第 ${currentPage.value} 个表格重载失败，请重试`);
-  }
-};
-
-// 7. 监听标签切换，自动查询当前日期数据
+// 6. 监听标签切换，自动查询当前日期数据
 watch(currentPage, () => {
   nextTick(() => handleQuery());
 });
 
-// 8. 生命周期
+// 7. 生命周期
 onMounted(() => {
   window.addEventListener("resize", handleResize);
   handleQuery();
@@ -228,7 +199,6 @@ onUnmounted(() => {
 
 <!-- 样式部分保持不变 -->
 <style scoped>
-/* 原有样式代码不变 */
 #tableEditableMain {
   width: 100%;
   box-sizing: border-box;

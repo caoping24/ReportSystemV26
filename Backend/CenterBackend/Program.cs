@@ -39,7 +39,7 @@ namespace CenterBackend
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped(typeof(IReportRepository<>), typeof(ReportRepository<>));
             builder.Services.AddScoped(typeof(IReportRecordRepository<>), typeof(ReportRecordRepository<>));
-
+            builder.Services.AddScoped(typeof(IOperatorInputDataRepository<>), typeof(OperatorInputDataRepository<>));
             string defaultConnection = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(defaultConnection));
             builder.Services.AddDbContext<CenterReportDbContext>(options => options.UseSqlServer(defaultConnection));

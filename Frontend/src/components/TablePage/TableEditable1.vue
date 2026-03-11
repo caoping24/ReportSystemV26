@@ -62,7 +62,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted, nextTick, defineProps } from "vue";
 import { ElMessage } from "element-plus";
-import { Headers, HourData, SaveCell, ReloadData } from "@/api/TableEdit";
+import { Headers, HourData, SaveCell } from "@/api/TableEdit";
 
 // 类型定义
 interface TableHeader {
@@ -288,29 +288,6 @@ const handleCellEdit = async (row: TableRow, prop: string): Promise<void> => {
   }
 };
 
-// 修改reloadTableData：type参数使用props.type
-const reloadTableData = async (): Promise<void> => {
-  if (!props.selectedDate) {
-    ElMessage.warning("请先选择查询日期");
-    return;
-  }
-
-  try {
-    ElMessage.info(`正在重载【${props.selectedDate}】数据，请稍候...`);
-    const nextDay = new Date(props.selectedDate);
-    nextDay.setDate(nextDay.getDate() + 1);
-    const reloadParams: ReloadDataParams = {
-      type: props.type,  // 修改：使用主组件传递的type，替代原有固定值1
-      time: nextDay.toISOString().split("T")[0],
-    };
-    await ReloadData(reloadParams);
-    await fetchTableData();
-    ElMessage.success(`【${props.selectedDate}】数据重载完成`);
-  } catch (error) {
-    ElMessage.error("数据重载失败，请重试");
-    console.error("reloadTableData error:", error);
-  }
-};
 
 // 初始化逻辑
 onMounted(async () => {
@@ -334,7 +311,6 @@ onUnmounted(() => {
 
 defineExpose({
   fetchTableData,
-  reloadTableData,
 });
 </script>
 
