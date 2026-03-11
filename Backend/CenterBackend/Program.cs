@@ -47,7 +47,6 @@ namespace CenterBackend
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IReportUnitOfWork, ReportUnitOfWork>();
 
-            builder.Services.AddScoped<ICalculatedAndSaveService, CalculatedAndSaveService>();
             builder.Services.AddScoped<IDashboardService, DashboardService>();
             builder.Services.AddScoped<IDataToViewService, DataToViewService>();
             builder.Services.AddScoped<IDataViewToExcel, DataViewToExcel>();
