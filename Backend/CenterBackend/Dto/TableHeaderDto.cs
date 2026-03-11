@@ -5,6 +5,18 @@ namespace CenterBackend.Dto
     /// <summary>
     /// 表格表头DTO
     /// </summary>
+    /// 
+    public class TableHeaderMainDto
+    {
+        public List<GroupHeader> groupHeaders { get; set; } = new List<GroupHeader>();
+        public List<TableHeaderDto> tableHeaders { get; set; } = new List<TableHeaderDto>();
+    }
+    public class GroupHeader
+    {
+        public List<string> Props { get; set; } = new List<string>();
+        public string Label { get; set; } = string.Empty;
+        public string Unit { get; set; } = string.Empty;
+    }
     public class TableHeaderDto
     {
         public string Prop { get; set; } = string.Empty;

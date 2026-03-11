@@ -4,6 +4,8 @@ using CenterBackend.Exceptions;
 using CenterBackend.IServices;
 using CenterBackend.Logging;
 using CenterBackend.Models;
+using CenterBackend.Models.SheetCalculateData;
+using CenterReport.Repository.Models;
 using Microsoft.AspNetCore.Mvc;
 using SharpCompress.Common;
 using System.Globalization;
@@ -26,7 +28,8 @@ namespace CenterBackend.Controllers
             this._webHostEnv = webHostEnv;
             this._logger = _IAppLogger;
         }
-       
+
+
         //  根据传入时间查询数据库,生成报表 Type 表示不同的报表类型
         [HttpPost("BuildReport")]
         public async Task<IActionResult> BuildAndDownloadReport([FromBody] CreateReportDto createReportDto)
