@@ -26,20 +26,7 @@ namespace CenterBackend.Controllers
             this._webHostEnv = webHostEnv;
             this._logger = _IAppLogger;
         }
-
-        //统计数据并且插入表中
-        [HttpPost("AnalysesInsert")]
-        public async Task<BaseResponse<bool>> AnalysesInsert([FromBody] CalculateAndInsertDto _CalculateAndInsertDto)
-        {
-            //await _logger.LogInfoAsync($"AnalysesInsert:CalculateAndInsertDto: {_CalculateAndInsertDto.Time},{_CalculateAndInsertDto.Time}");
-            if (_CalculateAndInsertDto.Type == 0)
-            {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "类型错误");
-            }
-            var result = await reportService.ConfigDataAnalyses(_CalculateAndInsertDto);
-            return ResultUtils<bool>.Success(result);
-        }
-
+       
         //  根据传入时间查询数据库,生成报表 Type 表示不同的报表类型
         [HttpPost("BuildReport")]
         public async Task<IActionResult> BuildAndDownloadReport([FromBody] CreateReportDto createReportDto)
