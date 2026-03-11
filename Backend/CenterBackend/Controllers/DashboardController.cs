@@ -33,7 +33,7 @@ namespace CenterBackend.Controllers
             catch (Exception)
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
-                return ResultUtils<LineChartDataDto>.error();
+                return ResultUtils<LineChartDataDto>.Error();
             }
         }
 
@@ -48,7 +48,7 @@ namespace CenterBackend.Controllers
             catch (Exception )
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
-                return ResultUtils<LineChartDataDto>.error();
+                return ResultUtils<LineChartDataDto>.Error();
             }
         }
 
@@ -63,7 +63,7 @@ namespace CenterBackend.Controllers
             catch (Exception)
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
-                return ResultUtils<LineChartDataDto>.error();
+                return ResultUtils<LineChartDataDto>.Error();
             }
         }
 
@@ -80,7 +80,7 @@ namespace CenterBackend.Controllers
             catch (Exception)
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
-                return ResultUtils<List<PieChartItemDto>>.error();
+                return ResultUtils<List<PieChartItemDto>>.Error();
             }
         }
 
@@ -96,7 +96,7 @@ namespace CenterBackend.Controllers
             catch (Exception)
             {
                 // 异常处理（实际项目可封装全局异常过滤器）
-                return ResultUtils<CoreChartDto>.error();
+                return ResultUtils<CoreChartDto>.Error();
             }
         }
 

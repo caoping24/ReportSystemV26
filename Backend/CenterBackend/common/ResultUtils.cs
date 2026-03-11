@@ -8,7 +8,7 @@
             return new BaseResponse<T>(0, data, "ok");
         }
 
-        public static BaseResponse<T> error()
+        public static BaseResponse<T> Error()
         {
             return new BaseResponse<T>(500, default(T), "查询失败");
         }
