@@ -628,7 +628,62 @@ namespace CenterBackend.Services
         }
         private async Task<bool> WeekMoveDataSheet8Async(WeekWorkBook WeekWorkBook)
         {
-            //表不明确，暂时不处理
+            WeekWorkBook.WorkSheet8 = Enumerable.Range(1, 9).Select(_ => new WorkSheet8()).ToList();
+
+            DateTime baseTime;
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            baseTime = currentWeekFirstDay.AddHours(8);
+            ProductionDataCollection ProductionDataCollection = new();
+            List<SourceData> sourceData = [];
+            List<OperatorInputData> operatorInputData = [];
+            for (var i = 0; i < 7; i++)
+            {
+                var startTime = baseTime.AddDays(i);
+                var endTime = startTime.AddDays(1);
+
+                ProductionDataCollection = await CalculateForSheet3Async(startTime);
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
+                operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
+
+                WeekWorkBook.WorkSheet8[i].Cell1 = CalculateAverage(sourceData, x => x.Cell11);
+                WeekWorkBook.WorkSheet8[i].Cell2 = CalculateAverage(sourceData, x => x.Cell13);
+                WeekWorkBook.WorkSheet8[i].Cell3 = CalculateAverage(sourceData, x => x.Cell17);
+
+
+                WeekWorkBook.WorkSheet8[i].Cell4 = ProductionDataCollection.TotalResult.AllAverage_1;
+                WeekWorkBook.WorkSheet8[i].Cell5 = ProductionDataCollection.TotalResult.AllAverage_3;
+                WeekWorkBook.WorkSheet8[i].Cell6 = ProductionDataCollection.TotalResult.AllAverage_4;
+
+                WeekWorkBook.WorkSheet8[i].Cell7 = ProductionDataCollection.TotalResult.AllProduction;
+                WeekWorkBook.WorkSheet8[i].Cell8 = ProductionDataCollection.TotalResult.AllYield;
+
+                WeekWorkBook.WorkSheet8[i].Cell9 = CalculateAverage(operatorInputData, x => x.Cell63);
+            }
+            for (var i = 7; i < 9; i++)
+            {
+                var startTime = baseTime;
+                if (i == 7) startTime = baseTime.AddDays(-7);
+                var endTime = startTime.AddDays(7);
+
+                var productionDataCollections = await CalculateForSheet3TimeRangeAsync(startTime, endTime);
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
+                operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
+
+                WeekWorkBook.WorkSheet8[i].Cell1 = CalculateAverage(sourceData, x => x.Cell11);
+                WeekWorkBook.WorkSheet8[i].Cell2 = CalculateAverage(sourceData, x => x.Cell13);
+                WeekWorkBook.WorkSheet8[i].Cell3 = CalculateAverage(sourceData, x => x.Cell17);
+
+
+                WeekWorkBook.WorkSheet8[i].Cell4 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_1);
+                WeekWorkBook.WorkSheet8[i].Cell5 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_3);
+                WeekWorkBook.WorkSheet8[i].Cell6 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_4);
+
+                WeekWorkBook.WorkSheet8[i].Cell7 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllProduction);
+                WeekWorkBook.WorkSheet8[i].Cell8 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllYield);
+
+                WeekWorkBook.WorkSheet8[i].Cell9 = CalculateAverage(operatorInputData, x => x.Cell63);
+            }
+
             return true;
         }
         private async Task<bool> WeekMoveDataSheet9Async(WeekWorkBook WeekWorkBook)
@@ -860,12 +915,15 @@ namespace CenterBackend.Services
         {
             if (data == null || !data.Any())// 空数据校验
                 return null;
-            var nonNullValues = data// 筛选非null的float值并计算平均值
-                .Select(selector)
-                .Where(x => x.HasValue)
-                .Select(x => x.GetValueOrDefault())
-                .ToList();
-            return nonNullValues.Count != 0 ? nonNullValues.Average() : (float?)null;// 计算平均值
+            var validValues = data.Select(selector).OfType<float>();
+            float sum = 0f;
+            int count = 0;
+            foreach (var value in validValues)
+            {
+                sum += value;
+                count++;
+            }
+            return count > 0 ? sum / count : (float?)null;
         }
         private static float? CalculateFirstLastDifference<T>(IEnumerable<T> data, Func<T, float?> selector)
         {
