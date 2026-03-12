@@ -1,13 +1,15 @@
 ﻿using CenterBackend.IServices;
 using CenterBackend.Models.ExcelDataView;
+using CenterBackend.Models.SheetCalculateData;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
-using CenterBackend.Models.SheetCalculateData;
+using Masuit.Tools;
 using Microsoft.Identity.Client;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
 using System.Collections;
 using System.Security.Cryptography.Xml;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace CenterBackend.Services
@@ -614,7 +616,14 @@ namespace CenterBackend.Services
         }
         private async Task<bool> WeekMoveDataSheet7Async(WeekWorkBook WeekWorkBook)
         {
-            //表不明确，暂时不处理
+            WeekWorkBook.WorkSheet7 = Enumerable.Range(1, 14).Select(_ => new WorkSheet7()).ToList();
+            DateTime startTime;
+            DateTime endTime;
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            startTime = new DateTime(WeekWorkBook.ReportedTime.Year, WeekWorkBook.ReportedTime.Month, 1);
+            endTime = startTime.AddMonths(1).AddDays(-1);
+            var temp = await CalculateForSheet3TimeRangeAsync(startTime, endTime);
+            var x = CalculateAverage(temp, x => x.TotalResult.AllProduction);
             return true;
         }
         private async Task<bool> WeekMoveDataSheet8Async(WeekWorkBook WeekWorkBook)
@@ -768,16 +777,43 @@ namespace CenterBackend.Services
         private async Task<bool> WeekMoveDataSheet13Async(WeekWorkBook WeekWorkBook)
         {
 
-            WeekWorkBook.WorkSheet11 = Enumerable.Range(1, 3).Select(_ => new WorkSheet11()).ToList();
+            WeekWorkBook.WorkSheet13 = Enumerable.Range(1, 14).Select(_ => new WorkSheet13()).ToList();
 
-            DateTime startTime;
-            DateTime endTime;
+            DateTime baseTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
-            List<OperatorInputData> operatorInputData = [];
+            baseTime = currentWeekFirstDay.AddHours(8);
+            ProductionDataCollection ProductionDataCollection= new ProductionDataCollection();
+            List<SourceData> sourceData = [];
+            for (var i = 0; i < 7; i++)
+            {
+                var startTime = baseTime.AddDays(i);
+                var endTime = startTime.AddDays(1);
 
-            startTime = WeekWorkBook.ReportedTime.Date.AddHours(8);
-            endTime = startTime.AddDays(7).AddHours(8);
-            await CalculateForSheet3Async(startTime);
+                ProductionDataCollection = await CalculateForSheet3Async(startTime);
+                sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
+
+                var dayShift = sourceData.Where(x => x.ReportedTime < startTime.AddHours(12));
+                WeekWorkBook.WorkSheet13[2 * i].TimePoint = startTime;
+                WeekWorkBook.WorkSheet13[2 * i].Cell1 = CalculateQualifiedRate(dayShift, x => x.Cell23, true, 0.515f, 0.05f);
+                WeekWorkBook.WorkSheet13[2 * i].Cell2 = CalculateQualifiedRate(dayShift, x => x.Cell3, true, 410f, 5f);
+                WeekWorkBook.WorkSheet13[2 * i].Cell3 = CalculateQualifiedRate(dayShift, x => x.Cell6, true, 168f, 2f);
+                WeekWorkBook.WorkSheet13[2 * i].Cell4 = CalculateQualifiedRate(dayShift, x => x.Cell66, false, 20, 0);
+                //WeekWorkBook.WorkSheet13[2 * i].Cell5 = 
+                WeekWorkBook.WorkSheet13[2 * i].Cell6 = ProductionDataCollection.DayResult.AllProduction;
+                WeekWorkBook.WorkSheet13[2 * i].Cell7 = ProductionDataCollection.DayResult.AllYield;
+                WeekWorkBook.WorkSheet13[2 * i].Cell8 = ProductionDataCollection.DayResult.AllAverage_1;
+
+                var nightShift = sourceData.Where(x => x.ReportedTime >= startTime.AddHours(12));
+                WeekWorkBook.WorkSheet13[2 * i + 1].TimePoint = startTime.AddHours(12);
+                WeekWorkBook.WorkSheet13[2 * i + 1].Cell1 = CalculateQualifiedRate(nightShift, x => x.Cell23, true, 0.515f, 0.05f);
+                WeekWorkBook.WorkSheet13[2 * i + 1].Cell2 = CalculateQualifiedRate(nightShift, x => x.Cell3, true, 410f, 5f);
+                WeekWorkBook.WorkSheet13[2 * i + 1].Cell3 = CalculateQualifiedRate(nightShift, x => x.Cell6, true, 168f, 2f);
+                WeekWorkBook.WorkSheet13[2 * i + 1].Cell4 = CalculateQualifiedRate(nightShift, x => x.Cell66, false, 20, 0);
+                //WeekWorkBook.WorkSheet13[2 * i + 1].Cell5 =
+                WeekWorkBook.WorkSheet13[2 * i + 1].Cell6 = ProductionDataCollection.NightResult.AllProduction;
+                WeekWorkBook.WorkSheet13[2 * i + 1].Cell7 = ProductionDataCollection.NightResult.AllYield;
+                WeekWorkBook.WorkSheet13[2 * i + 1].Cell8 = ProductionDataCollection.NightResult.AllAverage_1;
+            }
             return true;
         }
         /***********************辅助方法***********************/
@@ -921,6 +957,37 @@ namespace CenterBackend.Services
             dataCellection.CalculateSheet();
             return dataCellection;
         }
-  
+
+        /// <summary>
+        /// 计算手写表一段时间的数据
+        /// </summary>
+        /// <param name="startTime">开始时间</param>
+        /// <param name="endTime">结束时间</param>
+        /// <returns>ProductionDataCollection</returns>
+        private async Task<List<ProductionDataCollection>> CalculateForSheet3TimeRangeAsync(DateTime startDate, DateTime endtDate)
+        {
+            if (startDate > endtDate)
+            {
+                var x = endtDate;
+                endtDate = startDate;
+                startDate = x;
+            }
+            List<ProductionDataCollection> productionDataCollection = [];
+            var currentDay = startDate.Date.AddHours(8);
+            var lastDay = endtDate.Date.AddHours(8);
+            while (currentDay <= lastDay)
+            {
+                var data = await CalculateForSheet3Async(currentDay);
+                if (data != null)
+                {
+                    if (data.DayShiftData.Count != 0) productionDataCollection.AddRange(data);
+                }
+                currentDay = currentDay.AddDays(1);
+            }
+
+            return productionDataCollection;
+        }
+
+
     }
 }

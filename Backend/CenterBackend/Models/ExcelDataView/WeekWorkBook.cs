@@ -167,6 +167,5 @@
         public float? Cell6 { get; set; }
         public float? Cell7 { get; set; }
         public float? Cell8 { get; set; }
-        public float? Cell9 { get; set; }
     }
 }
