@@ -775,11 +775,9 @@ namespace CenterBackend.Services
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
             List<OperatorInputData> operatorInputData = [];
 
-            startTime = currentWeekFirstDay;
-            endTime = startTime.AddDays(7);
-            operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
-
-            CalculateForSheet3(operatorInputData);
+            startTime = WeekWorkBook.ReportedTime.Date.AddHours(8);
+            endTime = startTime.AddDays(7).AddHours(8);
+            await CalculateForSheet3Async(startTime);
             return true;
         }
         /***********************辅助方法***********************/
@@ -816,7 +814,6 @@ namespace CenterBackend.Services
             }
             return sortedList;
         }
-
         private static DateTime GetWeekFirstDay(DateTime dt)
         {
             int diff = (int)dt.DayOfWeek - (int)DayOfWeek.Monday;
@@ -874,82 +871,56 @@ namespace CenterBackend.Services
             float qualifiedRate = (qualifiedCount / (float)nonNullValues.Count) * 100f;// 计算合格利率（合格数/总有效数 * 100%），保留3位小数
             return (float)Math.Round(qualifiedRate, 3);
         }
-        /// <returns>非null值的总和（无有效数据时返回null）</returns>
-        private static float? CalculateSum<T>(IEnumerable<T> data, Func<T, float?> selector)
+        private static float? CalculateSum<T>(IEnumerable<T> data, Func<T, float?> selector)//非null值的总和
         {
-            // 1. 空数据校验：集合为null或无数据时直接返回null
-            if (data == null || !data.Any())
+            if (data == null || !data.Any())//空数据校验
                 return null;
-
-            // 2. 筛选非null的float值
-            var nonNullValues = data
-                .Select(selector)          // 提取float?字段
-                .Where(x => x.HasValue)    // 过滤掉null值
+            var nonNullValues = data        //筛选非null的float值
+                .Select(selector)           // 提取float?字段
+                .Where(x => x.HasValue)     // 过滤掉null值
                 .Select(x => x.GetValueOrDefault())      // 转换为float（非可空）
                 .ToList();
-
-            // 3. 计算总和：有有效数据则返回和，无则返回null
-            return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;
+            return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;//计算总和
         }
-        /***********************Excel计算逻辑***********************/
+        /***********************Excel***********************/
 
-        //K5 = E5 * J5 / 100
-        //R5 = L5 * Q5 / 100
-
-        //S5 = (E5 * J5 + L5 * Q5) / (J5 + Q5)  
-        //T5 = (F5 * J5 + M5 * Q5) / (J5 + Q5)
-        //U5 = (G5 * J5 + N5 * Q5) / (J5 + Q5)
-        //V5 = (H5 * J5 + O5 * Q5) / (J5 + Q5)
-        //W5 = (I5 * J5 + P5 * Q5) / (J5 + Q5)
-
-        //X5 = J5 + Q5
-        //Y5 = K5 + R5
-        private static ProductionDataCollection CalculateForSheet3(List<OperatorInputData> data)
+        /// <summary>
+        /// 计算手写表一天的数据
+        /// </summary>
+        /// <param name="startTime">对应当天日期</param>
+        /// <returns>返回计算完成的sheet3的数据集合</returns>
+        private async Task<ProductionDataCollection> CalculateForSheet3Async(DateTime startTime)
         {
+            //查询当日数据
+            startTime = startTime.Date.AddHours(8);
+            var endTime = startTime.AddDays(24);
+            List<OperatorInputData> operatorInputData = [];
 
-
-            if (data == null || data.Count == 0)// 1.空数据校验
+            operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
+            if (operatorInputData == null || operatorInputData.Count == 0)// 空数据校验
                 return new ProductionDataCollection();
-            //白班数据
+
+            //填充当日数据
             ProductionDataCollection dataCellection = new();
-            var DayShiftData = FilterDayShiftData(data, true);
+            IEnumerable<OperatorInputData> filteredList;
+            var ShiftStart = startTime;//早班开始
+            var ShiftTime = ShiftStart.AddHours(12);//换班时间
+            var ShiftEnd = ShiftTime.AddHours(12);//换班时间
+
+            filteredList = operatorInputData.Where(x => x.ReportedTime >= ShiftStart && x.ReportedTime < ShiftTime && x.Cell21 != null).Take(5);
+            var DayShiftData = (filteredList != null) ? filteredList.ToList() : [];//早班数据
             dataCellection.DayShiftData = DayShiftData.Select(ProductionData.FromOperatorInput).ToList();
 
-            var NightShiftData = FilterDayShiftData(data, false);
+            filteredList = operatorInputData.Where(x => x.ReportedTime >= ShiftTime && x.ReportedTime < ShiftEnd && x.Cell21 != null).Take(5);
+            var NightShiftData = (filteredList != null) ? filteredList.ToList() : [];//晚班数据
             dataCellection.NightShiftData = NightShiftData.Select(ProductionData.FromOperatorInput).ToList();
-
-            //计算逻辑...
-            CalculateProductions(dataCellection);
-
+            
+            if (dataCellection.DayShiftData == null || dataCellection.DayShiftData.Count == 0) return dataCellection;
+            if (dataCellection.NightShiftData == null || dataCellection.NightShiftData.Count == 0) return dataCellection;
+            //表内计算,得出当日所有统计数据
+            dataCellection.CalculateSheet();
             return dataCellection;
         }
-
-        private static List<OperatorInputData> FilterDayShiftData(List<OperatorInputData> inputList, bool isDayShift)
-        {
-            if (inputList==null || inputList.Count == 0)
-                return [];
-
-            var firstData = inputList.FirstOrDefault();
-            if (firstData == null) return [];
-
-            var dateStart = firstData.ReportedTime.Date;
-            var dayShiftEndTime = dateStart.AddHours(20);//换班时间
-
-            var sortedList = SortDataByTime(inputList, dateStart, 25);//从基准日期 8点开始排序，取前25条数据
-            var filteredList = isDayShift
-                ? sortedList.Where(data => data.ReportedTime < dayShiftEndTime).ToList()
-                : sortedList.Where(data => data.ReportedTime >= dayShiftEndTime).ToList();
-
-            return filteredList;
-        }
-
-        private static void CalculateProductions(ProductionDataCollection collection)
-        { 
-            if (collection == null) return;
-            if (collection.DayShiftData==null || collection.DayShiftData.Count==0) return;
-            collection.CalculateSingleCells();
-            collection.CalculateTotalCells();
-        }
-
+  
     }
 }

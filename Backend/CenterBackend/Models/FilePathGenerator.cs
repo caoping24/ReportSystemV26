@@ -8,9 +8,9 @@ namespace CenterBackend.Models
         private const string ModelDirName = "Model";//模板文件保存目录名称
 
         private const string modelFileNameDay = "Model-20260116.xlsx";//各个模板文件的名称
-        private const string modelFileNameMonth = "Model-20251208-Week.xlsx";
+        private const string modelFileNameMonth = "Temp";
         private const string modelFileNameYear = "Temp";
-        private const string modelFileNameWeek = "Temp";
+        private const string modelFileNameWeek = "Model-20251208-Week.xlsx";
 
         private readonly IWebHostEnvironment _webHostEnv;
         private readonly string _rootDirectory;

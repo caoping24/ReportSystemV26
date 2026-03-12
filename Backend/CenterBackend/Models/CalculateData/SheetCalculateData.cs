@@ -76,12 +76,16 @@ namespace CenterBackend.Models.SheetCalculateData
         public float FirstAverage_3 { get; set; }
         public float FirstAverage_4 { get; set; }
         public float FirstAverage_5 { get; set; }
+        public float FirstProduction { get; set; }//总产量
+        public float FirstYield { get; set; }//总折百产量
         //二次
         public float SecondAverage_1 { get; set; }
         public float SecondAverage_2 { get; set; }
         public float SecondAverage_3 { get; set; }
         public float SecondAverage_4 { get; set; }
         public float SecondAverage_5 { get; set; }
+        public float SecondProduction { get; set; }//总产量
+        public float SecondYield { get; set; }//总折百产量
 
         // 汇总结果
         public float AllAverage_1 { get; set; }
@@ -96,16 +100,23 @@ namespace CenterBackend.Models.SheetCalculateData
     //**********************计算**********************
     public static class ProductionDataCollectionExtensions
     {
-        //**********************行内计算**********************
-        public static void CalculateSingleCells(this ProductionDataCollection collection)
+        //整个表计算
+        public static void CalculateSheet(this ProductionDataCollection collection)
         {
-
+            collection.CalculateSingleCells();
+            collection.CalculateTotalCells();
+        }
+        //**********************行内计算**********************
+        private static void CalculateSingleCells(this ProductionDataCollection collection)
+        {
             // 1. 白班
             //一次
             MulColumn(collection. DayShiftData, x => x.Cell21, x => x.Cell26, setValue3: (d, result) => d.Cell27 = result);
             //二次
             MulColumn(collection.DayShiftData, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell37 = result);
             //合计
+            WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell21, x => x.Cell26, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell41 = result);
+            WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell24, x => x.Cell26, x => x.Cell34, x => x.Cell36, setValue3: (d, result) => d.Cell44 = result);
             SumColumn(collection.DayShiftData, x => x.Cell26, x => x.Cell36, setValue3: (d, result) => d.Cell46 = result);
             SumColumn(collection.DayShiftData, x => x.Cell27, x => x.Cell37, setValue3: (d, result) => d.Cell47 = result);
 
@@ -115,13 +126,13 @@ namespace CenterBackend.Models.SheetCalculateData
             //二次
             MulColumn(collection.NightShiftData, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell37 = result);
             //合计
+            WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell21, x => x.Cell26, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell41 = result);
+            WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell24, x => x.Cell26, x => x.Cell34, x => x.Cell36, setValue3: (d, result) => d.Cell44 = result);
             SumColumn(collection.NightShiftData, x => x.Cell26, x => x.Cell36, setValue3: (d, result) => d.Cell46 = result);
             SumColumn(collection.NightShiftData, x => x.Cell27, x => x.Cell37, setValue3: (d, result) => d.Cell47 = result);
-
-
         }
         //**********************汇总计算**********************
-        public static void CalculateTotalCells(this ProductionDataCollection collection)
+        private static void CalculateTotalCells(this ProductionDataCollection collection)
         {
             //白班
             collection.DayResult.AllProduction = SumRow(collection.DayShiftData, x => x.Cell46);
@@ -130,10 +141,10 @@ namespace CenterBackend.Models.SheetCalculateData
             collection.DayResult.AllAverage_4 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell44, x => x.Cell46);
 
             //夜班
-            collection.NightResult.AllProduction = SumRow(collection.DayShiftData, x => x.Cell46);
-            collection.NightResult.AllYield = SumRow(collection.DayShiftData, x => x.Cell47);
+            collection.NightResult.AllProduction = SumRow(collection.NightShiftData, x => x.Cell46);
+            collection.NightResult.AllYield = SumRow(collection.NightShiftData, x => x.Cell47);
             collection.NightResult.AllAverage_1 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell41, x => x.Cell46);
-            collection.NightResult.AllAverage_4 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell41, x => x.Cell46);
+            collection.NightResult.AllAverage_4 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell44, x => x.Cell46);
 
             //当日
             var value1 = collection.DayResult.AllAverage_1 * collection.DayResult.AllProduction + collection.NightResult.AllAverage_1 * collection.NightResult.AllProduction;
@@ -142,34 +153,30 @@ namespace CenterBackend.Models.SheetCalculateData
             var value4 = collection.DayResult.AllYield + collection.NightResult.AllYield;
 
             collection.TotalResult.AllAverage_1 = value1 / value3;
-            collection.TotalResult.AllAverage_4 = value1 / value3;
+            collection.TotalResult.AllAverage_4 = value2 / value3;
             collection.TotalResult.AllProduction = value3;
             collection.TotalResult.AllYield = value4;
         }
         //**********************通用方法**********************
         // 列内求和
         private static float SumRow(
-                                List<ProductionData> dataList,
-                                Func<ProductionData, float?> getValue
-            )
+                                    List<ProductionData> dataList,
+                                    Func<ProductionData, float?> getValue)
         {
             float Result = 0; 
             foreach (var d in dataList)
             {
                 float a = getValue(d) ?? 0f;
                 Result += a;
-
             }
-
             return Result;
         }
         // 行内求和
         private static void SumColumn(
-                                List<ProductionData> dataList,
-                                Func<ProductionData, float?> getValue1,
-                                Func<ProductionData, float?> getValue2,
-                                Action<ProductionData, float?> setValue3
-            )
+                                    List<ProductionData> dataList,
+                                    Func<ProductionData, float?> getValue1,
+                                    Func<ProductionData, float?> getValue2,
+                                    Action<ProductionData, float?> setValue3)
         {
             if (dataList == null || dataList.Count == 0) return;
             // 逐行计算 a+b，收集有效结果
@@ -183,15 +190,13 @@ namespace CenterBackend.Models.SheetCalculateData
                 rowResults.Add(Result);
                 setValue3(d, Result);
             }
-
         }
         // 行内求折百
         private static void MulColumn(
                                 List<ProductionData> dataList,
                                 Func<ProductionData, float?> getValue1,
                                 Func<ProductionData, float?> getValue2,
-                                Action<ProductionData, float?> setValue3
-            )
+                                Action<ProductionData, float?> setValue3)
         {
             if (dataList == null || dataList.Count == 0) return ;
 
@@ -208,8 +213,13 @@ namespace CenterBackend.Models.SheetCalculateData
             }
         }
 
-        // 两列加权平均
-        private static float WeightedAverageTowColumn(List<ProductionData> dataList, Func<ProductionData, float?> getValue, Func<ProductionData, float?> getWeight)
+
+
+        // 所有列求两列加权平均
+        private static float WeightedAverageTowColumn(
+                                                    List<ProductionData> dataList, 
+                                                    Func<ProductionData, float?> getValue, 
+                                                    Func<ProductionData, float?> getWeight)
         {
             if (dataList == null || dataList.Count == 0) return 0;
 
@@ -224,14 +234,35 @@ namespace CenterBackend.Models.SheetCalculateData
             }
             return totalWeight == 0 ? 0 : weightedSum / totalWeight;
         }
-        // 四列加权平均
+        // 行内求四列加权平均
+        private static void WeightedAverageFourColumn(
+                                                    List<ProductionData> dataList,
+                                                    Func<ProductionData, float?> getValue1,
+                                                    Func<ProductionData, float?> getWeight1,
+                                                    Func<ProductionData, float?> getValue2,
+                                                    Func<ProductionData, float?> getWeight2,
+                                                    Action<ProductionData, float?> setValue3)
+        {
+            if (dataList == null || dataList.Count == 0) return;
+
+            foreach (var d in dataList)
+            {
+                var value1 = getValue1(d) ?? 0f;
+                var weight1 = getWeight1(d) ?? 0f;
+                var value2 = getValue2(d) ?? 0f;
+                var weight2 = getWeight2(d) ?? 0f;
+                float weightedSum = (value1 * weight1) + (value2 * weight2);
+                float totalWeight = (weight1 + weight2);
+                setValue3(d, weightedSum / totalWeight);
+            }
+        }
+        // 所有列四列加权平均
         private static float WeightedAverageFourColumn(
-                                List<ProductionData> dataList,
-                                Func<ProductionData, float?> getValue1,
-                                Func<ProductionData, float?> getWeight1,
-                                Func<ProductionData, float?> getValue2,
-                                Func<ProductionData, float?> getWeight2
-                                )
+                                                    List<ProductionData> dataList,
+                                                    Func<ProductionData, float?> getValue1,
+                                                    Func<ProductionData, float?> getWeight1,
+                                                    Func<ProductionData, float?> getValue2,
+                                                    Func<ProductionData, float?> getWeight2)
         {
             if (dataList == null || dataList.Count == 0) return 0;
 

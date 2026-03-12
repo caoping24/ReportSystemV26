@@ -2,10 +2,10 @@
 {
     public class RegisterDto
     {
-        public string UserAccount { get; set; }
+        public string UserAccount { get; set; } = string.Empty;
 
-        public string UserPassword { get; set; }
+        public string UserPassword { get; set; } = string.Empty;
 
-        public string CheckPassword { get; set; }
+        public string CheckPassword { get; set; } = string.Empty;
     }
 }
