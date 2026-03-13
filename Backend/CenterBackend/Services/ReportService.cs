@@ -1,7 +1,7 @@
 ﻿using CenterBackend.Dto;
 using CenterBackend.IServices;
 using CenterBackend.Models;
-using CenterBackend.Models.SheetCalculateData;
+using CenterBackend.Models.CalculateData;
 using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository;
 using CenterReport.Repository.IServices;
