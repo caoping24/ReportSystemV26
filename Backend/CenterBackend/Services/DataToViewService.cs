@@ -422,8 +422,8 @@ namespace CenterBackend.Services
                     continue;
                 if (sourceData != null && sourceData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet2[i].Cell1 = CalculateFirstLastDifference(sourceData, x => x.Cell13);
-                    WeekWorkBook.WorkSheet2[i].Cell2 = CalculateFirstLastDifference(sourceData, x => x.Cell15);
+                    WeekWorkBook.WorkSheet2[i].Cell1 = CalculateAverage(sourceData, x => x.Cell13);
+                    WeekWorkBook.WorkSheet2[i].Cell2 = CalculateAverage(sourceData, x => x.Cell15);
                     WeekWorkBook.WorkSheet2[i].Cell3 = CalculateAverage(sourceData, x => x.Cell19);
                     WeekWorkBook.WorkSheet2[i].Cell4 = CalculateAverage(sourceData, x => x.Cell22);
                     WeekWorkBook.WorkSheet2[i].Cell5 = CalculateAverage(sourceData, x => x.Cell24);
