@@ -189,7 +189,7 @@ namespace CenterBackend.Services
                 if (dataList != null && dataList.Count > i && dataList[i] != null)
                 {
                     var dataItem = dataList[i];
-                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 1, 1, 7);
+                    WriteDataRowsToExcel(dataItem, srcSheet, 6 + i, 1, 1, 7);
                 }
             }
         }

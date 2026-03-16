@@ -631,7 +631,6 @@ namespace CenterBackend.Services
         {
             WeekWorkBook.WorkSheet8 = Enumerable.Range(1, 9).Select(_ => new WorkSheet8()).ToList();
 
-            DateTime baseTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             ProductionDataCollection ProductionDataCollection = new();
             List<SourceData> sourceData = [];
@@ -907,7 +906,6 @@ namespace CenterBackend.Services
 
             WeekWorkBook.WorkSheet13 = Enumerable.Range(1, 14).Select(_ => new WorkSheet13()).ToList();
 
-            DateTime baseTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             ProductionDataCollection ProductionDataCollection= new();
             List<SourceData> sourceData = [];
