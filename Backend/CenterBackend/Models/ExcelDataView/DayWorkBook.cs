@@ -268,6 +268,19 @@ namespace CenterBackend.Models.ExcelDataView
         public float? Cell98 { get; set; }
         public float? Cell99 { get; set; }
         public float? Cell100 { get; set; }
+        public float? Cell101 { get; set; }
+        public float? Cell102 { get; set; }
+        public float? Cell103 { get; set; }
+        public float? Cell104 { get; set; }
+        public float? Cell105{ get; set; }
+        public float? Cell106 { get; set; }
+        public float? Cell107 { get; set; }
+        public float? Cell108 { get; set; }
+        public float? Cell109{ get; set; }
+        public float? Cell110 { get; set; }
+        public float? Cell111 { get; set; }
+        public float? Cell112 { get; set; }
+        public float? Cell113 { get; set; }
     }
 
 }

@@ -96,6 +96,25 @@ namespace CenterBackend.Services
                 targeRow = 38 + i;
                 BatchWriteDataToExcel(data, srcSheet, targeRow, colOffSet, 101, 150);
             }
+
+            //考评表
+            var allList = dayWorkBookData.AllDay;
+            if (allList.Count == 0)
+                return false;
+            srcSheet = srcWorkbook.GetSheetAt(4);                                       //实际要写的表
+            //SetXlsxCellString(srcSheet, 51, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
+            for (int i = 0; i < 2; i++)
+            {
+                if (i >= allList.Count) break;
+                var data = allList[i];
+                if (data == null) continue; // 如果 data 为空则跳过
+                int targeRow = 23 * i;
+                WriteDataColumnsToExcel(data, srcSheet, 5 + targeRow, 2, 1, 33);
+                WriteDataColumnsToExcel(data, srcSheet, 5 + targeRow, 2, 34, 66);
+                WriteDataColumnsToExcel(data, srcSheet, 5 + targeRow, 2, 67, 99);
+                WriteDataColumnsToExcel(data, srcSheet, 5 + targeRow, 2, 100, 113);
+            }
+
             return true;
         }
 
