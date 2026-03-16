@@ -3,10 +3,12 @@ using CenterBackend.Models;
 using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository.Models;
 using Microsoft.AspNetCore.Mvc;
+using NPOI.OpenXmlFormats.Spreadsheet;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace CenterBackend.Services
 {
@@ -284,19 +286,79 @@ namespace CenterBackend.Services
         }
         private static void WeekWriteExcelSheet10(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(9);
+            srcSheet.ForceFormulaRecalculation = false;
 
+            var dataList = weekWorkBookData.WorkSheet10;
+            for (int i = 0; i < 3; i++)
+            {
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    WriteDataRowsToExcel(dataItem, srcSheet, 6 + i, 1, 1, 4);
+                    float total = dataItem.Cell5 == null ? 0.0f : dataItem.Cell5.Value;
+                    if (i == 3) SetXlsxCellValue(srcSheet, 4, 1, total);
+                }
+            }
         }
         private static void WeekWriteExcelSheet11(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(10);
+            srcSheet.ForceFormulaRecalculation = false;
 
+            var dataList = weekWorkBookData.WorkSheet11;
+            for (int i = 0; i < 3; i++)
+            {
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    WriteDataRowsToExcel(dataItem, srcSheet, 6 + i, 1, 1, 4);
+                    float total = dataItem.Cell5 == null ? 0.0f : dataItem.Cell5.Value;
+                    if (i == 3) SetXlsxCellValue(srcSheet, 4, 1, total);
+                }
+            }
         }
 
         private static void WeekWriteExcelSheet12(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(11);
+            srcSheet.ForceFormulaRecalculation = false;
 
+            var dataList = weekWorkBookData.WorkSheet12;
+            for (int i = 0; i < 3; i++)
+            {
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    WriteDataRowsToExcel(dataItem, srcSheet, 7 + i, 1, 1, 8);
+                }
+            }
         }
         private static void WeekWriteExcelSheet13(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(12);
+            srcSheet.ForceFormulaRecalculation = false;
+
+            var dataList = weekWorkBookData.WorkSheet13;
+            for (int i = 0; i < 14; i++)
+            {
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    WriteDataRowsToExcel(dataItem, srcSheet, 7 + i, 2, 1, 8);
+                }
+            }
+            var baseDate = weekWorkBookData.ReportedTime;
+            for (var j = 0; j < 7; j++)
+            {
+                DateTime currentDate = baseDate.AddDays(j);
+                string dateText = currentDate.ToString("yyyy-MM-dd");
+                SetXlsxCellString(srcSheet, 7 + (2 * j), 1, $"{dateText}");
+            }
 
         }
 

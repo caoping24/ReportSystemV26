@@ -398,7 +398,7 @@ namespace CenterBackend.Services
 
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             List<SourceData> sourceData = [];
             for (var i = 0; i < 3; i++)
             {
@@ -442,7 +442,7 @@ namespace CenterBackend.Services
 
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             List<OperatorInputData> operatorInputData = [];
             for (var i = 0; i < 3; i++)
             {
@@ -458,7 +458,7 @@ namespace CenterBackend.Services
                 }
                 else
                 {
-                    startTime = new DateTime(WeekWorkBook.ReportedTime.Year, WeekWorkBook.ReportedTime.Month, 1);//本月第一天
+                    startTime = new DateTime(WeekWorkBook.ReportedTime.Year, WeekWorkBook.ReportedTime.Month, 1).AddHours(8);//本月第一天
                     endTime = startTime.AddMonths(1).AddDays(-1);
                 }
 
@@ -482,7 +482,7 @@ namespace CenterBackend.Services
 
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             List<SourceData> sourceData = [];
             List<OperatorInputData> operatorInputData = [];
             for (var i = 0; i < 3; i++)
@@ -532,13 +532,13 @@ namespace CenterBackend.Services
 
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             List<OperatorInputData> operatorInputData = [];
             for (var i = 0; i < 3; i++)
             {
                 if (i == 0)
                 {
-                    startTime = new DateTime(WeekWorkBook.ReportedTime.Year, 1, 1);//本年第一天
+                    startTime = new DateTime(WeekWorkBook.ReportedTime.Year, 1, 1).AddHours(8);//本年第一天
                     endTime = startTime.AddYears(1).AddDays(-1);
 
                 }
@@ -575,7 +575,7 @@ namespace CenterBackend.Services
 
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             List<OperatorInputData> operatorInputData = [];
             for (var i = 0; i < 3; i++)
             {
@@ -620,7 +620,7 @@ namespace CenterBackend.Services
             WeekWorkBook.WorkSheet7 = Enumerable.Range(1, 14).Select(_ => new WorkSheet7()).ToList();
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             startTime = new DateTime(WeekWorkBook.ReportedTime.Year, WeekWorkBook.ReportedTime.Month, 1);
             endTime = startTime.AddMonths(1).AddDays(-1);
             var temp = await CalculateForSheet3TimeRangeAsync(startTime, endTime);
@@ -632,14 +632,13 @@ namespace CenterBackend.Services
             WeekWorkBook.WorkSheet8 = Enumerable.Range(1, 9).Select(_ => new WorkSheet8()).ToList();
 
             DateTime baseTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
-            baseTime = currentWeekFirstDay.AddHours(8);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             ProductionDataCollection ProductionDataCollection = new();
             List<SourceData> sourceData = [];
             List<OperatorInputData> operatorInputData = [];
             for (var i = 0; i < 7; i++)
             {
-                var startTime = baseTime.AddDays(i);
+                var startTime = currentWeekFirstDay.AddDays(i);
                 var endTime = startTime.AddDays(1);
 
                 ProductionDataCollection = await CalculateForSheet3Async(startTime);
@@ -662,8 +661,8 @@ namespace CenterBackend.Services
             }
             for (var i = 7; i < 9; i++)
             {
-                var startTime = baseTime;
-                if (i == 7) startTime = baseTime.AddDays(-7);
+                var startTime = currentWeekFirstDay;
+                if (i == 7) startTime = currentWeekFirstDay.AddDays(-7);
                 var endTime = startTime.AddDays(7);
 
                 var productionDataCollections = await CalculateForSheet3TimeRangeAsync(startTime, endTime);
@@ -693,7 +692,7 @@ namespace CenterBackend.Services
 
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             List<OperatorInputData> operatorInputData = [];
             List<SourceData> sourceData = [];
             for (var i = 0; i < 2; i++)
@@ -734,7 +733,7 @@ namespace CenterBackend.Services
 
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             List<OperatorInputData> operatorInputData = [];
             List<SourceData> sourceData = [];
             for (var i = 0; i < 2; i++)
@@ -823,6 +822,7 @@ namespace CenterBackend.Services
 
                     var sum = CalculateSum(productionDataCollections, x => x.TotalResult.AllProduction);
                     WeekWorkBook.WorkSheet11[i].Cell4 = sum == 0 ? 0 : WeekWorkBook.WorkSheet11[i].Cell4 / sum;//废液外排单耗
+                    WeekWorkBook.WorkSheet11[i].Cell5 = sum;//废液外排累计
                 }
             }
             return true;
@@ -834,7 +834,6 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-
             List<OperatorInputData> operatorInputData = [];
             List<SourceData> sourceData = [];
             ProductionDataCollection productionDataCollection = new();
@@ -909,13 +908,12 @@ namespace CenterBackend.Services
             WeekWorkBook.WorkSheet13 = Enumerable.Range(1, 14).Select(_ => new WorkSheet13()).ToList();
 
             DateTime baseTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date);
-            baseTime = currentWeekFirstDay.AddHours(8);
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             ProductionDataCollection ProductionDataCollection= new();
             List<SourceData> sourceData = [];
             for (var i = 0; i < 7; i++)
             {
-                var startTime = baseTime.AddDays(i);
+                var startTime = currentWeekFirstDay.AddDays(i);
                 var endTime = startTime.AddDays(1);
 
                 ProductionDataCollection = await CalculateForSheet3Async(startTime);
