@@ -79,18 +79,6 @@
         public DateTime TimePoint { get; set; }
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
-        public float? Cell8 { get; set; }
-        public float? Cell9 { get; set; }
-        public float? Cell10 { get; set; }
-        public float? Cell11 { get; set; }
-        public float? Cell12 { get; set; }
-        public float? Cell13 { get; set; }
-
     }
 
     public class WorkSheet8
@@ -106,7 +94,6 @@
         public float? Cell8 { get; set; }
         public float? Cell9 { get; set; }
         public float? Cell10 { get; set; }
-        public float? Cell11 { get; set; }
     }
 
     public class WorkSheet9
@@ -115,10 +102,11 @@
         public float? Cell1 { get; set; }
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
+        public float? Cell4 { get; set; }//浓缩比
         public float? Cell5 { get; set; }
         public float? Cell6 { get; set; }
         public float? Cell7 { get; set; }
+        public float? Cell8 { get; set; }
     }
 
     public class WorkSheet10
