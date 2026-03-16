@@ -157,7 +157,6 @@ namespace CenterBackend.Services
             Cell.SetCellValue(value);// 赋值
         }
 
-
         private static void WriteDataRowsToExcel<T>(T dataItem, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
         {
             if (dataItem == null) return;
@@ -176,7 +175,6 @@ namespace CenterBackend.Services
                 }
             }
         }
-
         private static void WeekWriteExcelSheet2(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
             ISheet srcSheet;
@@ -193,7 +191,6 @@ namespace CenterBackend.Services
                 }
             }
         }
-
         private static void WeekWriteExcelSheet3(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
             ISheet srcSheet;

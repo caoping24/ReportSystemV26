@@ -1,12 +1,9 @@
 ﻿using CenterReport.Repository.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR.Protocol;
-using NPOI.SS.Formula.Functions;
-using static FastExpressionCompiler.ExpressionCompiler;
 
-namespace CenterBackend.Models.SheetCalculateData
+namespace CenterBackend.Models.CalculateData
 {
-
+    //**********************数据结构**********************
+    //手写记录表 表3
     public class ProductionDataCollection
     {
         public List<ProductionData> DayShiftData { get; set; } = [];
