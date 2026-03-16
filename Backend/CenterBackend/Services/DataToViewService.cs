@@ -676,11 +676,14 @@ namespace CenterBackend.Services
                 WeekWorkBook.WorkSheet8[i].Cell4 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_1);
                 WeekWorkBook.WorkSheet8[i].Cell5 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_3);
                 WeekWorkBook.WorkSheet8[i].Cell6 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_4);
+                float temp = WeekWorkBook.WorkSheet8[i].Cell6 ?? 0f;
+                WeekWorkBook.WorkSheet8[i].Cell7 = 100 - temp;
 
-                WeekWorkBook.WorkSheet8[i].Cell7 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllProduction);
-                WeekWorkBook.WorkSheet8[i].Cell8 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllYield);
 
-                WeekWorkBook.WorkSheet8[i].Cell9 = CalculateAverage(operatorInputData, x => x.Cell63);
+                WeekWorkBook.WorkSheet8[i].Cell8 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllProduction);
+                WeekWorkBook.WorkSheet8[i].Cell9 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllYield);
+
+                WeekWorkBook.WorkSheet8[i].Cell10 = CalculateAverage(operatorInputData, x => x.Cell63);
             }
 
             return true;
@@ -712,16 +715,20 @@ namespace CenterBackend.Services
                     WeekWorkBook.WorkSheet9[i].Cell1 = CalculateFirstLastDifference(sourceData, x => x.Cell107);
                     WeekWorkBook.WorkSheet9[i].Cell2 = CalculateAverage(sourceData, x => x.Cell114);
                     WeekWorkBook.WorkSheet9[i].Cell3 = CalculateAverage(sourceData, x => x.Cell112);
-                    WeekWorkBook.WorkSheet9[i].Cell4 = CalculateAverage(sourceData, x => x.Cell110);
+                    float input =  WeekWorkBook.WorkSheet9[i].Cell2 ?? 0f;
+                    float output = WeekWorkBook.WorkSheet9[i].Cell3 ?? 0f;
+                    if (output != 0) WeekWorkBook.WorkSheet9[i].Cell4 = input/output;
+
+                    WeekWorkBook.WorkSheet9[i].Cell5 = CalculateAverage(sourceData, x => x.Cell110);
                 }
                 operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
                 if (operatorInputData.Count == 0)//无数据则跳过
                     continue;
                 if (operatorInputData != null && operatorInputData.Count != 0)
                 {
-                    WeekWorkBook.WorkSheet9[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell41);
-                    WeekWorkBook.WorkSheet9[i].Cell6 = CalculateAverage(operatorInputData, x => x.Cell43);
-                    WeekWorkBook.WorkSheet9[i].Cell7 = CalculateAverage(operatorInputData, x => x.Cell45);
+                    WeekWorkBook.WorkSheet9[i].Cell6 = CalculateAverage(operatorInputData, x => x.Cell41);
+                    WeekWorkBook.WorkSheet9[i].Cell7 = CalculateAverage(operatorInputData, x => x.Cell43);
+                    WeekWorkBook.WorkSheet9[i].Cell8 = CalculateAverage(operatorInputData, x => x.Cell45);
                 }
             }
             return true;
