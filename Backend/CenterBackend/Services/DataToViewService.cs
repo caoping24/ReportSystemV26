@@ -1,4 +1,5 @@
-﻿using CenterBackend.IServices;
+﻿using AngleSharp.Dom;
+using CenterBackend.IServices;
 using CenterBackend.Models.CalculateData;
 using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository.IServices;
@@ -6,6 +7,7 @@ using CenterReport.Repository.Models;
 using Masuit.Tools;
 using Masuit.Tools.Models;
 using Microsoft.Identity.Client;
+using NPOI.POIFS.Crypt.Dsig;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
 using System.Collections;
@@ -33,7 +35,8 @@ namespace CenterBackend.Services
             var operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
             MoveDataShifts(DayWorkBook, sourceData, operatorInputData);
             MoveDataShiftsAnalysis(DayWorkBook, sourceData, operatorInputData);
-            MoveDataDayAnalysis(DayWorkBook, sourceData, operatorInputData);
+            var operatorInputdataYesterDay = await _operatorInputData.GetByDateTimeRangeAsync(startTime.AddDays(-1), endTime.AddDays(-1));
+            MoveDataDayAnalysis(DayWorkBook, sourceData, operatorInputData, operatorInputdataYesterDay);
             return true;
         }
 
@@ -584,14 +587,12 @@ namespace CenterBackend.Services
             }
 
         }
-        private static void MoveDataDayAnalysis(DayWorkBook DayWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
+        private static void MoveDataDayAnalysis(DayWorkBook DayWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas, List<OperatorInputData> operatorInputDatasYesterDay)
         {
             DateTime startTime = DayWorkBook.ReportedTime.Date.AddHours(8);
             ProductionDataCollection productionDataCollection = new();
             DayAnalysis target = DayWorkBook.DayAnalysis;
 
-            //List<SourceData> sourcedataPart;
-            //List<OperatorInputData> operatorInputdataPart;
             if (sourceDatas == null || sourceDatas.Count == 0)
                 return;
             if (operatorInputDatas == null || operatorInputDatas.Count == 0)
@@ -600,32 +601,65 @@ namespace CenterBackend.Services
             productionDataCollection = CalculateForSheet3(startTime, operatorInputDatas);
             float rangeYield = productionDataCollection.TotalResult.AllYield;//获取每日折百产量
 
+            const float qualifiedCell1 = 0.515f;//羟基乙腈浓度
+            const float diffCell1 = 0.0103f;
+            const float qualifiedCell2 = 0.515f;//氨化反应热点温度
+            const float diffCell2 = 0.0103f;
+            const float qualifiedCell3 = 0.515f;//一次结晶温度
+            const float diffCell3 = 0.0103f;
+            const float qualifiedCell4 = 0.515f;//羟基浓度
+            const float diffCell4 = 0.0103f;
+            const float qualifiedCell5 = 0.515f;//氨/腈摩尔比
+            const float diffCell5 = 0.0103f;
+
+            float minRange = 0;
+            float maxRange = 0;
+            (int, int) rerult = (0, 0);
             //填充考评表数据
-            for (var i = 0; i < 2; i++)
-            {
-                target.Cell1 = CalculateFirstLastDifference(sourceDatas, x => x.Cell23) / 24;
-                target.Cell2 = CalculateAverage(sourceDatas, x => x.Cell26) / 24;
-                target.Cell3 = CalculateAverage(sourceDatas, x => x.Cell66) / 24;
+            minRange = qualifiedCell1 + diffCell1;
+            maxRange = qualifiedCell1 - diffCell1;
+            rerult = CountValueInRange(sourceDatas, x => x.Cell3, minRange, maxRange);
+            target.Cell1 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
-                target.Cell4 = CalculateAverage(sourceDatas, x => x.Cell20);
-                target.Cell5 = CalculateFirstLastDifference(sourceDatas, x => x.Cell23) / 24;
+            minRange = qualifiedCell2 + diffCell2;
+            maxRange = qualifiedCell2 - diffCell2;
+            rerult = CountValueInRange(sourceDatas, x => x.Cell26, minRange, maxRange);
+            target.Cell2 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
-                var count1 = productionDataCollection.DayShiftData.Where(x => x.Cell41 >= 0.9);
-                var count2 = productionDataCollection.NightShiftData.Where(x => x.Cell41 >= 0.9);
-                float? production1 = CalculateSum(count1, x => x.Cell46);
-                float? production2 = CalculateSum(count2, x=>x.Cell46);
-                float sum = productionDataCollection.TotalResult.AllProduction;
-                const float Epsilon = 0.0001f;//处理浮点数精度
-                target.Cell6 = Math.Abs(sum) > Epsilon ? (production1 ?? 0f + production1 ?? 0f) / sum : 0;
+            minRange = qualifiedCell3 + diffCell3;
+            maxRange = qualifiedCell3 - diffCell3;
+            rerult = CountValueInRange(sourceDatas, x => x.Cell66, minRange, maxRange);
+            target.Cell3 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
-                target.Cell7 = productionDataCollection.TotalResult.AllProduction;
-                target.Cell8 = productionDataCollection.TotalResult.AllYield;
-                //target.Cell9 = 
-                //target.Cell10 = 
-                target.Cell11 = productionDataCollection.TotalResult.AllAverage_3;
-                target.Cell12 = productionDataCollection.TotalResult.AllAverage_4;
-                target.Cell13 = productionDataCollection.TotalResult.AllAverage_5;
-            }
+            minRange = qualifiedCell4 + diffCell4;
+            maxRange = qualifiedCell4 - diffCell4;
+            rerult = CountValueInRange(sourceDatas, x => x.Cell6, minRange, maxRange);
+            target.Cell4 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
+
+            minRange = qualifiedCell5 + diffCell5;
+            maxRange = qualifiedCell5 - diffCell5;
+            rerult = CountRatioInRange(sourceDatas, x => x.Cell20, x => x.Cell14, minRange, maxRange);
+            target.Cell5 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
+
+            var count1 = productionDataCollection.DayShiftData.Where(x => x.Cell41 >= 0.9);
+            var count2 = productionDataCollection.NightShiftData.Where(x => x.Cell41 >= 0.9);
+            float? production1 = CalculateSum(count1, x => x.Cell46);
+            float? production2 = CalculateSum(count2, x=>x.Cell46);
+            float sum = productionDataCollection.TotalResult.AllProduction;
+            const float Epsilon = 0.0001f;//处理浮点数精度
+            target.Cell6 = Math.Abs(sum) > Epsilon ? (production1 ?? 0f + production1 ?? 0f) / sum : 0;
+
+            target.Cell7 = productionDataCollection.TotalResult.AllProduction;
+            target.Cell8 = productionDataCollection.TotalResult.AllYield;
+
+            var productionDataCollectionYesterDay = CalculateForSheet3(startTime.AddDays(-1), operatorInputDatasYesterDay);//计算昨日的产量
+            var temp1  = productionDataCollection.TotalResult.AllProduction;
+            var temp2 = productionDataCollectionYesterDay.TotalResult.AllProduction;
+            target.Cell9 = (temp1 - temp2) > 0 ? (temp1 - temp2) : 0;
+            target.Cell10 = (temp1 - temp2) <= 0 ? (temp1 - temp2) : 0;
+            target.Cell11 = productionDataCollection.TotalResult.AllAverage_3;
+            target.Cell12 = productionDataCollection.TotalResult.AllAverage_4;
+            target.Cell13 = productionDataCollection.TotalResult.AllAverage_5;
         }
 
         private static bool WeekMoveDataSheet2Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
@@ -1187,6 +1221,49 @@ namespace CenterBackend.Services
             return true;
         }
         /***********************辅助方法***********************/
+        /// <summary>
+        /// 统计单个字段值落在 [minRange, maxRange] 范围内的数量（跳过null）
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="selector">字段选择器（如 x => x.Cell26）</param>
+        /// <param name="minRange">区间下限</param>
+        /// <param name="maxRange">区间上限</param>
+        private static (int nonNullTotal, int qualifiedCount) CountValueInRange<T>(IEnumerable<T> data, Func<T, float?> selector, float minRange, float maxRange)
+        {
+            if (data == null || !data.Any())//空数据校验
+                return (0,0);
+            var nonNullTotal = data        
+                            .Select(selector)           
+                            .Where(x => x != null)     
+                            .Count();
+            var qualifiedCount = data
+                            .Select(selector)
+                            .Where(x => x != null)
+                            .Select(x => x >= minRange && x <= maxRange)
+                            .Count();
+            return (nonNullTotal, qualifiedCount);
+        }
+        /// <summary>
+        /// 统计两个字段的比值落在 [minRange, maxRange] 范围内的数量（跳过null、避免除零）
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="selector1">字段选择器 分子</param>
+        /// <param name="selector2">字段选择器 分母</param>
+        /// <param name="minRange">区间下限</param>
+        /// <param name="maxRange">区间上限</param>
+        private static (int nonNullTotal, int qualifiedCount) CountRatioInRange<T>(IEnumerable<T> data, Func<T, float?> selector1, Func<T, float?> selector2, float minRange, float maxRange)
+        {
+            if (data == null || !data.Any())//空数据校验
+                return (0, 0);
+            var nonNullTotal = data
+                                .Where(x => selector1 != null && selector2 != null && selector2(x) != 0)
+                                .Count();
+            var qualifiedCount = data
+                                .Where(x => selector1 != null && selector2 != null && selector2(x) != 0)
+                                .Select(x => selector1(x)/selector2(x)>= minRange&& selector1(x) / selector2(x) <= maxRange )
+                                .Count();
+            return (nonNullTotal, qualifiedCount);
+        }
         private static List<SourceData> SortDataByTime(List<SourceData> sourceData, DateTime baseDate, int maxCount)
         {
             baseDate = baseDate.Date.AddHours(8);//从8点开始
@@ -1291,7 +1368,7 @@ namespace CenterBackend.Services
                 .ToList();
             return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;//计算总和
         }
-        /***********************Excel***********************/
+        /***********************Excel需要计算的表***********************/
 
         /// <summary>
         /// 计算手写表一天的数据
