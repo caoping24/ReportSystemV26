@@ -24,28 +24,16 @@ namespace CenterBackend.Services
 
         public async Task<bool> DayGetMapDataAsync(DayWorkBook DayWorkBook)
         {
-            var startTime = DayWorkBook.ReportedTime.Date.AddHours(8);
-            var endTime = DayWorkBook.ReportedTime.Date.AddDays(1).AddHours(8);
+            DateTime startTime = DayWorkBook.ReportedTime.Date.AddHours(8);
+            DateTime endTime = startTime.AddDays(1).AddHours(8);
 
             var sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
-            if (sourceData == null || sourceData.Count == 0)//未查到数据
-                return false;
+            if (sourceData == null || sourceData.Count == 0)
+                return false;//未查到数据
             var operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
+            MoveDataSingleDay(DayWorkBook, sourceData, operatorInputData);
 
-            DayWorkBook.DaySheet = Enumerable.Range(0, 13).Select(_ => new DayWorkSheet()).ToList();
-            DayWorkBook.NightSheet = Enumerable.Range(0, 13).Select(_ => new DayWorkSheet()).ToList();
-
-            var baseTime = startTime;
-            var dataPart1 = SortDataByTime(sourceData, baseTime, 25);//原始数据
-            var dataPart2 = SortDataByTime(operatorInputData, baseTime, 25);//人工录入数据
-
-            List<SourceData> source1 = dataPart1.Take(13).ToList();
-            List<OperatorInputData> source2 = dataPart2.Take(13).ToList();
-            DayMoveData(DayWorkBook.DaySheet, source1, source2);//白班
-
-            source1 = dataPart1.Skip(12).Take(13).ToList();
-            source2 = dataPart2.Skip(12).Take(13).ToList();
-            DayMoveData(DayWorkBook.NightSheet, source1, source2);//夜班
+            MoveDataAnalysis(DayWorkBook, sourceData, operatorInputData);
 
             return true;
         }
@@ -82,11 +70,57 @@ namespace CenterBackend.Services
             return true;
         }
         /***********************数据处理***********************/
-        private static void DayMoveData(List<DayWorkSheet> DayWorkSheet, List<SourceData> sourceData, List<OperatorInputData> operatorInputData)
+
+        private static void MoveDataSingleDay(DayWorkBook DayWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
+        {
+            DayWorkBook.DaySheet = Enumerable.Range(0, 13).Select(_ => new DayWorkSheet()).ToList();
+            DayWorkBook.NightSheet = Enumerable.Range(0, 13).Select(_ => new DayWorkSheet()).ToList();
+
+            var startTime = DayWorkBook.ReportedTime.Date.AddHours(8);
+            var dataPart1 = SortDataByTime(sourceDatas, startTime, 25);//原始数据
+            var dataPart2 = SortDataByTime(operatorInputDatas, startTime, 25);//人工录入数据
+
+            List<SourceData> source1;
+            List<OperatorInputData> source2;
+
+            source1 = dataPart1.Take(13).ToList();
+            source2 = dataPart2.Take(13).ToList();
+            ShiftsMoveData(DayWorkBook.DaySheet, source1, source2);//白班
+
+            source1 = dataPart1.Skip(12).Take(13).ToList();
+            source2 = dataPart2.Skip(12).Take(13).ToList();
+            ShiftsMoveData(DayWorkBook.NightSheet, source1, source2);//夜班
+        }
+        private static void MoveDataAnalysis(DayWorkBook DayWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
+        {
+            DateTime startTime = DayWorkBook.ReportedTime.Date.AddHours(8);
+            ProductionDataCollection productionDataCollection = new();
+            MaterialDataCollection materialDataCollection = new();
+            DayWorkBook.AllDay = Enumerable.Range(0, 2).Select(_ => new DayAnalysis()).ToList();//白班+晚班
+            if (operatorInputDatas != null)
+            {
+                productionDataCollection = CalculateForSheet3(startTime, operatorInputDatas);
+                float rangeYield = productionDataCollection.TotalResult.AllYield;//获取每日折百产量
+                for (var y = 0; y < 10; y++)
+                {
+                    materialDataCollection.MaterialDatas[y].TotalResult.Yield = rangeYield;
+                }
+                materialDataCollection.CalculateSum();//计算原料单耗
+            }
+            var target = DayWorkBook.AllDay;
+            for (var y = 0; y < 2; y++)
+            {
+
+            }
+
+
+           
+        }
+        private static void ShiftsMoveData(List<DayWorkSheet> DayWorkSheet, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
             var target = DayWorkSheet;
-            var source1 = sourceData;
-            var source2 = operatorInputData;
+            var source1 = sourceDatas;
+            var source2 = operatorInputDatas;
             //原始数据的映射
             for (int i = 0; i < 13; i++)
             {
@@ -867,7 +901,7 @@ namespace CenterBackend.Services
                 }
                 for (var y = 0; y < 10; y++)
                 {
-                    materialDataCollection.MaterialDatas[i].TotalResult.Yield = rangeYield;
+                    materialDataCollection.MaterialDatas[y].TotalResult.Yield = rangeYield;
                 }
 
                 if (sourceDatas != null)
