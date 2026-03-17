@@ -98,15 +98,15 @@ namespace CenterBackend.Services
             }
 
             //考评表
-            var allList = dayWorkBookData.AllDay;
-            if (allList.Count == 0)
+            var shiftsList = dayWorkBookData.ShiftsAnalysis;
+            if (shiftsList.Count == 0)
                 return false;
             srcSheet = srcWorkbook.GetSheetAt(4);                                       //实际要写的表
             //SetXlsxCellString(srcSheet, 51, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
             for (int i = 0; i < 2; i++)
             {
-                if (i >= allList.Count) break;
-                var data = allList[i];
+                if (i >= shiftsList.Count) break;
+                var data = shiftsList[i];
                 if (data == null) continue; // 如果 data 为空则跳过
                 int targeRow = 21 * i;
                 WriteDataRowsToExcel(data, srcSheet, 6 + targeRow, 2, 1, 33);
@@ -114,6 +114,28 @@ namespace CenterBackend.Services
                 WriteDataRowsToExcel(data, srcSheet, 16 + targeRow, 2, 67, 99);
                 WriteDataRowsToExcel(data, srcSheet, 21 + targeRow, 2, 100, 113);
             }
+            //日报表
+            var dayList = dayWorkBookData.DayAnalysis;
+            if (dayList == null)
+                return false;
+            srcSheet = srcWorkbook.GetSheetAt(5);                                       //实际要写的表
+            //SetXlsxCellString(srcSheet, 51, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
+            SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
+            SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
+            SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
+
+            SetXlsxCellValue(srcSheet, 9, 7, dayList.Cell4 ?? 0f);
+            SetXlsxCellValue(srcSheet, 10, 7, dayList.Cell5 ?? 0f);
+
+            SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
+
+            SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 2, dayList.Cell8 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell9 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 4, dayList.Cell10 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell11 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 6, dayList.Cell12 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
 
             return true;
         }
@@ -144,7 +166,7 @@ namespace CenterBackend.Services
             return true;
         }
 
-        private static void BatchWriteDataToExcel(DayWorkSheet dataList, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
+        private static void BatchWriteDataToExcel(SingleShift dataList, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
         {
             if (dataList == null) return;
             int offset = 0;
