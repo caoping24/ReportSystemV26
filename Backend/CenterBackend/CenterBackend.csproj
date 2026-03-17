@@ -40,7 +40,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="wwwroot\Model\" />
 	  <Folder Include="wwwroot\Log\" />
 	</ItemGroup>
 	<ItemGroup>

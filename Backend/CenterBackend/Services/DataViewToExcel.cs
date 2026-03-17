@@ -108,11 +108,11 @@ namespace CenterBackend.Services
                 if (i >= allList.Count) break;
                 var data = allList[i];
                 if (data == null) continue; // 如果 data 为空则跳过
-                int targeRow = 23 * i;
-                WriteDataColumnsToExcel(data, srcSheet, 6 + targeRow, 3, 1, 33);
-                WriteDataColumnsToExcel(data, srcSheet, 6 + targeRow, 3, 34, 66);
-                WriteDataColumnsToExcel(data, srcSheet, 6 + targeRow, 3, 67, 99);
-                WriteDataColumnsToExcel(data, srcSheet, 6 + targeRow, 3, 100, 113);
+                int targeRow = 21 * i;
+                WriteDataRowsToExcel(data, srcSheet, 6 + targeRow, 2, 1, 33);
+                WriteDataRowsToExcel(data, srcSheet, 11 + targeRow, 2, 34, 66);
+                WriteDataRowsToExcel(data, srcSheet, 16 + targeRow, 2, 67, 99);
+                WriteDataRowsToExcel(data, srcSheet, 21 + targeRow, 2, 100, 113);
             }
 
             return true;
