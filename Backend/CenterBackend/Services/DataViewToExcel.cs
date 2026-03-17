@@ -109,10 +109,10 @@ namespace CenterBackend.Services
                 var data = allList[i];
                 if (data == null) continue; // 如果 data 为空则跳过
                 int targeRow = 23 * i;
-                WriteDataColumnsToExcel(data, srcSheet, 5 + targeRow, 2, 1, 33);
-                WriteDataColumnsToExcel(data, srcSheet, 5 + targeRow, 2, 34, 66);
-                WriteDataColumnsToExcel(data, srcSheet, 5 + targeRow, 2, 67, 99);
-                WriteDataColumnsToExcel(data, srcSheet, 5 + targeRow, 2, 100, 113);
+                WriteDataColumnsToExcel(data, srcSheet, 6 + targeRow, 3, 1, 33);
+                WriteDataColumnsToExcel(data, srcSheet, 6 + targeRow, 3, 34, 66);
+                WriteDataColumnsToExcel(data, srcSheet, 6 + targeRow, 3, 67, 99);
+                WriteDataColumnsToExcel(data, srcSheet, 6 + targeRow, 3, 100, 113);
             }
 
             return true;
@@ -259,7 +259,7 @@ namespace CenterBackend.Services
                 if (dataList != null && dataList.Count > i && dataList[i] != null)
                 {
                     var dataItem = dataList[i];
-                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 1, 1, 7);
+                    WriteDataRowsToExcel(dataItem, srcSheet, 6 + i, 1, 1, 7);
                 }
             }
         }

@@ -48,7 +48,8 @@ namespace CenterBackend.Services
 
         public async Task<bool> WeekGetMapDataAsync(WeekWorkBook WeekWorkBook)
         {
-            DateTime currentYearFirstDay = new(WeekWorkBook.ReportedTime.Year, WeekWorkBook.ReportedTime.Month, 1);
+            DateTime currentYearFirstDay = new(WeekWorkBook.ReportedTime.Year, 1, 1);
+            currentYearFirstDay= currentYearFirstDay.AddHours(8);
             DateTime currentYearLastDay = currentYearFirstDay.AddYears(1).AddDays(-1);
             List<SourceData> sourceData = await _sourceData.GetByDateTimeRangeAsync(currentYearFirstDay, currentYearLastDay);
             List< OperatorInputData > operatorInputData= await _operatorInputData.GetByDateTimeRangeAsync(currentYearFirstDay, currentYearLastDay);
