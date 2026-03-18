@@ -24,9 +24,9 @@ namespace CenterBackend.Services
                 bool writeResult = false;
                 if (DataCollection.SheetType == SheetType.DayReport && DataCollection is DayWorkBook dayWorkBook)
                     writeResult = DayWriteExcel(workbook, dayWorkBook);
-                else if (DataCollection.SheetType == SheetType.MonthReport && DataCollection is DayWorkBook monthWorkBook)
+                else if (DataCollection.SheetType == SheetType.MonthReport && DataCollection is MonthWorkBook monthWorkBook)
                     writeResult = MonthWriteExcel(workbook, monthWorkBook);
-                else if (DataCollection.SheetType == SheetType.YearReport && DataCollection is DayWorkBook yearWorkBook)
+                else if (DataCollection.SheetType == SheetType.YearReport && DataCollection is YearWorkBook yearWorkBook)
                     writeResult = YearWriteExcel(workbook, yearWorkBook);
                 else if (DataCollection.SheetType == SheetType.WeekReport && DataCollection is WeekWorkBook weekWorkBook)
                     writeResult = WeekWriteExcel(workbook, weekWorkBook);
@@ -140,13 +140,57 @@ namespace CenterBackend.Services
             return true;
         }
 
-        private static bool MonthWriteExcel(XSSFWorkbook srcWorkbook, DayWorkBook monthWorkBookData)
+        private static bool MonthWriteExcel(XSSFWorkbook srcWorkbook, MonthWorkBook monthWorkBookData)
         {
+            ISheet srcSheet;
+            var dayList = monthWorkBookData.MonthAnalysis;
+            if (dayList == null)
+                return false;
+            srcSheet = srcWorkbook.GetSheetAt(0);                                       //实际要写的表
+            //SetXlsxCellString(srcSheet, 51, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
+            SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
+            SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
+            SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
+
+            SetXlsxCellValue(srcSheet, 9, 7, dayList.Cell4 ?? 0f);
+            SetXlsxCellValue(srcSheet, 10, 7, dayList.Cell5 ?? 0f);
+
+            SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
+
+            SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 2, dayList.Cell8 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell9 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 4, dayList.Cell10 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell11 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 6, dayList.Cell12 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
             return true;
         }
 
-        private static bool YearWriteExcel(XSSFWorkbook srcWorkbook, DayWorkBook yearWorkBookData)
+        private static bool YearWriteExcel(XSSFWorkbook srcWorkbook, YearWorkBook yearWorkBookData)
         {
+            ISheet srcSheet;
+            var dayList = yearWorkBookData.YearAnalysis;
+            if (dayList == null)
+                return false;
+            srcSheet = srcWorkbook.GetSheetAt(0);                                       //实际要写的表
+            //SetXlsxCellString(srcSheet, 51, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
+            SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
+            SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
+            SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
+
+            SetXlsxCellValue(srcSheet, 9, 7, dayList.Cell4 ?? 0f);
+            SetXlsxCellValue(srcSheet, 10, 7, dayList.Cell5 ?? 0f);
+
+            SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
+
+            SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 2, dayList.Cell8 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell9 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 4, dayList.Cell10 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell11 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 6, dayList.Cell12 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
             return true;
         }
         private static bool WeekWriteExcel(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)

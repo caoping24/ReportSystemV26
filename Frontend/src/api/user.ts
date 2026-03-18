@@ -86,40 +86,52 @@ export const getReportByPage = async (params: {
     params: params,
   });
 };
-
-// 你的下载接口封装文件 【精准修复版】
-export const downloadReport = async (timeStr: string, tabKey: number) => {
-  return myAxios.request({
-    url: "api/Report/DownloadExcel",
-    method: "GET",
-    params: { timeStr: timeStr, Type: tabKey },
-    responseType: "blob",
-    timeout: 60000,
-  });
-};
-// 新增批量下载报表ZIP接口
-// 接口定义文件（如 api/user.ts）
-export const batchDownloadReportZip = async (params: {
-  type: number; // 报表类型 1-日报 2-周报 3-月报 4-年报
-  timeStr: string; // 时间字符串（格式：YYYY/YYYY-MM/YYYY-MM-DD）
-}) => {
-  return myAxios.request({
-    url: "/api/File/ZipDownloadFile", // 后端批量下载接口地址
-    method: "GET", // 改为 GET 请求
-    params: params, // GET 请求参数放在 params 中（会拼接到 URL）
-    responseType: "blob", // 仍需保留 blob 处理二进制流
-    timeout: 120000, // 保持超时设置
-  });
-};
-// 新增：重新生成报表接口封装
-export const regenerateReports = async (params: {
-  type: number; // 报表类型
-  time: string; // 时间字符串，后端期望格式请与后端约定（这里建议 'YYYY-MM-DD' 或 'YYYY-MM-01'）
-}) => {
+export const regenerateReports = async (
+  params: { type: number; time: string },
+  config?: Record<string, any> // 透传Axios配置（进度监听等）
+) => {
   return myAxios.request({
     url: "/api/Report/BuildReport",
     method: "POST",
-    responseType: "blob", 
+    responseType: "blob",
     data: params,
+    timeout:60000,
+    ...config, // 合并进度监听等配置
   });
+};
+
+// 批量下载ZIP接口（支持透传配置）
+export const batchDownloadReportZip = async (
+  params: { type: number; timeStr: string },
+  config?: Record<string, any> // 透传Axios配置
+) => {
+  return myAxios.request({
+    url: "/api/File/ZipDownloadFile",
+    method: "GET",
+    params: params,
+    responseType: "blob",
+    timeout: 120000,
+    ...config, // 合并进度监听等配置
+  });
+};
+
+// 文件下载工具函数（通用）
+export const handleFileDownload = (
+  response: { data: Blob },
+  fileName: string,
+  fileType: 'xlsx' | 'zip'
+) => {
+  const blob = new Blob([response.data], {
+    type: fileType === 'xlsx' 
+      ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      : 'application/zip'
+  });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(link);
 };

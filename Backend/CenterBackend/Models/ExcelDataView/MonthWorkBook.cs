@@ -2,7 +2,7 @@
 {
     public class MonthWorkBook : BaseSheet
     {
-        MonthAnalysis MonthAnalysis { get; set; } = new();
+        public MonthAnalysis MonthAnalysis { get; set; } = new();
     }
     public class MonthAnalysis
     {

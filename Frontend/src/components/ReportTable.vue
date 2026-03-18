@@ -21,9 +21,7 @@
         {{ dayjs(record.createdtime).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
       <template v-if="column.key === 'description'">
-        {{
-          record.description
-        }}
+        {{ record.description }}
       </template>
       <template v-else-if="column.key === 'action'">
         <!-- 仅保留下载按钮 -->
@@ -56,8 +54,6 @@ const props = defineProps<ReportTableProps>();
 const emit = defineEmits<{
   (e: "download", tabKey: string, reportedTime: string): void;
 }>();
-
-// 移除了emitRegenerate函数
 
 //格式化并触发 download 事件
 const handleDownload = (reportedTime: string | Date | undefined) => {
