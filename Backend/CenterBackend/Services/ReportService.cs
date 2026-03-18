@@ -74,8 +74,36 @@ namespace CenterBackend.Services
                     }
                     break;
                 case 2:
+                    MonthWorkBook monthDataCollections = new()
+                    {
+                        SheetType = SheetType.WeekReport,
+                        ReportedTime = fileInfo.ReportedTime,
+                        Directory = fileInfo.Directory,
+                        FileName = fileInfo.FileName,
+                        ModFilePath = fileInfo.ModFilePath,
+                    };
+                    if (await _dataToViewService.MonthGetMapDataAsync(monthDataCollections))
+                    {
+                        var FilePath = System.IO.Path.Combine(monthDataCollections.Directory, monthDataCollections.FileName);
+                        if (_fileService.CopyFile(monthDataCollections.ModFilePath, FilePath))
+                            isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(monthDataCollections);
+                    }
                     break;
-                case 3: 
+                case 3:
+                    YearWorkBook yearDataCollections = new()
+                    {
+                        SheetType = SheetType.WeekReport,
+                        ReportedTime = fileInfo.ReportedTime,
+                        Directory = fileInfo.Directory,
+                        FileName = fileInfo.FileName,
+                        ModFilePath = fileInfo.ModFilePath,
+                    };
+                    if (await _dataToViewService.YearGetMapDataAsync(yearDataCollections))
+                    {
+                        var FilePath = System.IO.Path.Combine(yearDataCollections.Directory, yearDataCollections.FileName);
+                        if (_fileService.CopyFile(yearDataCollections.ModFilePath, FilePath))
+                            isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(yearDataCollections);
+                    }
                     break;
                 case 4:
                     WeekWorkBook weekDataCollections = new()

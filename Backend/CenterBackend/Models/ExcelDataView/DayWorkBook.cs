@@ -6,12 +6,13 @@ namespace CenterBackend.Models.ExcelDataView
     public class DayWorkBook : BaseSheet
     {
         // Use lists with pre-filled DayWorkSheet instances to avoid nullable element warnings
-        public List<DayWorkSheet> DaySheet { get; set; } = [];
-        public List<DayWorkSheet> NightSheet { get; set; } = [];
-        public List<DayAnalysis> AllDay { get; set; } = [];
+        public List<SingleShift> DaySheet { get; set; } = [];
+        public List<SingleShift> NightSheet { get; set; } = [];
+        public List<ShiftsAnalysis> ShiftsAnalysis { get; set; } = [];
+        public DayAnalysis DayAnalysis { get; set; } = new();
 
     }
-    public class DayWorkSheet
+    public class SingleShift
     {
         public int TimePoint { get; set; }
         public float? Cell1 { get; set; }
@@ -165,7 +166,7 @@ namespace CenterBackend.Models.ExcelDataView
         public float? Cell149 { get; set; }
         public float? Cell150 { get; set; }
     }
-    public class DayAnalysis
+    public class ShiftsAnalysis
     {
         public int TimePoint { get; set; }
         public float? Cell1 { get; set; }
@@ -282,5 +283,21 @@ namespace CenterBackend.Models.ExcelDataView
         public float? Cell112 { get; set; }
         public float? Cell113 { get; set; }
     }
-
+    public class DayAnalysis 
+    {
+        public int TimePoint { get; set; }
+        public float? Cell1 { get; set; }
+        public float? Cell2 { get; set; }
+        public float? Cell3 { get; set; }
+        public float? Cell4 { get; set; }
+        public float? Cell5 { get; set; }
+        public float? Cell6 { get; set; }
+        public float? Cell7 { get; set; }
+        public float? Cell8 { get; set; }
+        public float? Cell9 { get; set; }
+        public float? Cell10 { get; set; }
+        public float? Cell11 { get; set; }
+        public float? Cell12 { get; set; }
+        public float? Cell13 { get; set; }
+    }
 }
