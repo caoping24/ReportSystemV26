@@ -76,7 +76,7 @@ namespace CenterBackend.Services
                 case 2:
                     MonthWorkBook monthDataCollections = new()
                     {
-                        SheetType = SheetType.WeekReport,
+                        SheetType = SheetType.MonthReport,
                         ReportedTime = fileInfo.ReportedTime,
                         Directory = fileInfo.Directory,
                         FileName = fileInfo.FileName,
@@ -92,7 +92,7 @@ namespace CenterBackend.Services
                 case 3:
                     YearWorkBook yearDataCollections = new()
                     {
-                        SheetType = SheetType.WeekReport,
+                        SheetType = SheetType.YearReport,
                         ReportedTime = fileInfo.ReportedTime,
                         Directory = fileInfo.Directory,
                         FileName = fileInfo.FileName,
