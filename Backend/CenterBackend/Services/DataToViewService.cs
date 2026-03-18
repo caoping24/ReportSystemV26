@@ -802,7 +802,7 @@ namespace CenterBackend.Services
                 }
                 else
                 {
-                    startTime = new DateTime(currentWeekFirstDay.Year, currentWeekFirstDay.Month, 1);
+                    startTime = new DateTime(currentWeekFirstDay.Year, (i+1), 1);
                     endTime = startTime.AddMonths(i).AddDays(-1);
                 }
                 var productionDataCollections =  CalculateForSheet3TimeRange(startTime, endTime, operatorInputDatas);
@@ -1257,9 +1257,9 @@ namespace CenterBackend.Services
         {
             //查询当日数据
             startTime = startTime.Date.AddHours(8);
-            var endTime = startTime.AddDays(24);
+            var endTime = startTime.AddHours(24);
 
-            operatorInputData = operatorInputData.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+            operatorInputData = operatorInputData.Where(x => x.ReportedTime >= startTime && x.ReportedTime <= endTime).ToList();
             if (operatorInputData == null || operatorInputData.Count == 0)// 空数据校验
                 return new ProductionDataCollection();
 
@@ -1270,11 +1270,11 @@ namespace CenterBackend.Services
             var ShiftTime = ShiftStart.AddHours(12);//换班时间
             var ShiftEnd = ShiftTime.AddHours(12);//换班时间
 
-            filteredList = operatorInputData.Where(x => x.ReportedTime >= ShiftStart && x.ReportedTime < ShiftTime && x.Cell21 != null).Take(5);
+            filteredList = operatorInputData.Where(x => x.ReportedTime >= ShiftStart && x.ReportedTime <= ShiftTime && x.Cell21 != null).Take(5);
             var DayShiftData = (filteredList != null) ? filteredList.ToList() : [];//早班数据
             dataCellection.DayShiftData = DayShiftData.Select(ProductionData.FromOperatorInput).ToList();
 
-            filteredList = operatorInputData.Where(x => x.ReportedTime >= ShiftTime && x.ReportedTime < ShiftEnd && x.Cell21 != null).Take(5);
+            filteredList = operatorInputData.Where(x => x.ReportedTime >= ShiftTime && x.ReportedTime <= ShiftEnd && x.Cell21 != null).Take(5);
             var NightShiftData = (filteredList != null) ? filteredList.ToList() : [];//晚班数据
             dataCellection.NightShiftData = NightShiftData.Select(ProductionData.FromOperatorInput).ToList();
             
