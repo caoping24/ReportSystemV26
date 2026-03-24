@@ -20,7 +20,7 @@ namespace CenterReport.Repository.Models
         /// <summary>
         /// 最后修改时间（对应SQL中的LastChange，默认值由数据库设置）
         /// </summary>
-        public DateTime LastChange { get; set; } = DateTime.Now;
+        public DateTime? LastChange { get; set; } = DateTime.Now;
 
         // 类型（可空）
         public int? Type { get; set; } = 0;

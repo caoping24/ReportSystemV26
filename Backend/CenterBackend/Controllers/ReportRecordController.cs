@@ -176,6 +176,7 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell15", Label = "甘氨腈（g/L）", Unit = "g/L" },
             new TableHeaderDto { Prop = "Cell16", Label = "三乙腈（g/L）", Unit = "g/L" },
             new TableHeaderDto { Prop = "Cell17", Label = "反应液检测数据pH", Unit = "" },
+            new TableHeaderDto { Prop = "Cell18", Label = "反应液比重(kg/m3)", Unit = "" },
         }
     },
 
@@ -193,7 +194,7 @@ namespace CenterBackend.Controllers
             },
             new GroupHeader
             {
-                Props = new List<string> { "Cell31", "Cell32", "Cell33", "Cell34", "Cell35", "Cell36", "Cell37" },
+                Props = new List<string> { "Cell31", "Cell32", "Cell33", "Cell34", "Cell35", "Cell36" },
                 Label = "二次结晶物/二次产品",
                 Unit = ""
             }
@@ -213,7 +214,7 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell34", Label = "二乙腈 + 水 (%)", Unit = "%" },
             new TableHeaderDto { Prop = "Cell35", Label = "未知物含量 (%)", Unit = "%" },
             new TableHeaderDto { Prop = "Cell36", Label = "产量 (kg)", Unit = "kg" },
-            new TableHeaderDto { Prop = "Cell37", Label = "折百产量 (kg)", Unit = "kg" },
+      
         }
     },
   

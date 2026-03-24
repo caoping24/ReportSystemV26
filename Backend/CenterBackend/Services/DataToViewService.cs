@@ -634,28 +634,28 @@ namespace CenterBackend.Services
             float maxRange = 0;
             (int, int) rerult = (0, 0);
             //填充考评表数据
-            minRange = qualifiedCell1 + diffCell1;
-            maxRange = qualifiedCell1 - diffCell1;
+            maxRange = qualifiedCell1 + diffCell1;
+            minRange = qualifiedCell1 - diffCell1;
             rerult = CountValueInRange(sourceDatas, x => x.Cell3, minRange, maxRange);
             target.Cell1 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
-            minRange = qualifiedCell2 + diffCell2;
-            maxRange = qualifiedCell2 - diffCell2;
+            maxRange = qualifiedCell2 + diffCell2;
+            minRange = qualifiedCell2 - diffCell2;
             rerult = CountValueInRange(sourceDatas, x => x.Cell26, minRange, maxRange);
             target.Cell2 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
-            minRange = qualifiedCell3 + diffCell3;
-            maxRange = qualifiedCell3 - diffCell3;
+            maxRange = qualifiedCell3 + diffCell3;
+            minRange = qualifiedCell3 - diffCell3;
             rerult = CountValueInRange(sourceDatas, x => x.Cell66, minRange, maxRange);
             target.Cell3 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
-            minRange = qualifiedCell4 + diffCell4;
-            maxRange = qualifiedCell4 - diffCell4;
+            maxRange = qualifiedCell4 + diffCell4;
+            minRange = qualifiedCell4 - diffCell4;
             rerult = CountValueInRange(sourceDatas, x => x.Cell6, minRange, maxRange);
             target.Cell4 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
-            minRange = qualifiedCell5 + diffCell5;
-            maxRange = qualifiedCell5 - diffCell5;
+            maxRange = qualifiedCell5 + diffCell5;
+            minRange = qualifiedCell5 - diffCell5;
             rerult = CountRatioInRange(sourceDatas, x => x.Cell20, x => x.Cell14, minRange, maxRange);
             target.Cell5 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
@@ -1365,8 +1365,7 @@ namespace CenterBackend.Services
                 if (sourceDatas != null)
                 {
                     var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-
-                    var dayShift = sourceData.Where(x => x.ReportedTime < startTime.AddHours(12));
+                    var dayShift = sourceData.Where(x => x.ReportedTime < startTime.AddHours(12)).ToList();
                     WeekWorkBook.WorkSheet13[2 * i].TimePoint = startTime;
                     WeekWorkBook.WorkSheet13[2 * i].Cell1 = CalculateQualifiedRate(dayShift, x => x.Cell23, true, 0.515f, 0.05f);
                     WeekWorkBook.WorkSheet13[2 * i].Cell2 = CalculateQualifiedRate(dayShift, x => x.Cell3, true, 410f, 5f);
@@ -1377,7 +1376,7 @@ namespace CenterBackend.Services
                     WeekWorkBook.WorkSheet13[2 * i].Cell7 = ProductionDataCollection.DayResult.AllYield;
                     WeekWorkBook.WorkSheet13[2 * i].Cell8 = ProductionDataCollection.DayResult.AllAverage_1;
 
-                    var nightShift = sourceData.Where(x => x.ReportedTime >= startTime.AddHours(12));
+                    var nightShift = sourceData.Where(x => x.ReportedTime >= startTime.AddHours(12)).ToList();
                     WeekWorkBook.WorkSheet13[2 * i + 1].TimePoint = startTime.AddHours(12);
                     WeekWorkBook.WorkSheet13[2 * i + 1].Cell1 = CalculateQualifiedRate(nightShift, x => x.Cell23, true, 0.515f, 0.05f);
                     WeekWorkBook.WorkSheet13[2 * i + 1].Cell2 = CalculateQualifiedRate(nightShift, x => x.Cell3, true, 410f, 5f);
