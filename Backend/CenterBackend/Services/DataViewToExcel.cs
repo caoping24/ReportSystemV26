@@ -292,7 +292,7 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(1);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 4, 1, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
             var dataList = weekWorkBookData.WorkSheet2;
             for (int i = 0; i < 3; i++)
             {
@@ -308,7 +308,7 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(2);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 4, 1, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
             var dataList = weekWorkBookData.WorkSheet3;
             for (int i = 0; i < 3; i++)
             {
@@ -493,7 +493,7 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(12);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 6, 1, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
             var dataList = weekWorkBookData.WorkSheet13;
             for (int i = 0; i < 14; i++)
             {
