@@ -12,6 +12,7 @@ namespace ReportServer
     {
         public MainWindow()
         {
+            //await _collectWinccDatas.ReadAndSaveDataAsync();
             InitializeComponent();
             this.Closing += MainWindow_Closing;
             this.GotFocus += Window_GotFocus;
