@@ -114,6 +114,7 @@ namespace CenterBackend.Models.CalculateData
             //合计
             WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell21, x => x.Cell26, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell41 = result);
             WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell22, x => x.Cell26, x => x.Cell32, x => x.Cell36, setValue3: (d, result) => d.Cell42 = result);
+            WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell23, x => x.Cell26, x => x.Cell33, x => x.Cell36, setValue3: (d, result) => d.Cell43 = result);
             WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell24, x => x.Cell26, x => x.Cell34, x => x.Cell36, setValue3: (d, result) => d.Cell44 = result);
             SumColumn(collection.DayShiftData, x => x.Cell26, x => x.Cell36, setValue3: (d, result) => d.Cell46 = result);
             SumColumn(collection.DayShiftData, x => x.Cell27, x => x.Cell37, setValue3: (d, result) => d.Cell47 = result);
@@ -126,6 +127,7 @@ namespace CenterBackend.Models.CalculateData
             //合计
             WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell21, x => x.Cell26, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell41 = result);
             WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell22, x => x.Cell26, x => x.Cell32, x => x.Cell36, setValue3: (d, result) => d.Cell42= result);
+            WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell23, x => x.Cell26, x => x.Cell33, x => x.Cell36, setValue3: (d, result) => d.Cell43 = result);
             WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell24, x => x.Cell26, x => x.Cell34, x => x.Cell36, setValue3: (d, result) => d.Cell44 = result);
             SumColumn(collection.NightShiftData, x => x.Cell26, x => x.Cell36, setValue3: (d, result) => d.Cell46 = result);
             SumColumn(collection.NightShiftData, x => x.Cell27, x => x.Cell37, setValue3: (d, result) => d.Cell47 = result);
@@ -138,7 +140,7 @@ namespace CenterBackend.Models.CalculateData
             collection.DayResult.AllYield = SumRow(collection.DayShiftData, x => x.Cell47);
             collection.DayResult.AllAverage_1 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell41, x => x.Cell46);
             collection.DayResult.AllAverage_2 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell42, x => x.Cell46);
-
+            collection.DayResult.AllAverage_3 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell43, x => x.Cell46);
             collection.DayResult.AllAverage_4 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell44, x => x.Cell46);
 
             //夜班
@@ -146,6 +148,7 @@ namespace CenterBackend.Models.CalculateData
             collection.NightResult.AllYield = SumRow(collection.NightShiftData, x => x.Cell47);
             collection.NightResult.AllAverage_1 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell41, x => x.Cell46);
             collection.NightResult.AllAverage_2 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell42, x => x.Cell46);
+            collection.NightResult.AllAverage_3 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell43, x => x.Cell46);
             collection.NightResult.AllAverage_4 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell44, x => x.Cell46);
 
             //当日
@@ -154,9 +157,11 @@ namespace CenterBackend.Models.CalculateData
             var value3 = collection.DayResult.AllProduction +  collection.NightResult.AllProduction;
             var value4 = collection.DayResult.AllYield + collection.NightResult.AllYield;
             var value5= collection.DayResult.AllAverage_2 * collection.DayResult.AllProduction + collection.NightResult.AllAverage_2* collection.NightResult.AllProduction;
-            
+            var value6 = collection.DayResult.AllAverage_3 * collection.DayResult.AllProduction + collection.NightResult.AllAverage_3 * collection.NightResult.AllProduction;
+
             collection.TotalResult.AllAverage_1 = value1 / value3;
             collection.TotalResult.AllAverage_2 = value5/ value3;
+            collection.TotalResult.AllAverage_3 = value6 / value3;
             collection.TotalResult.AllAverage_4 = value2 / value3;
             collection.TotalResult.AllProduction = value3;
             collection.TotalResult.AllYield = value4;

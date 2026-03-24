@@ -1365,8 +1365,7 @@ namespace CenterBackend.Services
                 if (sourceDatas != null)
                 {
                     var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-
-                    var dayShift = sourceData.Where(x => x.ReportedTime < startTime.AddHours(12));
+                    var dayShift = sourceData.Where(x => x.ReportedTime < startTime.AddHours(12)).ToList();
                     WeekWorkBook.WorkSheet13[2 * i].TimePoint = startTime;
                     WeekWorkBook.WorkSheet13[2 * i].Cell1 = CalculateQualifiedRate(dayShift, x => x.Cell23, true, 0.515f, 0.05f);
                     WeekWorkBook.WorkSheet13[2 * i].Cell2 = CalculateQualifiedRate(dayShift, x => x.Cell3, true, 410f, 5f);
@@ -1377,7 +1376,7 @@ namespace CenterBackend.Services
                     WeekWorkBook.WorkSheet13[2 * i].Cell7 = ProductionDataCollection.DayResult.AllYield;
                     WeekWorkBook.WorkSheet13[2 * i].Cell8 = ProductionDataCollection.DayResult.AllAverage_1;
 
-                    var nightShift = sourceData.Where(x => x.ReportedTime >= startTime.AddHours(12));
+                    var nightShift = sourceData.Where(x => x.ReportedTime >= startTime.AddHours(12)).ToList();
                     WeekWorkBook.WorkSheet13[2 * i + 1].TimePoint = startTime.AddHours(12);
                     WeekWorkBook.WorkSheet13[2 * i + 1].Cell1 = CalculateQualifiedRate(nightShift, x => x.Cell23, true, 0.515f, 0.05f);
                     WeekWorkBook.WorkSheet13[2 * i + 1].Cell2 = CalculateQualifiedRate(nightShift, x => x.Cell3, true, 410f, 5f);
