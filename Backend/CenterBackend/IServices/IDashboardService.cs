@@ -4,16 +4,24 @@ namespace CenterBackend.IServices
 {
     public interface IDashboardService
     {
-        //第一个折线图
-        Task<LineChartDataDto> getLineChartOne(DateTime time);
-        //第二个折线图
-        Task<LineChartDataDto> getLineCharTwo(DateTime time);
-        //第三个折线图
-        Task<LineChartDataDto> getLineCharThree(DateTime time);
-        //饼图
-        Task<List<PieChartItemDto>> getPieChart(DateTime time);
-        //三个卡片图
-        Task<CoreChartDto> getCoreChart(DateTime time);
+        Task<CoreChartDto> GetPage1CoreChart1();
+        Task<LineChartDataDto> GetPage1LineChart1();
+        Task<LineChartDataDto> GetPage1LineChart2();
+        Task<LineChartDataDto> GetPage1LineChart3();
+        Task<LineChartDataDto> GetPage1LineChart4();
+        Task<LineChartDataDto> GetPage1LineChart5();
 
+        Task<CoreChartDto> GetPage2CoreChart1();
+        Task<LineChartDataDto> GetPage2LineChart1();
+        Task<LineChartDataDto> GetPage2LineChart2();
+        Task<LineChartDataDto> GetPage2LineChart3();
+        Task<LineChartDataDto> GetPage2LineChart4();
+        Task<LineChartDataDto> GetPage2LineChart5();
+
+        Task<CoreChartDto> GetPage3CoreChart1();
+        Task<LineChartDataDto> GetPage3LineChart1();
+        Task<LineChartDataDto> GetPage3LineChart2();
+        Task<LineChartDataDto> GetPage3LineChart3();
+        Task<LineChartDataDto> GetPage3LineChart4();
     }
 }

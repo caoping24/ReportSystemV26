@@ -5,224 +5,270 @@ using CenterReport.Repository.Models;
 
 namespace CenterBackend.Services
 {
-    public class DashboardService : IDashboardService
+    public class DashboardService(IReportRepository<SourceData> sourceData, IReportRepository<OperatorInputData> operatorInputData) : IDashboardService
     {
-        private readonly IReportRepository<SourceData> _sourceData;
-        public DashboardService(IReportRepository<SourceData> _SourceData )
-        {
-            this._sourceData = _SourceData;
-        }
-        public async Task<LineChartDataDto> getLineChartOne(DateTime time)
-        {
-            //时间范围昨日0点到现在
-            var queryStartTime = time.AddHours(-24).Date;
-            var queryEndTime = time;
-            var totalHours = (int)Math.Ceiling((queryEndTime - queryStartTime).TotalHours); // 总小时数（X轴长度）
+        private readonly IReportRepository<SourceData> _sourceData = sourceData;
+        private readonly IReportRepository<OperatorInputData> _operatorInputData = operatorInputData;
 
-            // 生成X轴刻度：0~totalHours-1（可按需替换为实际时间文本，如「昨日8点」）
+        // 获取查询时间范围：昨日8:00到今日8:00
+        private static (DateTime start, DateTime end) GetQueryTimeRange(DateTime time)
+        {
+            var startTime = time.AddDays(-1).Date.AddHours(8);
+            var endTime = startTime.AddHours(24);
+            return (startTime, endTime);
+        }
+        private static float? CalculateAverage<T>(IEnumerable<T> data, Func<T, float?> selector)
+        {
+            if (data == null || !data.Any())// 空数据校验
+                return null;
+            var validValues = data.Select(selector).OfType<float>();
+            float sum = 0f;
+            int count = 0;
+            foreach (var value in validValues)
+            {
+                sum += value;
+                count++;
+            }
+            return count > 0 ? sum / count : (float?)null;
+        }
+        private static float? CalculateFirstLastDifference<T>(IEnumerable<T> data, Func<T, float?> selector)
+        {
+            if (data == null || !data.Any())
+                return null;
+
+            var nonNullValues = data
+                .Select(selector)
+                .Where(x => x.HasValue)
+                .Select(x => x.GetValueOrDefault())
+                .ToList();
+            if (nonNullValues.Count < 2)
+                return null;
+            float firstValue = nonNullValues.First();//计算差值
+            float lastValue = nonNullValues.Last();
+            float difference = lastValue - firstValue;
+            return difference;
+        }
+        private static float? CalculateSum<T>(IEnumerable<T> data, Func<T, float?> selector)//非null值的总和
+        {
+            if (data == null || !data.Any())//空数据校验
+                return null;
+            var nonNullValues = data        //筛选非null的float值
+                .Select(selector)           // 提取float?字段
+                .Where(x => x.HasValue)     // 过滤掉null值
+                .Select(x => x.GetValueOrDefault())      // 转换为float（非可空）
+                .ToList();
+            return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;//计算总和
+        }
+        //从SourceData中查询数据生成一条曲线dto
+        private async Task<LineChartDataDto> GetLineSourceDataAsync(DateTime currentTime, Func<SourceData, float?> valueSelector)
+        {
+            var (startTime, endTime) = GetQueryTimeRange(currentTime);
+            endTime = currentTime;
+
+            int totalHours = (int)Math.Ceiling((endTime - startTime).TotalHours);
             string[] xAxis = Enumerable.Range(0, totalHours)
                                        .Select(i => (i % 24).ToString())
                                        .ToArray();
 
-            var chartDataDto = new LineChartDataDto//[全null基础DTO]
-            {
-                XAxis = xAxis,
-                Series = new List<LineChartSeriesDto>
-                {
-                    new LineChartSeriesDto
-                    {
-                        Name = "羟基进料流量",
-                        Data = Enumerable.Repeat((float?)null, totalHours).ToArray() // 全null数组
-                    }
-                }
-            };
+            List<SourceData> dataList = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
+            if (dataList == null || dataList.Count == 0)
+                return new LineChartDataDto();
 
-            List<SourceData> sourceDatas = await _sourceData.GetByDateTimeRangeAsync(queryStartTime, queryEndTime)//查询
-                                                 .ConfigureAwait(false);
-            if (sourceDatas == null || !sourceDatas.Any())// 无数据
-            {
-                return chartDataDto; // 直接返回全null基础DTO
-            }
+            LineChartDataDto lineChartDataDto = new();
+            float?[] seriesData = lineChartDataDto.Series[0].Data;
 
-            // 有数据：按「时间→X轴索引」映射，填充对应位置的非null值
-            float?[] DataLine1 = chartDataDto.Series[0].Data;
-            foreach (var sourceData in sourceDatas)
+            foreach (var dataItem in dataList)
             {
-                var hourDiff = (int)Math.Floor((sourceData.ReportedTime - queryStartTime).TotalHours); // 计算当前数据时间与查询开始时间的小时差 → 对应X轴索引
-                if (hourDiff < 0 || hourDiff >= totalHours)// 索引越界校验：过滤异常时间数据，避免数组报错
-                {
+                int hourDiff = (int)Math.Floor((dataItem.ReportedTime - startTime).TotalHours);
+                if (hourDiff < 0 || hourDiff >= totalHours)
                     continue;
-                }
-                if (sourceData.Cell19 != null && sourceData.Cell19 is float TempValue1)
+                float? value = valueSelector(dataItem);
+                if (value.HasValue)
                 {
-                    DataLine1[hourDiff] = TempValue1 * 1000;
+                    seriesData[hourDiff] = value;
                 }
             }
-            return chartDataDto;
+            return lineChartDataDto;
         }
 
-
-        public async Task<LineChartDataDto> getLineCharTwo(DateTime time)
+        //从OperatorInputData中查询数据生成一条曲线dto
+        private async Task<LineChartDataDto> GetLineOperateDataAsync(DateTime currentTime, Func<OperatorInputData, float?> valueSelector)
         {
-            //时间范围昨日0点到现在
-            var queryStartTime = time.AddHours(-24).Date;
-            var queryEndTime = time;
-            var totalHours = (int)Math.Ceiling((queryEndTime - queryStartTime).TotalHours); // 总小时数（X轴长度）
+            var (startTime, endTime) = GetQueryTimeRange(currentTime);
+            endTime = currentTime;
 
-            // 生成X轴刻度：0~totalHours-1（可按需替换为实际时间文本，如「昨日8点」）
+            int totalHours = (int)Math.Ceiling((endTime - startTime).TotalHours);
             string[] xAxis = Enumerable.Range(0, totalHours)
                                        .Select(i => (i % 24).ToString())
                                        .ToArray();
 
-            var chartDataDto = new LineChartDataDto//[全null基础DTO]
-            {
-                XAxis = xAxis,
-                Series = new List<LineChartSeriesDto>
-                {
-                    new LineChartSeriesDto
-                    {
-                        Name = "摩尔比",
-                        Data = Enumerable.Repeat((float?)null, totalHours).ToArray() // 全null数组
-                    },
-                    new LineChartSeriesDto
-                    {
-                        Name = "累计配比",
-                        Data = Enumerable.Repeat((float?)null, totalHours).ToArray() // 全null数组
-                    }
-                }
-            };
+            List<OperatorInputData> dataList = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
+            if (dataList == null || dataList.Count == 0)
+                return new LineChartDataDto();
 
-            List<SourceData> sourceDatas = await _sourceData.GetByDateTimeRangeAsync(queryStartTime, queryEndTime)//查询
-                                                 .ConfigureAwait(false);
-            if (sourceDatas == null || !sourceDatas.Any())// 无数据
-            {
-                return chartDataDto; // 直接返回全null基础DTO
-            }
+            LineChartDataDto lineChartDataDto = new();
+            float?[] seriesData = lineChartDataDto.Series[0].Data;
 
-            // 有数据：按「时间→X轴索引」映射，填充对应位置的非null值
-            float?[] DataLine1 = chartDataDto.Series[0].Data;
-            float?[] DataLine2 = chartDataDto.Series[1].Data;
-            foreach (var sourceData in sourceDatas)
+            foreach (var dataItem in dataList)
             {
-                var hourDiff = (int)Math.Floor((sourceData.ReportedTime - queryStartTime).TotalHours); // 计算当前数据时间与查询开始时间的小时差 → 对应X轴索引
-                if (hourDiff < 0 || hourDiff >= totalHours)// 索引越界校验：过滤异常时间数据，避免数组报错
-                {
+                int hourDiff = (int)Math.Floor((dataItem.ReportedTime - startTime).TotalHours);
+                if (hourDiff < 0 || hourDiff >= totalHours)
                     continue;
-                }
-
-                if (sourceData.Cell22 != null && sourceData.Cell22 is float TempValue1)
+                float? value = valueSelector(dataItem);
+                if (value.HasValue)
                 {
-                    DataLine1[hourDiff] = TempValue1;
-                }
-
-                if (sourceData.Cell23 != null && sourceData.Cell23 is float TempValue2)
-                {
-                    DataLine2[hourDiff] = TempValue2;
+                    seriesData[hourDiff] = value;
                 }
             }
-            return chartDataDto;
+            return lineChartDataDto;
         }
 
-        public async Task<LineChartDataDto> getLineCharThree(DateTime time)
+        public async Task<CoreChartDto> GetPage1CoreChart1()
         {
-            //时间范围昨日0点到现在
-            var queryStartTime = time.AddHours(-24).Date;
-            var queryEndTime = time;
-            var totalHours = (int)Math.Ceiling((queryEndTime - queryStartTime).TotalHours); // 总小时数（X轴长度）
+            (var startTime, var endtime) = GetQueryTimeRange(DateTime.Now);//记录上一个班次的数据
+            List<SourceData> dataList = await _sourceData.GetByDateTimeRangeAsync(startTime, endtime);
+            CoreChartDto coreChartDto = new();
+            if (dataList == null || dataList.Count == 0) 
+                return coreChartDto;
 
-            // 生成X轴刻度：0~totalHours-1（可按需替换为实际时间文本，如「昨日8点」）
-            string[] xAxis = Enumerable.Range(0, totalHours)
-                                       .Select(i => (i % 24).ToString())
-                                       .ToArray();
+            coreChartDto.Card1 = CalculateAverage(dataList, x => x.Cell19);//羟基流量
+            coreChartDto.Card2 = CalculateAverage(dataList, x => x.Cell13);//气氨流量
+            coreChartDto.Card3 = CalculateAverage(dataList, x => x.Cell23);//摩尔比
+            coreChartDto.Card4 = CalculateAverage(dataList, x => x.Cell15);//配料蒸汽
+            coreChartDto.Card5 = CalculateAverage(dataList, x => x.Cell26);//热点温度
 
-            //[全null基础DTO]
-            var chartDataDto = new LineChartDataDto
-            {
-                XAxis = xAxis,
-                Series = new List<LineChartSeriesDto>
-                {
-                    new LineChartSeriesDto
-                    {
-                        Name = "羟基原料浓度1",
-                        Data = Enumerable.Repeat((float?)null, totalHours).ToArray() // 全null数组
-                    },
-                    new LineChartSeriesDto
-                    {
-                        Name = "羟基配后浓度2",
-                        Data = Enumerable.Repeat((float?)null, totalHours).ToArray() // 全null数组
-                    }
-                }
-            };
-
-            List<SourceData> sourceDatas = await _sourceData.GetByDateTimeRangeAsync(queryStartTime, queryEndTime)//查询
-                                                 .ConfigureAwait(false);
-            if (sourceDatas == null || !sourceDatas.Any())// 无数据
-            {
-                return chartDataDto; // 直接返回全null基础DTO
-            }
-
-            // 有数据：按「时间→X轴索引」映射，填充对应位置的非null值
-            float?[] DataLine1 = chartDataDto.Series[0].Data;
-            float?[] DataLine2 = chartDataDto.Series[1].Data;
-            foreach (var sourceData in sourceDatas)
-            {
-                var hourDiff = (int)Math.Floor((sourceData.ReportedTime - queryStartTime).TotalHours); // 计算当前数据时间与查询开始时间的小时差 → 对应X轴索引
-                if (hourDiff < 0 || hourDiff >= totalHours)// 索引越界校验：过滤异常时间数据，避免数组报错
-                {
-                    continue;
-                }
-                if (sourceData.Cell3 != null && sourceData.Cell3 is float TempValue1)
-                {
-                    DataLine1[hourDiff] = TempValue1;
-                }
-
-                if (sourceData.Cell6 != null && sourceData.Cell6 is float TempValue2)
-                {
-                    DataLine2[hourDiff] = TempValue2;
-                }
-            }
-            return chartDataDto;
-        }
-
-        public async Task<List<PieChartItemDto>> getPieChart(DateTime time)
-        {
-            await Task.Delay(1);
-            var pieChartItems = new List<PieChartItemDto>
-        {
-            new PieChartItemDto { Name = "类别A", Value = 40 },
-            new PieChartItemDto { Name = "类别B", Value = 30 },
-            new PieChartItemDto { Name = "类别C", Value = 20 },
-            new PieChartItemDto { Name = "类别D", Value = 10 }
-        };
-
-            return pieChartItems;
-        }
-
-        public async Task<CoreChartDto> getCoreChart(DateTime time)
-        {
-            //var StartTime = time.AddDays(-1).Date;
-            var StartTime = time.Date;
-            StartTime = StartTime.AddHours(8).AddMinutes(30);
-            var EndTime = time.Date;
-            EndTime = EndTime.AddHours(8).AddMinutes(40);
-
-            List<SourceData> dataList = new();
-            var coreChartDto = new CoreChartDto
-            {
-                Yesterday = 0,
-                Week = 0,
-                Month = 0,
-                Year = 0
-            };
-            if (dataList == null || !dataList.Any()) return coreChartDto;
-
-            if (dataList[0].Cell3 is float value1) coreChartDto.Yesterday = value1;
-            if (dataList[0].Cell6 is float value2) coreChartDto.Week = value2;
-            if (dataList[0].Cell22 is float value3 && value3 < 2) coreChartDto.Month = value3; // 大于2 则表示值错误
-            if (dataList[0].Cell23 is float value4) coreChartDto.Year = value4;
             return coreChartDto;
-
         }
+
+        public async Task<LineChartDataDto> GetPage1LineChart1()
+        {
+            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell19);
+        }
+
+        public async Task<LineChartDataDto> GetPage1LineChart2()
+        {
+            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell13);
+        }
+
+        public async Task<LineChartDataDto> GetPage1LineChart3()
+        {
+            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell23);
+        }
+
+        public async Task<LineChartDataDto> GetPage1LineChart4()
+        {
+            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell15);
+        }
+
+        public async Task<LineChartDataDto> GetPage1LineChart5()
+        {
+            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell26);
+        }
+
+        public async Task<CoreChartDto> GetPage2CoreChart1()
+        {
+            (var startTime, var endtime) = GetQueryTimeRange(DateTime.Now);
+            List<SourceData> dataList = await _sourceData.GetByDateTimeRangeAsync(startTime, endtime);
+            List<OperatorInputData> dataList2 = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endtime);
+            CoreChartDto coreChartDto = new();
+            if (dataList == null || dataList.Count == 0)
+            {
+                return coreChartDto;
+            }
+            else
+            {
+                coreChartDto.Card1 = CalculateAverage(dataList, x => x.Cell66);//一次结晶温度
+
+                coreChartDto.Card3 = CalculateFirstLastDifference(dataList, x => x.Cell107);//低蒸结晶进料量
+                coreChartDto.Card4 = CalculateFirstLastDifference(dataList, x => x.Cell116);//低蒸结晶出料量
+                coreChartDto.Card5 = CalculateAverage(dataList, x => x.Cell108);//低蒸结晶温度
+                coreChartDto.Card6 = CalculateAverage(dataList, x => x.Cell122);//二次结晶温度
+            }
+            if (dataList2 == null || dataList2.Count == 0)
+            {
+                return coreChartDto;
+            }
+            else
+            {
+                coreChartDto.Card2 = CalculateSum(dataList2, x => x.Cell26);//一次结晶产量
+                coreChartDto.Card7 = CalculateSum(dataList2, x => x.Cell36);//二次结晶温度
+            }
+            return coreChartDto;
+        }
+
+        public async Task<LineChartDataDto> GetPage2LineChart1()
+        {
+            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell66);
+        }
+
+        public async Task<LineChartDataDto> GetPage2LineChart2()
+        {
+            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell108);
+        }
+
+        public async Task<LineChartDataDto> GetPage2LineChart3()
+        {
+            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell122);
+        }
+
+        public async Task<LineChartDataDto> GetPage2LineChart4()
+        {
+            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell26);
+        }
+
+        public async Task<LineChartDataDto> GetPage2LineChart5()
+        {
+            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell36);
+        }
+
+        public async Task<CoreChartDto> GetPage3CoreChart1()
+        {
+            (var startTime, var endtime) = GetQueryTimeRange(DateTime.Now);
+            List<SourceData> dataList = await _sourceData.GetByDateTimeRangeAsync(startTime, endtime);
+            List<OperatorInputData> dataList2 = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endtime);
+            CoreChartDto coreChartDto = new();
+            if (dataList == null || dataList.Count == 0)
+            {
+                return coreChartDto;
+            }
+            else
+            {
+                coreChartDto.Card4 = CalculateFirstLastDifference(dataList, x => x.Cell134);//废液排放
+            }
+            if (dataList2 == null || dataList2.Count == 0)
+            {
+                return coreChartDto;
+            }
+            else
+            {
+                coreChartDto.Card1 = CalculateFirstLastDifference(dataList, x => x.Cell71);//蒸汽消耗
+                coreChartDto.Card2 = CalculateFirstLastDifference(dataList, x => x.Cell72);//脱盐水消耗
+                coreChartDto.Card3 = CalculateFirstLastDifference(dataList, x => x.Cell73);//电量消耗
+            }
+
+            return coreChartDto;
+        }
+
+        public async Task<LineChartDataDto> GetPage3LineChart1()
+        {
+            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell71);
+        }
+
+        public async Task<LineChartDataDto> GetPage3LineChart2()
+        {
+            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell72);
+        }
+
+        public async Task<LineChartDataDto> GetPage3LineChart3()
+        {
+            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell73);
+        }
+
+        public async Task<LineChartDataDto> GetPage3LineChart4()
+        {
+            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell133);
+        }
+
     }
 
 
