@@ -106,7 +106,7 @@ export const batchDownloadReportZip = async (
   config?: Record<string, any> // 透传Axios配置
 ) => {
   return myAxios.request({
-    url: "/api/File/ZipDownloadFile",
+    url: "/api/File/DownloadZipFile",
     method: "GET",
     params: params,
     responseType: "blob",

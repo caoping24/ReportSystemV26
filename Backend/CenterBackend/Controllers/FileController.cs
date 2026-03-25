@@ -62,7 +62,7 @@ namespace CenterBackend.Controllers
         {
             bool isValid = DateTime.TryParseExact(
                 timeStr,
-                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd",
                 CultureInfo.InvariantCulture, // 替代null，避免区域设置影响（比如中文/英文系统）
                 DateTimeStyles.None,
                 out DateTime fileDate);
@@ -94,7 +94,7 @@ namespace CenterBackend.Controllers
         {
             bool isValid = DateTime.TryParseExact(
                 timeStr,
-                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd",
                 CultureInfo.InvariantCulture, // 替代null，避免区域设置影响（比如中文/英文系统）
                 DateTimeStyles.None,
                 out DateTime fileDate);
