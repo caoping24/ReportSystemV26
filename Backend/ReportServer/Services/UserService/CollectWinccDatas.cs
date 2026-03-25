@@ -52,8 +52,8 @@ namespace ReportServer.Services.UserService
         }
         private async Task AutoAddRecords()
         {
-            //DateTime now = DateTime.Now;
-            DateTime now = new DateTime(2025, 12,29,9,0,1);
+            DateTime now = DateTime.Now;
+            //DateTime now = new DateTime(2025, 12,29,9,0,1);
             List<ReportRecord> reportRecordList = [];
 
             if (IsDaily(now))
