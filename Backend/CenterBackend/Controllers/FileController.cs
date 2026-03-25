@@ -109,12 +109,30 @@ namespace CenterBackend.Controllers
             {
                 return new BadRequestObjectResult(new { success = false, msg = "无效的请求参数" });
             }
+            string zipName;
+            switch (type) 
+            {
+                case 1:
+                    zipName = $"日报表 {fileDate.Year}年{fileDate.Month}月";
+                    break;
+                case 2:
+                    zipName = $"月报表 {fileDate.Year}年{fileDate.Month}月";
+                    break;
+                case 3:
+                    zipName = $"年报表 {fileDate.Year}年";
+                    break;
+                case 4:
+                    zipName = $"周报表 {fileDate.Year}年{fileDate.Month}月";
+                    break;
+                default:
+                    return new BadRequestObjectResult(new { success = false, msg = "下载失败" });
+            }
             try
             {
-                bool isSuccess = _fileService.CompressFolderToZip(fileInfo.Directory, filePathGenerator.TempDirectory, "测试.zip");
+                bool isSuccess = _fileService.CompressFolderToZip(fileInfo.Directory, filePathGenerator.TempDirectory, zipName);
                 if (isSuccess)
                 {
-                    var (filePath, contentType, downloadFileName) = _fileService.DownloadFileInfo(filePathGenerator.TempDirectory, "测试.zip");
+                    var (filePath, contentType, downloadFileName) = _fileService.DownloadFileInfo(filePathGenerator.TempDirectory, zipName);
                     return PhysicalFile(filePath, contentType, downloadFileName);//官方推荐：直接用 PhysicalFile 自动处理文件流、响应头、范围请求（大文件下载）
                 }
                 return new BadRequestObjectResult(new { success = false, msg = "下载失败" });

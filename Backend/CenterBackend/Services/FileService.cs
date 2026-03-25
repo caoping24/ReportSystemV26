@@ -50,6 +50,7 @@ namespace CenterBackend.Services
                 {
                     return false;
                 }
+                ClearTempFolder(zipSaveDirectory);
                 CreateFolder(zipSaveDirectory);//自动创建存储目录
                 string zipSavePath = Path.Combine(zipSaveDirectory, zipFileName);
                 using (var fs = new FileStream(zipSavePath, FileMode.Create, FileAccess.Write))
@@ -67,7 +68,7 @@ namespace CenterBackend.Services
             }
         }
 
-        // 将单个文件压缩为Zip包
+        // 将单个文件压缩为Zip包(目前未使用,存在问题:下载前未清除遗留文件)
         public bool CompressSingleFileToZip(string sourceFilePath, string zipSaveDirectory, string zipFileName)
         {
             try
@@ -165,7 +166,31 @@ namespace CenterBackend.Services
                 CompressDirectory(dir, zipStream, rootFolder);
             }
         }
+        //清空文件夹方法
+        private static void ClearTempFolder(string tempPath)
+        {
+            try
+            {
+                if (!Directory.Exists(tempPath))
+                    return;
 
+                // 删除所有文件
+                foreach (var file in Directory.GetFiles(tempPath))
+                {
+                    File.Delete(file);
+                }
+
+                // 删除所有子文件夹
+                foreach (var dir in Directory.GetDirectories(tempPath))
+                {
+                    Directory.Delete(dir, true);
+                }
+            }
+            catch
+            {
+                // 清空失败不影响压缩
+            }
+        }
         private static string GetMimeType(string filePath)
         {
             string extension = Path.GetExtension(filePath).ToLowerInvariant();
