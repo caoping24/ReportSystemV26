@@ -21,7 +21,7 @@
           <div class="batch-download-header">
             <h3 class="batch-download-title">批量报表下载</h3>
             <p class="batch-download-desc">
-              根据选择的报表类型和月份，下载对应月份的报表文件
+              根据选择的报表类型和{{ isYearReport ? '年份' : '月份' }}，下载对应{{ isYearReport ? '年份' : '月份' }}的报表文件
             </p>
           </div>
 
@@ -46,7 +46,7 @@
                   @change="handleReportTypeChange"
                 >
                   <a-select-option
-                    v-for="item in reportTabs.filter((item) => item.key !== '4')"
+                    v-for="item in reportTabs.filter((item) => item.key !== '6')"
                     :key="item.key"
                     :value="item.key"
                   >
@@ -55,19 +55,21 @@
                 </a-select>
               </a-form-item>
 
+              <!-- 修复：将条件渲染写在同一行，避免解析异常 -->
               <a-form-item
-                label="选择月份"
-                :validate-status="!batchMonth && batchReportType ? 'error' : ''"
-                :help="!batchMonth && batchReportType ? '请选择报表月份' : ''"
+                :label="isYearReport ? '选择年份' : '选择月份'"
+                :validate-status="!batchDate && batchReportType ? 'error' : ''"
+                :help="!batchDate && batchReportType ? (isYearReport ? '请选择报表年份' : '请选择报表月份') : ''"
               >
+                <!-- 动态切换日期选择器类型：年报表显示年份选择器，其他显示月份选择器 -->
                 <a-date-picker
-                  v-model:value="batchMonth"
-                  picker="month"
+                  v-model:value="batchDate"
+                  :picker="isYearReport ? 'year' : 'month'"
                   style="width: 100%; max-width: 300px"
-                  placeholder="选择报表月份"
-                  format="YYYY年MM月"
+                  :placeholder="isYearReport ? '选择报表年份' : '选择报表月份'"
+                  :format="isYearReport ? 'YYYY年' : 'YYYY年MM月'"
                   allow-clear
-                  :disabled-date="disabledFutureDate"
+                  :disabled-date="isYearReport ? disabledFutureYear : disabledFutureDate"
                 />
               </a-form-item>
 
@@ -89,7 +91,7 @@
 
                 <div class="batch-tips">
                   <InfoCircleOutlined style="margin-right: 4px" />
-                  提示：下载所选月份的对应类型报表文件（默认按当月01日查询）
+                  提示：{{ isYearReport ? '下载所选年份的对应类型报表文件' : '下载所选月份的对应类型报表文件（默认按当月01日查询）' }}
                 </div>
               </a-form-item>
             </a-form>
@@ -160,7 +162,8 @@ const tableData: Record<string, TableDataItem> = reactive({
   "3": { list: [] },
 });
 const batchReportType = ref<string>("");
-const batchMonth = ref<dayjs.Dayjs | null>(null);
+// 替换原batchMonth为batchDate，适配年份/月份两种场景
+const batchDate = ref<dayjs.Dayjs | null>(null);
 const isBatchDownloading = ref<boolean>(false);
 const isRegenerating = ref<boolean>(false);
 
@@ -185,18 +188,31 @@ const paginationConfig = computed(() => ({
   },
 }));
 
+// 修复：确保计算属性定义正确，无语法错误
+const isYearReport = computed(() => {
+  return batchReportType.value === "3";
+});
+
 // ===================== 方法定义 =====================
+// 原有月份禁用逻辑（保留）
 const disabledFutureDate = (current: dayjs.Dayjs) => {
   return current?.isAfter(dayjs().endOf("month")) || false;
 };
 
+// 新增年份禁用逻辑：只能选择当前年份及之前的年份
+const disabledFutureYear = (current: dayjs.Dayjs) => {
+  const currentYear = dayjs().year();
+  return current?.year() > currentYear || false;
+};
+
+// 调整验证逻辑：适配年份/月份两种场景
 const validateBatchParams = () => {
   if (!batchReportType.value) {
     message.warning("请选择报表类型");
     return false;
   }
-  if (!batchMonth.value) {
-    message.warning("请选择报表月份");
+  if (!batchDate.value) {
+    message.warning(isYearReport.value ? '请选择报表年份' : '请选择报表月份');
     return false;
   }
   return true;
@@ -271,25 +287,38 @@ const downloadExcel = async (tabKey: string, reportedTime: string) => {
   }
 };
 
-// 批量下载：移除进度条，保留按钮loading+全局提示
+// 批量下载：调整日期处理逻辑，适配年份/月份
 const batchDownloadZip = async () => {
   if (!validateBatchParams()) return;
-  const selectedTime = batchMonth.value!.format("YYYY-MM-01");
+  
+  // 根据报表类型处理时间参数
+  let selectedTime = "";
+  if (isYearReport.value) {
+    // 年报表：取所选年份的1月1日
+    selectedTime = batchDate.value!.format("YYYY-01-01");
+  } else {
+    // 非年报表：取所选月份的1日
+    selectedTime = batchDate.value!.format("YYYY-MM-01");
+  }
+
   const params = {
     type: Number(batchReportType.value),
     timeStr: selectedTime,
   };
+  
   // 全局加载提示
   const loadingInstance = message.loading("批量下载中，请稍候...", 0);
   try {
     isBatchDownloading.value = true;
     const res = await batchDownloadReportZip(params);
     loadingInstance(); // 关闭加载提示
-    handleFileDownload(
-      res,
-      `报表_${batchMonth.value!.format("YYYYMM")}.zip`,
-      "zip"
-    );
+    
+    // 调整默认文件名：年报表显示年份，其他显示月份
+    const defaultFileName = isYearReport.value 
+      ? `报表_${batchDate.value!.format("YYYY")}.zip` 
+      : `报表_${batchDate.value!.format("YYYYMM")}.zip`;
+      
+    handleFileDownload(res, defaultFileName, "zip");
   } catch (error) {
     loadingInstance(); // 异常时关闭加载提示
     console.error("批量下载ZIP失败：", error);
@@ -307,13 +336,15 @@ const handleTabChange = (key: string) => {
   }
 };
 
+// 调整报表类型切换逻辑：清空日期选择器
 const handleReportTypeChange = () => {
-  batchMonth.value = null;
+  batchDate.value = null;
 };
 
+// 调整重置逻辑：清空日期选择器
 const resetBatchForm = () => {
   batchReportType.value = "";
-  batchMonth.value = null;
+  batchDate.value = null;
 };
 
 const handleRegenerateRow = async (tabKey: string, reportedTime: string) => {
