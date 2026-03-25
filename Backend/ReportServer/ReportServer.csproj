@@ -8,7 +8,9 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>AppIco\SL_Icon_Color.ico</ApplicationIcon>
-		<PlatformTarget>AnyCPU</PlatformTarget>			
+		<PlatformTarget>x86</PlatformTarget>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>			
 	</PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +21,31 @@
   </ItemGroup>
 
   <ItemGroup>
+    <COMReference Include="CCHMITAGS">
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>9a7a73c1-1a5d-4184-87eb-4e391bb56515</Guid>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>True</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+      <Private>True</Private>
+    </COMReference>
+    <COMReference Include="CCHMIRUNTIME">
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>1bb46049-5331-4ac5-b09b-194199f07fa6</Guid>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>True</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+      <Private>True</Private>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CenterBackend\CenterBackend.csproj" />
+    <ProjectReference Include="..\Repository\ReportRepository\CenterReport.Repository.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,21 +70,32 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Config\appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
+    <Folder Include="ViewModels\" />
+    <Folder Include="Views\" />
+    <Folder Include="Models\" />
+    <Folder Include="Logs\" />
+  </ItemGroup>
 	<Target Name="CopyWebRootToWpfPublish" AfterTargets="Publish">
 		<ItemGroup>
-			<WebRootSourceFiles  Include="$(ProjectDir)..\CenterBackend\wwwroot\**\*" />
+			<WebRootSourceFiles Include="$(ProjectDir)..\CenterBackend\wwwroot\**\*" />
 		</ItemGroup>
 		<Copy SourceFiles="@(WebRootSourceFiles)" DestinationFolder="$(PublishDir)wwwroot\%(WebRootSourceFiles.RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true">
 			<Output TaskParameter="CopiedFiles" ItemName="WebRootCopiedFiles" />
 		</Copy>
 
 		<ItemGroup>
-			<ReportSourceFiles  Include="$(ProjectDir)..\CenterBackend\Report\**\*" />
+			<ReportSourceFiles Include="$(ProjectDir)..\CenterBackend\Report\**\*" />
 		</ItemGroup>
 		<Copy SourceFiles="@(ReportSourceFiles)" DestinationFolder="$(PublishDir)Report\%(ReportSourceFiles.RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true">
 			<Output TaskParameter="CopiedFiles" ItemName="ReportSourceFiles" />

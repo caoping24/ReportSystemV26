@@ -21,7 +21,7 @@
             <Image HorizontalAlignment="Center"  Margin="1,1,1,1"  Source="/Picture/MainPciture.jpg"/>
         </StackPanel>
         <StackPanel Grid.Row="1" >
-            <Label Content="Ver:1.1.0.0 LastChange:2026-02-26" Height="25" Background="AliceBlue"/>
+            <Label Content="Ver:2.1.0.0 LastChange:2026-03-24" Height="25" Background="AliceBlue"/>
         </StackPanel>
 
     </Grid>
