@@ -1,53 +1,130 @@
 import myAxios from "@/request";
 
-
-
-export const getLineChartOne = async (type: any) => {
+export const GetPage1CoreChart1 = async () => {
   return myAxios.request({
-    url: "/api/Dashboard/getLineChartOne",
+    url: "/api/Dashboard/GetPage1CoreChart1",
     method: "GET",
-    params: {
-      type,
-    },
   });
 };
 
-
-export const getLineChartTwo = async (type: any) => {
+export const GetPage1LineChart1 = async () => {
   return myAxios.request({
-    url: "/api/Dashboard/getLineChartTwo",
+    url: "/api/Dashboard/GetPage1LineChart1",
     method: "GET",
-       params: {
-      type,
-    },
-  });
-};
-export const getLineChartThree = async (type: any) => {
-  return myAxios.request({
-    url: "/api/Dashboard/getLineChartThree",
-    method: "GET",
-      params: {
-      type,
-    },
+    
   });
 };
 
-export const getPieChart = async (type: any) => {
+export const GetPage1LineChart2 = async () => {
   return myAxios.request({
-    url: "/api/Dashboard/getPieChart",
+    url: "/api/Dashboard/GetPage1LineChart2",
     method: "GET",
-   params: {
-      type,
-    },
+    
+  });
+};
+export const GetPage1LineChart3 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage1LineChart3",
+    method: "GET",
+    
+  });
+};
+export const GetPage1LineChart4 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage1LineChart4",
+    method: "GET",
+    
+  });
+};
+export const GetPage1LineChart5 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage1LineChart5",
+    method: "GET",
+    
+  });
+};
+// ------------------第二页接口-------------------------
+
+export const GetPage2CoreChart1 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage2CoreChart1",
+    method: "GET",
   });
 };
 
-export const getCoreChart = async (type: any) => {
+export const GetPage2LineChart1 = async () => {
   return myAxios.request({
-    url: "/api/Dashboard/getCoreChart",
+    url: "/api/Dashboard/GetPage2LineChart1",
     method: "GET",
-     params: {
-      type,
-    },
+    
   });
 };
+
+export const GetPage2LineChart2 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage2LineChart2",
+    method: "GET",
+    
+  });
+};
+export const GetPage2LineChart3 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage2LineChart3",
+    method: "GET",
+    
+  });
+};
+export const GetPage2LineChart4 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage2LineChart4",
+    method: "GET",
+    
+  });
+};
+export const GetPage2LineChart5 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage2LineChart5",
+    method: "GET",
+    
+  });
+};
+
+// -------------第三页
+
+export const GetPage3CoreChart1 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage3CoreChart1",
+    method: "GET",
+  });
+};
+
+export const GetPage3LineChart1 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage3LineChart1",
+    method: "GET",
+    
+  });
+};
+
+export const GetPage3LineChart2 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage3LineChart2",
+    method: "GET",
+    
+  });
+};
+export const GetPage3LineChart3 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage3LineChart3",
+    method: "GET",
+    
+  });
+};
+export const GetPage3LineChart4 = async () => {
+  return myAxios.request({
+    url: "/api/Dashboard/GetPage3LineChart4",
+    method: "GET",
+    
+  });
+};
+
