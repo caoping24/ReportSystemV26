@@ -2,6 +2,7 @@
 using CenterBackend.IServices;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
+using static FastExpressionCompiler.ExpressionCompiler;
 
 namespace CenterBackend.Services
 {
@@ -76,12 +77,13 @@ namespace CenterBackend.Services
 
             LineChartDataDto lineChartDataDto = new()
             {
+                XAxis = xAxis,
                 Series = new List<LineChartSeriesDto>
                 {
                     new LineChartSeriesDto()
                     {
                         Name = "Series1",
-                        Data = new float?[48]
+                        Data = new float?[totalHours]
                     }
                 }
             };
@@ -118,16 +120,16 @@ namespace CenterBackend.Services
 
             LineChartDataDto lineChartDataDto = new()
             {
+                XAxis = xAxis,
                 Series = new List<LineChartSeriesDto>
                 {
                     new LineChartSeriesDto()
                     {
                         Name = "Series1",
-                        Data = new float?[48]
+                        Data = new float?[totalHours]
                     }
                 }
             };
-
             float?[] seriesData = lineChartDataDto.Series[0].Data;
             foreach (var dataItem in dataList)
             {
@@ -162,27 +164,42 @@ namespace CenterBackend.Services
 
         public async Task<LineChartDataDto> GetPage1LineChart1()
         {
-            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell19);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell19);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "羟基流量(L/h)";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage1LineChart2()
         {
-            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell13);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell13);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "气氨流量(kg/h)";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage1LineChart3()
         {
-            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell23);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell23);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "摩尔比";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage1LineChart4()
         {
-            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell15);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell15);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "配料蒸汽流量(m³/h)";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage1LineChart5()
         {
-            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell26);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell26);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "反应器热点温度(℃)";
+            return result;
         }
 
         public async Task<CoreChartDto> GetPage2CoreChart1()
@@ -218,27 +235,42 @@ namespace CenterBackend.Services
 
         public async Task<LineChartDataDto> GetPage2LineChart1()
         {
-            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell66);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell66);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "一次结晶温度(℃)";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage2LineChart2()
         {
-            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell108);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell108);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "低蒸结晶温度(℃)";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage2LineChart3()
         {
-            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell122);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell122);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "二次结晶温度(℃)";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage2LineChart4()
         {
-            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell26);
+            var result = await GetLineOperateDataAsync(DateTime.Now, x => x.Cell26);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "一次结晶产量(kg)";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage2LineChart5()
         {
-            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell36);
+            var result = await GetLineOperateDataAsync(DateTime.Now, x => x.Cell36);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "二次结晶产量(kg)";
+            return result;
         }
 
         public async Task<CoreChartDto> GetPage3CoreChart1()
@@ -271,22 +303,34 @@ namespace CenterBackend.Services
 
         public async Task<LineChartDataDto> GetPage3LineChart1()
         {
-            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell71);
+            var result = await GetLineOperateDataAsync(DateTime.Now, x => x.Cell71);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "蒸汽总消耗(t)";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage3LineChart2()
         {
-            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell72);
+            var result = await GetLineOperateDataAsync(DateTime.Now, x => x.Cell72);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "脱盐水总消耗((m³))";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage3LineChart3()
         {
-            return await GetLineOperateDataAsync(DateTime.Now, x => x.Cell73);
+            var result = await GetLineOperateDataAsync(DateTime.Now, x => x.Cell73);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "电量消耗(kwh)";
+            return result;
         }
 
         public async Task<LineChartDataDto> GetPage3LineChart4()
         {
-            return await GetLineSourceDataAsync(DateTime.Now, x => x.Cell133);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell133);
+            if (result.Series != null && result.Series.Count > 0)
+                result.Series[0].Name = "废液排放量(m³)";
+            return result;
         }
 
     }
