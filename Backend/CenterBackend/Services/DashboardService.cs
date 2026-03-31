@@ -83,10 +83,10 @@ namespace CenterBackend.Services
                     new LineChartSeriesDto()
                     {
                         Name = "Series1",
-                        Data = new float?[totalHours]
+                        Data = new float?[totalHours + 1]
                     }
                 }
-            };
+            }; 
             float?[] seriesData = lineChartDataDto.Series[0].Data;
 
             foreach (var dataItem in dataList)
@@ -126,7 +126,7 @@ namespace CenterBackend.Services
                     new LineChartSeriesDto()
                     {
                         Name = "Series1",
-                        Data = new float?[totalHours]
+                        Data = new float?[totalHours + 1]
                     }
                 }
             };
