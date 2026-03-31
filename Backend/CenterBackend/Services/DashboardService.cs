@@ -81,7 +81,7 @@ namespace CenterBackend.Services
                     new LineChartSeriesDto()
                     {
                         Name = "Series1",
-                        Data = []
+                        Data = new float?[48]
                     }
                 }
             };
@@ -123,7 +123,7 @@ namespace CenterBackend.Services
                     new LineChartSeriesDto()
                     {
                         Name = "Series1",
-                        Data = []
+                        Data = new float?[48]
                     }
                 }
             };
