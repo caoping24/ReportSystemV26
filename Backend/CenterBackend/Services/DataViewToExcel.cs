@@ -392,13 +392,13 @@ namespace CenterBackend.Services
             //srcSheet.ForceFormulaRecalculation = false;
 
             var dataList = weekWorkBookData.WorkSheet8;
-            var baseTime = weekWorkBookData.ReportedTime;
+            var baseTime = GetWeekFirstDay(weekWorkBookData.ReportedTime);
             for (int i = 0; i < 9; i++)
             {
-                if (i <= 7)
+                if (i <7)
                 {
                     var currentDate = baseTime.AddDays(i).ToString("yyyy-MM-dd");
-                    SetXlsxCellString(srcSheet, 4, 2 + i, currentDate);
+                    SetXlsxCellString(srcSheet,4,(3 + i), currentDate);
                 } 
                 if (dataList != null && dataList.Count > i && dataList[i] != null)
                 {
@@ -513,5 +513,26 @@ namespace CenterBackend.Services
 
         }
 
+
+        private static DateTime GetWeekFirstDay(DateTime dt)
+        {
+            int diff = (int)dt.DayOfWeek - (int)DayOfWeek.Monday;
+            if (diff < 0) diff += 7;
+            return dt.AddDays(-diff).Date;
+        }
+        private static float? CalculateAverage<T>(IEnumerable<T> data, Func<T, float?> selector)
+        {
+            if (data == null || !data.Any())// 空数据校验
+                return null;
+            var validValues = data.Select(selector).OfType<float>();
+            float sum = 0f;
+            int count = 0;
+            foreach (var value in validValues)
+            {
+                sum += value;
+                count++;
+            }
+            return count > 0 ? sum / count : (float?)null;
+        }
     }
 }
