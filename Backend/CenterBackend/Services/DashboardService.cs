@@ -74,7 +74,17 @@ namespace CenterBackend.Services
             if (dataList == null || dataList.Count == 0)
                 return new LineChartDataDto();
 
-            LineChartDataDto lineChartDataDto = new();
+            LineChartDataDto lineChartDataDto = new()
+            {
+                Series = new List<LineChartSeriesDto>
+                {
+                    new LineChartSeriesDto()
+                    {
+                        Name = "Series1",
+                        Data = []
+                    }
+                }
+            };
             float?[] seriesData = lineChartDataDto.Series[0].Data;
 
             foreach (var dataItem in dataList)
