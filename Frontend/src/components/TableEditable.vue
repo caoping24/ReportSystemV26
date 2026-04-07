@@ -13,7 +13,7 @@
           <a-tab-pane 
             v-for="page in totalPages" 
             :key="page"
-            :tab="`可编辑表格 ${page}`"
+            :tab="`检测数据 ${page}`"
           />
         </a-tabs>
       </div>

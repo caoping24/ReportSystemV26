@@ -1398,7 +1398,7 @@ namespace CenterBackend.Services
         /// <param name="selector">字段选择器（如 x => x.Cell26）</param>
         /// <param name="minRange">区间下限</param>
         /// <param name="maxRange">区间上限</param>
-        private static (int nonNullTotal, int qualifiedCount) CountValueInRange<T>(IEnumerable<T> data, Func<T, float?> selector, float minRange, float maxRange)
+        public static (int nonNullTotal, int qualifiedCount) CountValueInRange<T>(IEnumerable<T> data, Func<T, float?> selector, float minRange, float maxRange)
         {
             if (data == null || !data.Any())//空数据校验
                 return (0,0);
@@ -1421,7 +1421,7 @@ namespace CenterBackend.Services
         /// <param name="selector2">字段选择器 分母</param>
         /// <param name="minRange">区间下限</param>
         /// <param name="maxRange">区间上限</param>
-        private static (int nonNullTotal, int qualifiedCount) CountRatioInRange<T>(IEnumerable<T> data, Func<T, float?> selector1, Func<T, float?> selector2, float minRange, float maxRange)
+        public static (int nonNullTotal, int qualifiedCount) CountRatioInRange<T>(IEnumerable<T> data, Func<T, float?> selector1, Func<T, float?> selector2, float minRange, float maxRange)
         {
             if (data == null || !data.Any())//空数据校验
                 return (0, 0);
@@ -1434,7 +1434,7 @@ namespace CenterBackend.Services
                                 .Count();
             return (nonNullTotal, qualifiedCount);
         }
-        private static List<SourceData> SortDataByTime(List<SourceData> sourceData, DateTime baseDate, int maxCount)
+        public static List<SourceData> SortDataByTime(List<SourceData> sourceData, DateTime baseDate, int maxCount)
         {
             baseDate = baseDate.Date.AddHours(8);//从8点开始
             var sortedList = new List<SourceData>(new SourceData[maxCount]);
@@ -1451,7 +1451,7 @@ namespace CenterBackend.Services
             return sortedList;
         }
         //根据时间排序数据-操作员输入数据
-        private static List<OperatorInputData> SortDataByTime(List<OperatorInputData> OperatorInputData, DateTime baseDate, int maxCount)
+        public static List<OperatorInputData> SortDataByTime(List<OperatorInputData> OperatorInputData, DateTime baseDate, int maxCount)
         {
             baseDate = baseDate.Date.AddHours(8);//从8点开始
             var sortedList = new List<OperatorInputData>(new OperatorInputData[maxCount]);
@@ -1467,13 +1467,13 @@ namespace CenterBackend.Services
             }
             return sortedList;
         }
-        private static DateTime GetWeekFirstDay(DateTime dt)
+        public static DateTime GetWeekFirstDay(DateTime dt)
         {
             int diff = (int)dt.DayOfWeek - (int)DayOfWeek.Monday;
             if (diff < 0) diff += 7;
             return dt.AddDays(-diff).Date;
         }
-        private static float? CalculateAverage<T>(IEnumerable<T> data, Func<T, float?> selector)
+        public static float? CalculateAverage<T>(IEnumerable<T> data, Func<T, float?> selector)
         {
             if (data == null || !data.Any())// 空数据校验
                 return null;
@@ -1487,7 +1487,7 @@ namespace CenterBackend.Services
             }
             return count > 0 ? sum / count : (float?)null;
         }
-        private static float? CalculateFirstLastDifference<T>(IEnumerable<T> data, Func<T, float?> selector)
+        public static float? CalculateFirstLastDifference<T>(IEnumerable<T> data, Func<T, float?> selector)
         {
             if (data == null || !data.Any())
                 return null;
@@ -1505,7 +1505,7 @@ namespace CenterBackend.Services
             return difference;
         }
         /// <param name="mode">mode：模式开关（true = 区间校验 [min,max]，false = 上限校验 [≤max]）</param>
-        private static float? CalculateQualifiedRate<T>(IEnumerable<T> data, Func<T, float?> selector, bool mode, float qualifiedValue, float qualifiedValuediff)
+        public static float? CalculateQualifiedRate<T>(IEnumerable<T> data, Func<T, float?> selector, bool mode, float qualifiedValue, float qualifiedValuediff)
         {
             var maxQualifiedValue = qualifiedValue + qualifiedValuediff;
             var minQualifiedValue = qualifiedValue - qualifiedValuediff;
@@ -1527,7 +1527,7 @@ namespace CenterBackend.Services
             float qualifiedRate = (qualifiedCount / (float)nonNullValues.Count) * 100f;// 计算合格利率（合格数/总有效数 * 100%），保留3位小数
             return (float)Math.Round(qualifiedRate, 3);
         }
-        private static float? CalculateSum<T>(IEnumerable<T> data, Func<T, float?> selector)//非null值的总和
+        public static float? CalculateSum<T>(IEnumerable<T> data, Func<T, float?> selector)//非null值的总和
         {
             if (data == null || !data.Any())//空数据校验
                 return null;
@@ -1544,7 +1544,7 @@ namespace CenterBackend.Services
         /// </summary>
         /// <param name="startTime">对应当天日期</param>
         /// <returns>返回计算完成的sheet3的数据集合</returns>
-        private static ProductionDataCollection CalculateForSheet3(DateTime startTime, List<OperatorInputData> operatorInputData)
+        public static ProductionDataCollection CalculateForSheet3(DateTime startTime, List<OperatorInputData> operatorInputData)
         {
             //查询当日数据
             startTime = startTime.Date.AddHours(8);
@@ -1581,7 +1581,7 @@ namespace CenterBackend.Services
         /// <param name="startTime">开始时间</param>
         /// <param name="endTime">结束时间</param>
         /// <returns>ProductionDataCollection</returns>
-        private static List<ProductionDataCollection> CalculateForSheet3TimeRange(DateTime startDate, DateTime endtDate, List<OperatorInputData> operatorInputData)
+        public static List<ProductionDataCollection> CalculateForSheet3TimeRange(DateTime startDate, DateTime endtDate, List<OperatorInputData> operatorInputData)
         {
             if (startDate > endtDate)
             {

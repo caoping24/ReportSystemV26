@@ -129,12 +129,19 @@ namespace CenterBackend.Services
             DateTime targetDateTime = new DateTime(targetDate.Year, targetDate.Month, targetDate.Day, hour, 0, 0);
 
             // 转换值为float?类型
-            if (!float.TryParse(valueStr, out float value))
+            float? targetValue;
+            if (string.IsNullOrEmpty(valueStr))
             {
-                throw new ArgumentException($"值转换失败，要求浮点数字符串，当前值：{valueStr}", nameof(valueStr));
+                targetValue = null;
             }
-            float? targetValue = value; // 兼容nullable float类型
-
+            else if (!float.TryParse(valueStr, out float value))
+            {
+                throw new ArgumentException($"值转换失败，要求浮点数字符串或空字符串，当前值：{valueStr}", nameof(valueStr));
+            }
+            else
+            {
+                targetValue = value;
+            }
             // 校验字段名是否存在
             PropertyInfo? propInfo = typeof(OperatorInputData).GetProperty(prop, BindingFlags.Public | BindingFlags.Instance);
             if (propInfo == null)
@@ -162,6 +169,7 @@ namespace CenterBackend.Services
             {
                 throw new InvalidOperationException($"设置字段{prop}值失败：{ex.Message}", ex);
             }
+
             await _operatorInputData.Update(targetData); // 标记实体为修改状态
             await _dbContext.SaveChangesAsync(); // 提交到数据库
 

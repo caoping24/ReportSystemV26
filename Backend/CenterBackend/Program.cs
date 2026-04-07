@@ -6,11 +6,15 @@ using CenterReport.Repository;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Services;
 using CenterUser.Repository;
+using Hangfire;
+using Hangfire.Common;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Session;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
+
 namespace CenterBackend
 {
     public class Program
@@ -43,6 +47,23 @@ namespace CenterBackend
             string defaultConnection = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(defaultConnection));
             builder.Services.AddDbContext<CenterReportDbContext>(options => options.UseSqlServer(defaultConnection));
+
+            // 配置 Hangfire，使用 SQL Server 存储任务数据
+            builder.Services.AddHangfire(cfg =>
+            {
+                cfg.UseSimpleAssemblyNameTypeSerializer()
+                   .UseRecommendedSerializerSettings()
+                   .UseSqlServerStorage(defaultConnection, new SqlServerStorageOptions
+                   {
+                       PrepareSchemaIfNecessary = true,
+                       SchemaName = "hangfire" // 可选
+                   });
+            });
+
+            builder.Services.AddHangfireServer();
+
+            // 你的任务服务（确保已注册）
+            builder.Services.AddScoped<IBackGroundServices, BackGroundServices>();
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IReportUnitOfWork, ReportUnitOfWork>();
@@ -130,6 +151,37 @@ namespace CenterBackend
 
             var app = builder.Build();
 
+
+            //启动定时任务
+            // 启动定时任务（用 DI API，避免 JobStorage.Current 未初始化）
+            var tz = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
+            var opt = new RecurringJobOptions { TimeZone = tz };
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var mgr = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+
+                mgr.AddOrUpdate(
+                    "daily-0810",
+                    Job.FromExpression<IBackGroundServices>(x => x.Daily0810()),
+                    "10 8 * * *",
+                    opt);
+
+                mgr.AddOrUpdate(
+                    "weekly-mon-0820",
+                    Job.FromExpression<IBackGroundServices>(x => x.WeeklyMon0820()),
+                    "20 8 * * 1",
+                    opt);
+
+                mgr.AddOrUpdate(
+                    "monthly-1st-0830",
+                    Job.FromExpression<IBackGroundServices>(x => x.MonthlyDay1_0830()),
+                    "30 8 1 * *",
+                    opt);
+            }
+
+
+
             // 临时请求日志（便于确认请求是否到达服务器；可上线前移除）
             app.Use(async (ctx, next) =>
             {
@@ -146,6 +198,11 @@ namespace CenterBackend
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "报表系统API v1");
                     c.RoutePrefix = "swagger";
                 });
+            }
+            string useHangfireDashboard = configuration.GetValue<string>("UseHangfireDashboard:ON") ?? string.Empty;
+            if (useHangfireDashboard == "true")
+            {
+                app.UseHangfireDashboard("/hangfire/main");
             }
 
             app.UseSpaStaticFiles();

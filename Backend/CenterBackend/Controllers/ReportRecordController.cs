@@ -105,10 +105,11 @@ namespace CenterBackend.Controllers
                 return StatusCode(500, new { message = "参数不合法" });
             }
 
-            if (string.IsNullOrEmpty(request.Value))
-            {
-                return StatusCode(200, new { message = "数据为空" });
-            }
+            //if (string.IsNullOrEmpty(request.Value))
+            //{
+            //    return StatusCode(200, new { message = "数据为空" });
+            //}
+
             try
             {
                 await _reportRecordService.UpdateSourceDataFieldAsync(
