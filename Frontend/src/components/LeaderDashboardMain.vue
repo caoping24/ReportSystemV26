@@ -11,9 +11,9 @@
           :tabBarStyle="{ marginBottom: 0 }" 
         >
           <a-tab-pane 
-            v-for="page in totalPages" 
+            v-for="(page, index) in totalPages" 
             :key="page"
-            :tab="`领导仓 ${page}`"
+            :tab="tabNames[index]"
           />
         </a-tabs>
       </div>
@@ -28,7 +28,6 @@
         刷新
       </a-button>
     </div>
-
     <!-- 动态渲染的组件（原有逻辑不变） -->
     <component 
       :is="currentComponent" 
@@ -54,6 +53,14 @@ const loadDashboardComponent = (page: number) => {
 // 2. 分页状态管理（核心修改：标签选中状态持久化）
 const totalPages = ref(3);
 const currentPage = ref(1);
+
+// 【新增】自定义标签名称数组（按顺序对应三个子页面）
+const tabNames = ref([
+  "配料 氨化 闪蒸",  // 对应 LeaderDashboard1
+  "结晶",      // 对应 LeaderDashboard2
+  "能耗"       // 对应 LeaderDashboard3
+]);
+
 // 核心修改1：将activeKey从computed改为ref直接管理，确保选中状态持久
 const activeKey = ref<string>("1"); // 初始选中第一个标签
 
@@ -75,7 +82,7 @@ const handleTabChange = (key: string) => {
   const page = Number(key);
   if (page < 1 || page > totalPages.value) return;
   activeKey.value = key; // 直接更新选中的标签key（持久化选中状态）
-  message.success(`切换到第 ${page} 个领导仓`);
+  message.success(`切换到${tabNames.value[page - 1]}`);
 };
 
 // 3. 原有子组件引用（完全不变）
@@ -94,17 +101,16 @@ const handleRefresh = async () => {
       message.warning("当前页面未加载完成，无法刷新");
       return;
     }
-
     // 调用子组件原有刷新方法（子组件仅暴露，不修改内部逻辑）
     if (typeof currentInstance.fetchAllData === "function") {
       await currentInstance.fetchAllData();
-      message.success(`第 ${currentPage.value} 个领导仓刷新成功`);
+      message.success(`${tabNames.value[currentPage.value - 1]}刷新成功`);
     } else {
       message.error("当前页面无刷新方法");
     }
   } catch (error) {
     console.error("刷新失败：", error);
-    message.error(`第 ${currentPage.value} 个领导仓刷新失败，请重试`);
+    message.error(`${tabNames.value[currentPage.value - 1]}刷新失败，请重试`);
   } finally {
     refreshLoading.value = false;
   }
@@ -134,13 +140,11 @@ watch(currentPage, () => {
   margin-left: 16px;
   white-space: nowrap;
 }
-
 /* 原有样式完全保留 */
 .dashboard-content {
   width: 100%;
   box-sizing: border-box;
 }
-
 /* 核心修改4：强化标签选中样式（和TableEditable.vue保持一致），确保选中状态持久且明显 */
 :deep(.ant-tabs-card) {
   border: none;
@@ -163,7 +167,6 @@ watch(currentPage, () => {
 :deep(.ant-tabs-tab:hover) {
   color: #096dd9 !important;
 }
-
 #leaderDashboardMain {
   width: 100%;
   box-sizing: border-box;
