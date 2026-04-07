@@ -1,207 +1,153 @@
 <template>
   <div id="leaderDashboardPage">
-    <!-- 上部：产量指标卡片区 -->
+    <!-- 产量指标卡片区 -->
     <div class="top">
       <div class="production-cards">
-        <!-- 原有卡片内容完全不变 -->
+        <!-- 指标1-5：正常展示数据 -->
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic
-            title="昨日羟基原料浓度"
-            :value="productionData.yesterday"
-            :precision="2"
-            suffix="g/L"
-            class="stat-item"
-          >
-            <template #prefix>
-              <CalendarOutlined class="stat-icon" />
-            </template>
+          <a-statistic title="羟基流量(L/h)" :value="productionData.card1" :precision="2" suffix="">
+            <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic
-            title="昨日羟基配料浓度"
-            :value="productionData.week"
-            :precision="2"
-            suffix="g/L"
-            class="stat-item"
-          >
-            <template #prefix>
-              <CalendarOutlined class="stat-icon" />
-            </template>
+          <a-statistic title="气氨流量(kg/h)" :value="productionData.card2" :precision="2" suffix="">
+            <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic
-            title="昨日摩尔比"
-            :value="productionData.month"
-            :precision="2"
-            suffix=" "
-            class="stat-item"
-          >
-            <template #prefix>
-              <CalendarOutlined class="stat-icon" />
-            </template>
+          <a-statistic title="摩尔比" :value="productionData.card3" :precision="2" suffix=" ">
+            <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic
-            title="昨日累计配比"
-            :value="productionData.year"
-            :precision="2"
-            suffix=" "
-            class="stat-item"
-          >
-            <template #prefix>
-              <CalendarOutlined class="stat-icon" />
-            </template>
+          <a-statistic title="配料蒸汽流量(m³/h)" :value="productionData.card4" :precision="2" suffix="">
+            <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
+        </a-card>
+        <a-card class="production-card" :loading="isLoading" hoverable>
+          <a-statistic title="反应器热点温度(℃)" :value="productionData.card5" :precision="2" suffix="">
+            <template #prefix><CalendarOutlined class="stat-icon" /></template>
+          </a-statistic>
+        </a-card>
+
+        <!-- 指标6：空白卡片，仅保留标题和图标 -->
+        <a-card class="production-card" :loading="isLoading" hoverable>
+          <div class="empty-card-header">
+            <CalendarOutlined class="stat-icon" />
+            <span class="empty-card-title"></span>
+          </div>
+          <div class="empty-card-content"></div>
+        </a-card>
+
+        <!-- 指标7：空白卡片，仅保留标题和图标 -->
+        <a-card class="production-card" :loading="isLoading" hoverable>
+          <div class="empty-card-header">
+            <CalendarOutlined class="stat-icon" />
+            <span class="empty-card-title"></span>
+          </div>
+          <div class="empty-card-content"></div>
+        </a-card>
+
+        <!-- 指标8：空白卡片，仅保留标题和图标 -->
+        <a-card class="production-card" :loading="isLoading" hoverable>
+          <div class="empty-card-header">
+            <CalendarOutlined class="stat-icon" />
+            <span class="empty-card-title"></span>
+          </div>
+          <div class="empty-card-content"></div>
         </a-card>
       </div>
-      <!-- 移除：子组件原有刷新按钮 -->
-      <!-- <div class="refresh-btn-group">
-        <a-button type="primary" @click="fetchAllData" :loading="isLoading">刷新</a-button>
-      </div> -->
     </div>
 
-    <!-- 中部、下部图表区域：原有内容完全不变 -->
+    <!-- 三个原有折线图 (Line1~Line3) -->
     <div class="chart-section line-charts-section">
-      <a-card
-        class="chart-card line-chart-card"
-        :loading="chartLoading.dayLine"
-        :body-style="{ padding: '5px' }"
-      >
-        <div style="width: 100%; height: 300px">
-          <div ref="dayLineChartRef" class="chart-container"></div>
-        </div>
+      <a-card class="chart-card" :loading="chartLoading.line1" :body-style="{ padding: '5px' }">
+        <div style="width: 100%; height: 300px"><div ref="lineChartRef1" class="chart-container"></div></div>
       </a-card>
-      <a-card
-        class="chart-card line-chart-card"
-        :loading="chartLoading.weekLine"
-        :body-style="{ padding: '5px' }"
-      >
-        <div style="width: 100%; height: 300px">
-          <div ref="weekLineChartRef" class="chart-container"></div>
-        </div>
+      <a-card class="chart-card" :loading="chartLoading.line2" :body-style="{ padding: '5px' }">
+        <div style="width: 100%; height: 300px"><div ref="lineChartRef2" class="chart-container"></div></div>
       </a-card>
-      <a-card
-        class="chart-card line-chart-card"
-        :loading="chartLoading.monthLine"
-        :body-style="{ padding: '5px' }"
-      >
-        <div style="width: 100%; height: 300px">
-          <div ref="monthLineChartRef" class="chart-container"></div>
-        </div>
+      <a-card class="chart-card" :loading="chartLoading.line3" :body-style="{ padding: '5px' }">
+        <div style="width: 100%; height: 300px"><div ref="lineChartRef3" class="chart-container"></div></div>
       </a-card>
     </div>
-    <div class="chart-section pie-bar-chart-section">
-      <a-card class="chart-card" :loading="chartLoading.pie">
-        <div style="width: 100%; height: 300px">
-          <div ref="pieChartRef" class="chart-container"></div>
-        </div>
+
+    <!-- 两个新增折线图 (Line4~Line5，需对接真实API) -->
+    <div class="chart-section new-line-charts-section">
+      <a-card class="chart-card" :loading="chartLoading.line4" :body-style="{ padding: '5px' }">
+        <div style="width: 100%; height: 300px"><div ref="lineChartRef4" class="chart-container"></div></div>
       </a-card>
-      <a-card class="chart-card" :loading="chartLoading.bar">
-        <div style="width: 100%; height: 300px">
-          <div ref="barChartRef" class="chart-container"></div>
-        </div>
+      <a-card class="chart-card" :loading="chartLoading.line5" :body-style="{ padding: '5px' }">
+        <div style="width: 100%; height: 300px"><div ref="lineChartRef5" class="chart-container"></div></div>
       </a-card>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-// 原有导入逻辑完全不变（仅新增defineExpose）
-import { ref, reactive, onMounted, onUnmounted, nextTick, defineExpose } from "vue";
+import { ref, reactive, onMounted, onUnmounted, nextTick } from "vue";
 import { message } from "ant-design-vue";
 import { CalendarOutlined } from "@ant-design/icons-vue";
 import * as echarts from "echarts";
 import {
-  getLineChartOne,
-  getLineChartTwo,
-  getLineChartThree,
-  getPieChart,
-  getCoreChart,
+  GetPage1CoreChart1,
+  GetPage1LineChart1,
+  GetPage1LineChart2,
+  GetPage1LineChart3,
+  GetPage1LineChart4,
+  GetPage1LineChart5,
 } from "@/api/Dashboard";
-import myAxios from "@/request";
 
-// 原有类型定义完全不变
+// 类型定义
 interface ProductionData {
-  yesterday: number;
-  week: number;
-  month: number;
-  year: number;
-}
-interface PieChartData {
-  name: string;
-  value: number;
+  card1: number; card2: number; card3: number; card4: number;
+  card5: number; card6: number; card7: number; card8: number;
 }
 interface LineChartData {
   xAxis: string[];
-  series: {
-    name: string;
-    data: number[];
-  }[];
-}
-interface ProductionQueryParams {
-  factoryId?: string;
-  warehouseId?: string;
-  startTime?: string;
-  endTime?: string;
-}
-interface RealApiResponse<T> {
-  code: number;
-  data: T;
-  message: string;
-  description: string | null;
+  series: { name: string; data: number[] }[];
 }
 interface ChartLoading {
-  pie: boolean;
-  dayLine: boolean;
-  weekLine: boolean;
-  monthLine: boolean;
-  bar: boolean;
+  line1: boolean; line2: boolean; line3: boolean;
+  line4: boolean; line5: boolean;
 }
-interface EChartsAxisValue {
-  min: number;
-  max: number;
-  data: number[];
-}
+interface EChartsAxisValue { min: number; max: number; data: number[]; }
 
-// 原有状态管理完全不变
-const isLoading = ref<boolean>(false);
+// 状态
+const isLoading = ref(false);
 const chartLoading = reactive<ChartLoading>({
-  pie: false,
-  dayLine: false,
-  weekLine: false,
-  monthLine: false,
-  bar: false,
+  line1: false, line2: false, line3: false,
+  line4: false, line5: false,
 });
 const productionData = reactive<ProductionData>({
-  yesterday: 0,
-  week: 0,
-  month: 0,
-  year: 0,
+  card1: 0, card2: 0, card3: 0, card4: 0,
+  card5: 0, card6: 0, card7: 0, card8: 0,
 });
-const pieChartRef = ref<HTMLDivElement | null>(null);
-const dayLineChartRef = ref<HTMLDivElement | null>(null);
-const weekLineChartRef = ref<HTMLDivElement | null>(null);
-const monthLineChartRef = ref<HTMLDivElement | null>(null);
-const barChartRef = ref<HTMLDivElement | null>(null);
-let pieChartInstance: echarts.ECharts | null = null;
-let dayLineChartInstance: echarts.ECharts | null = null;
-let weekLineChartInstance: echarts.ECharts | null = null;
-let monthLineChartInstance: echarts.ECharts | null = null;
-let barChartInstance: echarts.ECharts | null = null;
-const pieChartData = ref<PieChartData[]>([]);
-const dayLineChartData = ref<LineChartData>({ xAxis: [], series: [] });
-const weekLineChartData = ref<LineChartData>({ xAxis: [], series: [] });
-const monthLineChartData = ref<LineChartData>({ xAxis: [], series: [] });
-const barChartData = ref<LineChartData>({ xAxis: [], series: [] });
 
-// 原有数据请求方法完全不变（一行不改）
-const fetchProductionData = async (params?: ProductionQueryParams) => {
+// 图表ref与实例 (Line1~Line5)
+const lineChartRef1 = ref<HTMLDivElement | null>(null);
+const lineChartRef2 = ref<HTMLDivElement | null>(null);
+const lineChartRef3 = ref<HTMLDivElement | null>(null);
+const lineChartRef4 = ref<HTMLDivElement | null>(null);
+const lineChartRef5 = ref<HTMLDivElement | null>(null);
+let lineChartInstance1: echarts.ECharts | null = null;
+let lineChartInstance2: echarts.ECharts | null = null;
+let lineChartInstance3: echarts.ECharts | null = null;
+let lineChartInstance4: echarts.ECharts | null = null;
+let lineChartInstance5: echarts.ECharts | null = null;
+
+// 图表数据 (Line1~Line5)
+const lineChartData1 = ref<LineChartData>({ xAxis: [], series: [] });
+const lineChartData2 = ref<LineChartData>({ xAxis: [], series: [] });
+const lineChartData3 = ref<LineChartData>({ xAxis: [], series: [] });
+const lineChartData4 = ref<LineChartData>({ xAxis: [], series: [] });
+const lineChartData5 = ref<LineChartData>({ xAxis: [], series: [] });
+
+// 卡片数据
+const GetPage1CoreChart1Data = async () => {
   try {
-    const axiosRes = await getCoreChart();
-    const res = axiosRes.data as RealApiResponse<ProductionData>;
+    const axiosRes = await GetPage1CoreChart1();
+    const res = axiosRes.data as { code: number; data: ProductionData; message: string };
     if (res.code === 0) {
       Object.assign(productionData, res.data);
     } else {
@@ -212,499 +158,238 @@ const fetchProductionData = async (params?: ProductionQueryParams) => {
     message.error("核心产量数据加载失败");
   }
 };
-const fetchPieChartData = async (params?: ProductionQueryParams) => {
+
+// Line1 数据 (原日折线图)
+const fetchLineChartData1 = async () => {
   try {
-    chartLoading.pie = true;
-    const axiosRes = await getPieChart();
-    const res = axiosRes.data as RealApiResponse<PieChartData[]>;
-    if (res.code === 0) {
-      pieChartData.value = res.data;
-      await nextTick();
-      setTimeout(() => safeInitChart("pie"), 100);
+    chartLoading.line1 = true;
+    const axiosRes = await GetPage1LineChart1();
+    const res = axiosRes.data as { code: number; data: LineChartData; message: string };
+    if (res.code === 0 && res.data?.xAxis && res.data?.series) {
+      lineChartData1.value = res.data;
     } else {
-      throw new Error(res.message);
+      throw new Error(res.message || "数据格式异常");
     }
+    await nextTick();
+    setTimeout(() => initLineChart1(), 100);
   } catch (error) {
-    console.error("获取饼图数据失败：", error);
-    message.error("产量占比图表数据加载失败");
-    pieChartData.value = [
-      { name: "生产线A", value: 350 },
-      { name: "生产线B", value: 280 },
-      { name: "生产线C", value: 420 },
-      { name: "生产线D", value: 180 },
-    ];
-    await nextTick();
-    setTimeout(() => safeInitChart("pie"), 100);
+    console.error("获取Line1折线图数据失败：", error);
+    message.error("昨日羟基乙腈浓度趋势加载失败");
   } finally {
-    chartLoading.pie = false;
-  }
-};
-const fetchDayLineChartData = async (params?: ProductionQueryParams) => {
-  try {
-    chartLoading.dayLine = true;
-    const axiosRes = await getLineChartOne();
-    const res = axiosRes.data as RealApiResponse<LineChartData>;
-    if (res.code === 0) {
-      if (res.data && res.data.xAxis && res.data.series) {
-        dayLineChartData.value = res.data;
-      } else {
-        throw new Error("接口返回数据格式异常");
-      }
-      await nextTick();
-      setTimeout(() => safeInitChart("dayLine"), 100);
-    } else {
-      throw new Error(res.message || "获取昨日时段产量数据失败");
-    }
-  } catch (error) {
-    console.error("获取日折线图数据失败：", error);
-    message.error("昨日时段产量趋势图表数据加载失败");
-    dayLineChartData.value = {
-      xAxis: ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"],
-      series: [{ name: "羟基乙腈", data: [85, 88, 92, 89, 95, 91] }],
-    };
-    await nextTick();
-    setTimeout(() => safeInitChart("dayLine"), 100);
-  } finally {
-    chartLoading.dayLine = false;
-  }
-};
-const fetchWeekLineChartData = async (params?: ProductionQueryParams) => {
-  try {
-    chartLoading.weekLine = true;
-    const axiosRes = await getLineChartTwo();
-    const res = axiosRes.data as RealApiResponse<LineChartData>;
-    if (res.code === 0) {
-      if (res.data && res.data.xAxis && res.data.series) {
-        weekLineChartData.value = res.data;
-      } else {
-        throw new Error("接口返回数据格式异常");
-      }
-      await nextTick();
-      setTimeout(() => safeInitChart("weekLine"), 100);
-    } else {
-      throw new Error(res.message || "获取周产量数据失败");
-    }
-  } catch (error) {
-    console.error("获取周折线图数据失败：", error);
-    message.error("周产量趋势图表数据加载失败");
-    weekLineChartData.value = {
-      xAxis: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
-      series: [
-        { name: "摩尔比", data: [1.2, 1.3, 1.1, 1.4, 1.25, 1.35, 1.28] },
-      ],
-    };
-    await nextTick();
-    setTimeout(() => safeInitChart("weekLine"), 100);
-  } finally {
-    chartLoading.weekLine = false;
-  }
-};
-const fetchMonthLineChartData = async (params?: ProductionQueryParams) => {
-  try {
-    chartLoading.monthLine = true;
-    const axiosRes = await getLineChartThree();
-    const res = axiosRes.data as RealApiResponse<LineChartData>;
-    if (res.code === 0) {
-      if (res.data && res.data.xAxis && res.data.series) {
-        monthLineChartData.value = res.data;
-      } else {
-        throw new Error("接口返回数据格式异常");
-      }
-      await nextTick();
-      setTimeout(() => safeInitChart("monthLine"), 100);
-    } else {
-      throw new Error(res.message || "获取月产量数据失败");
-    }
-  } catch (error) {
-    console.error("获取月折线图数据失败：", error);
-    message.error("月产量趋势图表数据加载失败");
-    monthLineChartData.value = {
-      xAxis: ["1日", "5日", "10日", "15日", "20日", "25日", "30日"],
-      series: [{ name: "羟基乙腈配料", data: [82, 85, 88, 86, 90, 89, 91] }],
-    };
-    await nextTick();
-    setTimeout(() => safeInitChart("monthLine"), 100);
-  } finally {
-    chartLoading.monthLine = false;
-  }
-};
-const fetchBarChartData = async (params?: ProductionQueryParams) => {
-  try {
-    chartLoading.bar = true;
-    const mockBarData: LineChartData = {
-      xAxis: ["批次1", "批次2", "批次3", "批次4", "批次5", "批次6"],
-      series: [
-        { name: "羟基原料浓度", data: [85.2, 88.7, 90.1, 87.5, 92.3, 89.8] },
-        { name: "羟基配料浓度", data: [78.5, 81.2, 83.7, 80.9, 85.1, 82.4] },
-      ],
-    };
-    barChartData.value = mockBarData;
-    await nextTick();
-    setTimeout(() => safeInitChart("bar"), 100);
-  } catch (error) {
-    console.error("获取柱状图数据失败：", error);
-    message.error("柱状图数据加载失败");
-    barChartData.value = {
-      xAxis: ["暂无数据"],
-      series: [{ name: "产量", data: [0] }],
-    };
-    await nextTick();
-    setTimeout(() => safeInitChart("bar"), 100);
-  } finally {
-    chartLoading.bar = false;
+    chartLoading.line1 = false;
   }
 };
 
-// 原有图表初始化方法完全不变
-const safeInitChart = (
-  chartType: "pie" | "dayLine" | "weekLine" | "monthLine" | "bar" | "all" = "all"
-) => {
-  if (chartType === "pie" || chartType === "all") {
-    if (!pieChartRef.value) return;
-    try {
-      if (pieChartInstance) pieChartInstance.dispose();
-      pieChartInstance = echarts.init(pieChartRef.value);
-      const pieData = pieChartData.value.length ? pieChartData.value : [{ name: "暂无数据", value: 1 }];
-      pieChartInstance.setOption({
-        title: { text: "产量占比", left: "center", top: 10, textStyle: { fontSize: 16, fontWeight: 600 } },
-        color: ["#003399", "#00AEEF", "#0066CC", "#66B2FF"],
-        tooltip: { trigger: "item", formatter: "{a} <br/>{b}: {c} 件 ({d}%)" },
-        legend: { orient: "horizontal", bottom: 0, textStyle: { color: "#333" } },
-        toolbox: {
-          show: true,
-          feature: { saveAsImage: { show: true, title: "下载图片", type: "png", pixelRatio: 2, backgroundColor: "#ffffff" } },
-          right: 10, top: 10
-        },
-        series: [{
-          name: "产量占比", type: "pie", radius: ["40%", "70%"],
-          avoidLabelOverlap: false, label: { show: false },
-          emphasis: { label: { show: true, fontSize: 16, fontWeight: 600 } },
-          labelLine: { show: false }, data: pieData
-        }]
-      });
-    } catch (error) {
-      console.error("初始化饼图失败：", error);
-      pieChartInstance = null;
+// Line2 数据 (原周折线图)
+const fetchLineChartData2 = async () => {
+  try {
+    chartLoading.line2 = true;
+    const axiosRes = await GetPage1LineChart2();
+    const res = axiosRes.data as { code: number; data: LineChartData; message: string };
+    if (res.code === 0 && res.data?.xAxis && res.data?.series) {
+      lineChartData2.value = res.data;
+    } else {
+      throw new Error(res.message || "数据格式异常");
     }
-  }
-  if (chartType === "dayLine" || chartType === "all") {
-    if (!dayLineChartRef.value) return;
-    try {
-      if (dayLineChartInstance) dayLineChartInstance.dispose();
-      dayLineChartInstance = echarts.init(dayLineChartRef.value);
-      const xAxisData = dayLineChartData.value.xAxis.length ? dayLineChartData.value.xAxis : ["暂无数据"];
-      const seriesData = dayLineChartData.value.series.length ? dayLineChartData.value.series : [{ name: "产量", data: [0] }];
-      dayLineChartInstance.setOption({
-        title: { text: "昨日羟基乙腈浓度趋势", left: "center", top: 10, textStyle: { fontSize: 16, fontWeight: 600 } },
-        color: ["#003399"],
-        tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-        legend: { orient: "horizontal", top: 40, left: "center", textStyle: { color: "#333", fontSize: 12 } },
-        toolbox: {
-          show: true,
-          feature: { saveAsImage: { show: true, title: "下载图片", type: "png", pixelRatio: 2, backgroundColor: "#ffffff" } },
-          right: 10, top: 10
-        },
-        grid: { left: "3%", right: "4%", bottom: "3%", top: "70px", containLabel: true },
-        xAxis: { type: "category", data: xAxisData, axisLine: { lineStyle: { color: "#e8f4fc" } }, axisLabel: { color: "#666" } },
-        yAxis: {
-          type: "value", name: "g/L", nameTextStyle: { color: "#003399" },
-          axisLine: { lineStyle: { color: "#e8f4fc" } }, axisLabel: { color: "#666" },
-          splitLine: { lineStyle: { color: "#e8f4fc" } },
-          min: (value: EChartsAxisValue) => Math.floor(value.min),
-          max: (value: EChartsAxisValue) => Math.ceil(value.max),
-        },
-        series: seriesData.map((item) => ({
-          name: item.name, type: "line", smooth: true, data: item.data, showSymbol: false, lineStyle: { width: 1 }
-        }))
-      });
-    } catch (error) {
-      console.error("初始化日折线图失败：", error);
-      dayLineChartInstance = null;
-    }
-  }
-  if (chartType === "weekLine" || chartType === "all") {
-    if (!weekLineChartRef.value) return;
-    try {
-      if (weekLineChartInstance) weekLineChartInstance.dispose();
-      weekLineChartInstance = echarts.init(weekLineChartRef.value);
-      const xAxisData = weekLineChartData.value.xAxis.length ? weekLineChartData.value.xAxis : ["暂无数据"];
-      const seriesData = weekLineChartData.value.series.length ? weekLineChartData.value.series : [{ name: "产量", data: [0] }];
-      weekLineChartInstance.setOption({
-        title: { text: "本周摩尔比趋势", left: "center", top: 10, textStyle: { fontSize: 16, fontWeight: 600 } },
-        color: ["#003399"],
-        tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-        legend: { orient: "horizontal", top: 40, left: "center", textStyle: { color: "#333", fontSize: 12 } },
-        toolbox: {
-          show: true,
-          feature: { saveAsImage: { show: true, title: "下载图片", type: "png", pixelRatio: 2, backgroundColor: "#ffffff" } },
-          right: 10, top: 10
-        },
-        grid: { left: "3%", right: "4%", bottom: "3%", top: "70px", containLabel: true },
-        xAxis: { type: "category", data: xAxisData, axisLine: { lineStyle: { color: "#e8f4fc" } }, axisLabel: { color: "#666" } },
-        yAxis: {
-          type: "value", name: "-", nameTextStyle: { color: "#003399" },
-          axisLine: { lineStyle: { color: "#e8f4fc" } }, axisLabel: { color: "#666" },
-          splitLine: { lineStyle: { color: "#e8f4fc" } },
-          min: (value: EChartsAxisValue) => Math.floor(value.min),
-          max: (value: EChartsAxisValue) => Math.ceil(value.max),
-        },
-        series: seriesData.map((item) => ({
-          name: item.name, type: "line", smooth: true, data: item.data, showSymbol: false, lineStyle: { width: 1 }
-        }))
-      });
-    } catch (error) {
-      console.error("初始化周折线图失败：", error);
-      weekLineChartInstance = null;
-    }
-  }
-  if (chartType === "monthLine" || chartType === "all") {
-    if (!monthLineChartRef.value) return;
-    try {
-      if (monthLineChartInstance) monthLineChartInstance.dispose();
-      monthLineChartInstance = echarts.init(monthLineChartRef.value);
-      const xAxisData = monthLineChartData.value.xAxis.length ? monthLineChartData.value.xAxis : ["暂无数据"];
-      const seriesData = monthLineChartData.value.series.length ? monthLineChartData.value.series : [{ name: "产量", data: [0] }];
-      monthLineChartInstance.setOption({
-        title: { text: "本月羟基乙腈配料浓度趋势", left: "center", top: 10, textStyle: { fontSize: 16, fontWeight: 600 } },
-        color: ["#003399"],
-        tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-        legend: { orient: "horizontal", top: 40, left: "center", textStyle: { color: "#333", fontSize: 12 } },
-        toolbox: {
-          show: true,
-          feature: { saveAsImage: { show: true, title: "下载图片", type: "png", pixelRatio: 2, backgroundColor: "#ffffff" } },
-          right: 10, top: 10
-        },
-        grid: { left: "3%", right: "4%", bottom: "3%", top: "70px", containLabel: true },
-        xAxis: { type: "category", data: xAxisData, axisLine: { lineStyle: { color: "#e8f4fc" } }, axisLabel: { color: "#666" } },
-        yAxis: {
-          type: "value", name: "g/L", nameTextStyle: { color: "#003399" },
-          axisLine: { lineStyle: { color: "#e8f4fc" } }, axisLabel: { color: "#666" },
-          splitLine: { lineStyle: { color: "#e8f4fc" } },
-          min: (value: EChartsAxisValue) => Math.floor(value.min),
-          max: (value: EChartsAxisValue) => Math.ceil(value.max),
-        },
-        series: seriesData.map((item) => ({
-          name: item.name, type: "line", smooth: true, data: item.data, showSymbol: false, lineStyle: { width: 1 }
-        }))
-      });
-    } catch (error) {
-      console.error("初始化月折线图失败：", error);
-      monthLineChartInstance = null;
-    }
-  }
-  if (chartType === "bar" || chartType === "all") {
-    if (!barChartRef.value) return;
-    try {
-      if (barChartInstance) barChartInstance.dispose();
-      barChartInstance = echarts.init(barChartRef.value);
-      const xAxisData = barChartData.value.xAxis.length ? barChartData.value.xAxis : ["暂无数据"];
-      const seriesData = barChartData.value.series.length ? barChartData.value.series : [{ name: "产量", data: [0] }];
-      const colorList = [
-        {
-          normal: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: "#0066CC" }, { offset: 1, color: "#003399" }]),
-          hover: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: "#3399FF" }, { offset: 1, color: "#0066CC" }]),
-          border: "#002288",
-        },
-        {
-          normal: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: "#66B2FF" }, { offset: 1, color: "#00AEEF" }]),
-          hover: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: "#99CCFF" }, { offset: 1, color: "#66B2FF" }]),
-          border: "#0099DD",
-        },
-      ];
-      barChartInstance.setOption({
-        title: { text: "各批次浓度对比", left: "center", top: 10, textStyle: { fontSize: 16, fontWeight: 600 } },
-        color: [colorList[0].normal, colorList[1].normal],
-        tooltip: {
-          trigger: "axis", axisPointer: { type: "shadow" },
-          textStyle: { fontSize: 12 }, backgroundColor: "rgba(255,255,255,0.9)",
-          borderColor: "#e8f4fc", borderWidth: 1, padding: 10,
-          formatter: function (params: any) {
-            let res = `<div style="font-weight:600;margin-bottom:5px">${params[0].axisValue}</div>`;
-            params.forEach((item: any) => {
-              res += `<div style="margin:3px 0">
-                <span style="display:inline-block;width:8px;height:8px;background:${item.color};margin-right:5px;border-radius:2px;"></span>
-                ${item.seriesName}：<span style="font-weight:600">${item.value} g/L</span>
-              </div>`;
-            });
-            return res;
-          },
-        },
-        legend: { orient: "horizontal", top: 40, left: "center", textStyle: { color: "#333", fontSize: 12 }, icon: "rect", itemWidth: 12, itemHeight: 8, itemGap: 20 },
-        toolbox: {
-          show: true,
-          feature: { saveAsImage: { show: true, title: "下载图片", type: "png", pixelRatio: 2, backgroundColor: "#ffffff" } },
-          right: 10, top: 10
-        },
-        grid: { left: "3%", right: "4%", bottom: "3%", top: "70px", containLabel: true },
-        xAxis: {
-          type: "category", data: xAxisData,
-          axisLine: { lineStyle: { color: "#e8f4fc" } },
-          axisLabel: { color: "#666", fontSize: 11, interval: 0 },
-          axisTick: { alignWithLabel: true }
-        },
-        yAxis: {
-          type: "value", name: "g/L", nameTextStyle: { color: "#0066CC", fontSize: 12 },
-          axisLine: { lineStyle: { color: "#e8f4fc" } }, axisLabel: { color: "#666", fontSize: 11 },
-          splitLine: { lineStyle: { color: "#e8f4fc", type: "dashed" } },
-          min: (value: EChartsAxisValue) => Math.floor(value.min),
-          max: (value: EChartsAxisValue) => Math.ceil(value.max),
-        },
-        series: seriesData.map((item, index) => ({
-          name: item.name, type: "bar", barWidth: "35%", barGap: "30%", barCategoryGap: "40%", data: item.data,
-          itemStyle: {
-            color: colorList[index].normal, borderRadius: [4, 4, 0, 0],
-            borderWidth: 1, borderColor: colorList[index].border, borderType: "solid"
-          },
-          emphasis: {
-            itemStyle: {
-              color: colorList[index].hover, borderWidth: 1.5,
-              shadowBlur: 6, shadowColor: "rgba(0, 102, 204, 0.2)", shadowOffsetY: 2
-            },
-            label: { show: true, position: "top", fontSize: 11, fontWeight: 600, color: "#333", formatter: "{c} g/L" }
-          },
-          label: { show: false }
-        }))
-      });
-    } catch (error) {
-      console.error("初始化柱状图失败：", error);
-      barChartInstance = null;
-    }
+    await nextTick();
+    setTimeout(() => initLineChart2(), 100);
+  } catch (error) {
+    console.error("获取Line2折线图数据失败：", error);
+    message.error("本周摩尔比趋势加载失败");
+  } finally {
+    chartLoading.line2 = false;
   }
 };
 
-// 原有刷新方法完全不变（仅新增暴露）
+// Line3 数据 (原月折线图)
+const fetchLineChartData3 = async () => {
+  try {
+    chartLoading.line3 = true;
+    const axiosRes = await GetPage1LineChart3();
+    const res = axiosRes.data as { code: number; data: LineChartData; message: string };
+    if (res.code === 0 && res.data?.xAxis && res.data?.series) {
+      lineChartData3.value = res.data;
+    } else {
+      throw new Error(res.message || "数据格式异常");
+    }
+    await nextTick();
+    setTimeout(() => initLineChart3(), 100);
+  } catch (error) {
+    console.error("获取Line3折线图数据失败：", error);
+    message.error("本月羟基乙腈配料浓度趋势加载失败");
+  } finally {
+    chartLoading.line3 = false;
+  }
+};
+
+// Line4 数据 (需对接真实API)
+const fetchLineChartData4 = async () => {
+   try {
+    chartLoading.line4 = true;
+    const axiosRes = await GetPage1LineChart4();
+    const res = axiosRes.data as { code: number; data: LineChartData; message: string };
+    if (res.code === 0 && res.data?.xAxis && res.data?.series) {
+      lineChartData4.value = res.data;
+    } else {
+      throw new Error(res.message || "数据格式异常");
+    }
+    await nextTick();
+    setTimeout(() => initLineChart4(), 100);
+  } catch (error) {
+    console.error("获取Line4折线图数据失败：", error);
+    message.error("本月羟基乙腈配料浓度趋势加载失败");
+  } finally {
+    chartLoading.line4 = false;
+  }
+};
+
+// Line5 数据 (需对接真实API)
+const fetchLineChartData5 = async () => {
+  try {
+    chartLoading.line5 = true;
+    const axiosRes = await GetPage1LineChart5();
+    const res = axiosRes.data as { code: number; data: LineChartData; message: string };
+    if (res.code === 0 && res.data?.xAxis && res.data?.series) {
+      lineChartData5.value = res.data;
+    } else {
+      throw new Error(res.message || "数据格式异常");
+    }
+    await nextTick();
+    setTimeout(() => initLineChart5(), 100);
+  } catch (error) {
+    console.error("获取Line5折线图数据失败：", error);
+    message.error("本月羟基乙腈配料浓度趋势加载失败");
+  } finally {
+    chartLoading.line5 = false;
+  }
+};
+
+// 图表初始化函数（复用通用配置）
+const getBaseChartOption = (title: string, yAxisName: string, color: string, data: LineChartData) => {
+  const xAxisData = data.xAxis.length ? data.xAxis : ["暂无数据"];
+  const seriesData = data.series.length ? data.series : [{ name: "数据", data: [0] }];
+  return {
+    title: { text: title, left: "center", top: 10, textStyle: { fontSize: 16, fontWeight: 600 } },
+    color: [color],
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+    legend: { orient: "horizontal", top: 40, left: "center" },
+    toolbox: { show: true, feature: { saveAsImage: { show: true, title: "下载图片", type: "png" } }, right: 10, top: 10 },
+    grid: { left: "3%", right: "4%", bottom: "3%", top: "70px", containLabel: true },
+    xAxis: { type: "category", data: xAxisData, axisLine: { lineStyle: { color: "#e8f4fc" } }, axisLabel: { color: "#666" } },
+    yAxis: {
+      type: "value", name: yAxisName, nameTextStyle: { color: "#003399" },
+      axisLine: { lineStyle: { color: "#e8f4fc" } }, axisLabel: { color: "#666" },
+      splitLine: { lineStyle: { color: "#e8f4fc" } },
+      min: (value: EChartsAxisValue) => Math.floor(value.min),
+      max: (value: EChartsAxisValue) => Math.ceil(value.max),
+    },
+    series: seriesData.map(item => ({
+      name: item.name, type: "line", smooth: true, data: item.data,
+      showSymbol: title.includes("近7天") ? true : false,
+      lineStyle: { width: title.includes("近7天") ? 2 : 1 }
+    }))
+  };
+};
+
+const initLineChart1 = () => {
+  if (!lineChartRef1.value) return;
+  if (lineChartInstance1) lineChartInstance1.dispose();
+  lineChartInstance1 = echarts.init(lineChartRef1.value);
+  lineChartInstance1.setOption(getBaseChartOption("", "", "#003399", lineChartData1.value));
+};
+
+const initLineChart2 = () => {
+  if (!lineChartRef2.value) return;
+  if (lineChartInstance2) lineChartInstance2.dispose();
+  lineChartInstance2 = echarts.init(lineChartRef2.value);
+  lineChartInstance2.setOption(getBaseChartOption("", "-", "#003399", lineChartData2.value));
+};
+
+const initLineChart3 = () => {
+  if (!lineChartRef3.value) return;
+  if (lineChartInstance3) lineChartInstance3.dispose();
+  lineChartInstance3 = echarts.init(lineChartRef3.value);
+  lineChartInstance3.setOption(getBaseChartOption("", "", "#003399", lineChartData3.value));
+};
+
+const initLineChart4 = () => {
+  if (!lineChartRef4.value) return;
+  if (lineChartInstance4) lineChartInstance4.dispose();
+  lineChartInstance4 = echarts.init(lineChartRef4.value);
+  lineChartInstance4.setOption(getBaseChartOption("", "", "#003399", lineChartData4.value));
+};
+
+const initLineChart5 = () => {
+  if (!lineChartRef5.value) return;
+  if (lineChartInstance5) lineChartInstance5.dispose();
+  lineChartInstance5 = echarts.init(lineChartRef5.value);
+  lineChartInstance5.setOption(getBaseChartOption("", "", "#003399", lineChartData5.value));
+};
+
+// 刷新所有数据
 const fetchAllData = async () => {
-  try {
-    isLoading.value = true;
-    const params: ProductionQueryParams = {};
-    await fetchProductionData(params);
-    await Promise.all([
-      fetchPieChartData(params),
-      fetchDayLineChartData(params),
-      fetchWeekLineChartData(params),
-      fetchMonthLineChartData(params),
-      fetchBarChartData(params),
-    ]);
-    message.success("数据刷新请求已发送");
-    setTimeout(() => {
-      safeInitChart("all");
-    }, 500);
-  } catch (error) {
-    console.error("获取核心数据失败：", error);
-    message.error("核心数据加载失败，请稍后重试");
-  } finally {
-    setTimeout(() => {
-      isLoading.value = false;
-    }, 600);
-  }
+  isLoading.value = true;
+  await Promise.allSettled([
+    GetPage1CoreChart1Data(),
+    fetchLineChartData1(),
+    fetchLineChartData2(),
+    fetchLineChartData3(),
+    fetchLineChartData4(),
+    fetchLineChartData5(),
+  ]);
+  isLoading.value = false;
+  message.success("数据刷新请求已发送");
 };
 
-// 原有生命周期完全不变
+// 生命周期
 onMounted(async () => {
   await fetchAllData();
   const resizeHandler = () => {
-    if (pieChartInstance) pieChartInstance.resize();
-    if (dayLineChartInstance) dayLineChartInstance.resize();
-    if (weekLineChartInstance) weekLineChartInstance.resize();
-    if (monthLineChartInstance) monthLineChartInstance.resize();
-    if (barChartInstance) barChartInstance.resize();
+    [lineChartInstance1, lineChartInstance2, lineChartInstance3, lineChartInstance4, lineChartInstance5].forEach(instance => instance?.resize());
   };
   window.addEventListener("resize", resizeHandler);
   onUnmounted(() => {
     window.removeEventListener("resize", resizeHandler);
-    if (pieChartInstance) pieChartInstance.dispose();
-    if (dayLineChartInstance) dayLineChartInstance.dispose();
-    if (weekLineChartInstance) weekLineChartInstance.dispose();
-    if (monthLineChartInstance) monthLineChartInstance.dispose();
-    if (barChartInstance) barChartInstance.dispose();
+    [lineChartInstance1, lineChartInstance2, lineChartInstance3, lineChartInstance4, lineChartInstance5].forEach(instance => instance?.dispose());
   });
-});
-
-// ========== 仅新增：暴露原有fetchAllData方法给父组件 ==========
-defineExpose({
-  fetchAllData
 });
 </script>
 
 <style scoped>
-/* 原有样式完全不变（仅移除刷新按钮相关样式） */
-#leaderDashboardPage {
-  padding: 16px;
-  background-color: #f5f7fa;
-  min-height: 80vh;
-}
-.top {
+#leaderDashboardPage { padding: 16px; background-color: #f5f7fa; min-height: 80vh; }
+.top { width: 100%; margin-bottom: 16px; }
+.production-cards { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; width: 100%; }
+.production-card { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); min-width: 120px; }
+.stat-icon { color: #003399; font-size: 20px; }
+.chart-section.line-charts-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+.chart-section.new-line-charts-section { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 10px; }
+.chart-card { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.chart-container { width: 100%; height: 100%; }
+
+/* 空白卡片样式，保持高度一致 */
+.empty-card-header {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
 }
-.production-cards {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
+.empty-card-title {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.45);
 }
-.production-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+.empty-card-content {
+  height: 40px; /* 与原始统计数值区域高度大致对齐，保持卡片高度一致 */
 }
-.stat-item {
-  padding: 8px 0;
+
+@media (max-width: 1600px) { .production-cards { grid-template-columns: repeat(6, 1fr); } }
+@media (max-width: 1200px) { 
+  .production-cards { grid-template-columns: repeat(4, 1fr); }
+  .line-charts-section { grid-template-columns: repeat(2, 1fr); }
+  .new-line-charts-section { grid-template-columns: 1fr; }
 }
-.stat-icon {
-  color: #003399;
-  font-size: 20px;
+@media (max-width: 768px) { 
+  .production-cards { grid-template-columns: repeat(2, 1fr); }
+  .line-charts-section, .new-line-charts-section { grid-template-columns: 1fr; }
 }
-.chart-section.line-charts-section {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
-}
-.chart-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-.line-chart-card {
-  height: 300px;
-}
-.chart-container {
-  width: 100%;
-  height: 100%;
-}
-.chart-section.pie-bar-chart-section {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 10px;
-}
-/* 移除：原有刷新按钮样式 */
-/* .refresh-btn-group {
-  width: 120px;
-  margin-top: 10px;
-  text-align: right;
-} */
-@media (max-width: 1200px) {
-  .production-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .line-charts-section {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-@media (max-width: 768px) {
-  .production-cards {
-    grid-template-columns: 1fr;
-  }
-  .line-charts-section {
-    grid-template-columns: 1fr;
-  }
-  .pie-bar-chart-section {
-    grid-template-columns: 1fr;
-  }
-  .refresh-btn-group {
-    grid-column: 1 / 2;
-  }
-}
+@media (max-width: 480px) { .production-cards { grid-template-columns: 1fr; } }
 </style>
