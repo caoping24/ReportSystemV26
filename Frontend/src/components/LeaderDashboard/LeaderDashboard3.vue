@@ -5,12 +5,12 @@
       <div class="production-cards">
         <!-- 指标1-5：正常展示数据 -->
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="蒸汽总消耗(t)" :value="productionData.card1" :precision="2" suffix="">
+          <a-statistic title="低压蒸汽消耗(t)" :value="productionData.card1" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="脱盐水总消耗((m³))" :value="productionData.card2" :precision="2" suffix="">
+          <a-statistic title="中压蒸汽消耗(t)" :value="productionData.card2" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>

@@ -197,8 +197,8 @@ namespace ReportServer.Models
             //cell140人工录入
             //cell141人工录入
             //cell142人工录入
-            //cell143预留
-            //cell144预留
+            AddTagMap("FT04311/FQ.Out#Value", "cell143");//2026年5月11日新增脱盐水数据自动采集
+            AddTagMap("TT0103/MonAnalog.PV_Out#Value", "cell144");//2026年5月11日新增 降膜蒸发器温度自动采集
             //cell145预留
             //cell146预留
             //cell147预留

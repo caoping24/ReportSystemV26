@@ -13,7 +13,13 @@
           <a-tab-pane 
             v-for="page in totalPages" 
             :key="page"
-            :tab="`检测数据 ${page}`"
+            :tab="page === 1 ? '闪发器冷凝液' 
+                : page === 2 ? '反应液' 
+                : page === 3 ? '一次/二次结晶物/产品' 
+                : page === 4 ? '一次母液' 
+                : page === 5 ? '母液脱色前后/废液' 
+                : page === 6 ? '能源消耗' 
+                : `录入数据 ${page}`"
           />
         </a-tabs>
       </div>

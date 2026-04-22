@@ -138,7 +138,7 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell1", "Cell2", "Cell3", "Cell4", "Cell5" },
-                Label = "闪发器冷凝液检测数",
+                Label = "闪发器冷凝液成分检测",
                 Unit = ""
             }
         },
@@ -162,8 +162,8 @@ namespace CenterBackend.Controllers
         {
             new GroupHeader
             {
-                Props = new List<string> { "Cell11", "Cell12", "Cell13", "Cell14", "Cell15", "Cell16" ,"Cell17", "Cell18"},
-                Label = "反应液检测数据记录表",
+                Props = new List<string> { "Cell11", "Cell12", "Cell13", "Cell14", "Cell15", "Cell16" ,"Cell17"},//, "Cell18"
+                Label = "反应液成分检测",
                 Unit = ""
             },
         },
@@ -176,8 +176,8 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell14", Label = "羟基乙腈残余（g/L）", Unit = "g/L" },
             new TableHeaderDto { Prop = "Cell15", Label = "甘氨腈（g/L）", Unit = "g/L" },
             new TableHeaderDto { Prop = "Cell16", Label = "三乙腈（g/L）", Unit = "g/L" },
-            new TableHeaderDto { Prop = "Cell17", Label = "反应液检测数据pH", Unit = "" },
-            new TableHeaderDto { Prop = "Cell18", Label = "反应液比重(kg/m3)", Unit = "" },
+            new TableHeaderDto { Prop = "Cell17", Label = "反应液pH", Unit = "" },
+            //new TableHeaderDto { Prop = "Cell18", Label = "反应液比重(kg/m3)", Unit = "" }, 2026年5月11日 移除
         }
     },
 
@@ -190,13 +190,13 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell21", "Cell22", "Cell23", "Cell24", "Cell25", "Cell26" },
-                Label = "一次结晶物/一次产品",
+                Label = "一次结晶物/一次产品成分检测",
                 Unit = ""
             },
             new GroupHeader
             {
                 Props = new List<string> { "Cell31", "Cell32", "Cell33", "Cell34", "Cell35", "Cell36" },
-                Label = "二次结晶物/二次产品",
+                Label = "二次结晶物/二次产品成分检测",
                 Unit = ""
             }
         },
@@ -252,13 +252,13 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell51", "Cell52", "Cell53", "Cell54", "Cell55", "Cell56" },
-                Label = "母液脱色前检测数据",
+                Label = "母液脱色前成分检测",
                 Unit = ""
             },
             new GroupHeader
             {
                 Props = new List<string> { "Cell57", "Cell58", "Cell59", "Cell60", "Cell61", "Cell62" },
-                Label = "母液脱色后检测数据",
+                Label = "母液脱色后成分检测",
                 Unit = ""
             },
             new GroupHeader
@@ -297,15 +297,15 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell71", "Cell72", "Cell73" },
-                Label = "公用工程消耗",
+                Label = "能源消耗",
                 Unit = ""
             }
         },
         tableHeaders = new List<TableHeaderDto>
         {
             new TableHeaderDto { Prop = "hour", Label = "小时", Unit = "" },
-            new TableHeaderDto { Prop = "Cell71", Label = "蒸汽总消耗（t）" },
-            new TableHeaderDto { Prop = "Cell72", Label = "脱盐水消耗（t）" },
+            new TableHeaderDto { Prop = "Cell71", Label = "低压蒸汽消耗（t）" },
+            new TableHeaderDto { Prop = "Cell72", Label = "中压蒸汽消耗（t）" },
             new TableHeaderDto { Prop = "Cell73", Label = "电消耗（KWh）" },
         }
     }

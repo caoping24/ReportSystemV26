@@ -76,6 +76,7 @@ namespace CenterBackend.Services
             DateTime currentYearLastDay = currentYearFirstDay.AddYears(1).AddDays(-1);
             List<SourceData> sourceData = await _sourceData.GetByDateTimeRangeAsync(currentYearFirstDay, currentYearLastDay);
             List< OperatorInputData > operatorInputData= await _operatorInputData.GetByDateTimeRangeAsync(currentYearFirstDay, currentYearLastDay);
+
             WeekMoveDataSheet2Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet3Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet4Async(WeekWorkBook, sourceData, operatorInputData);
@@ -88,6 +89,7 @@ namespace CenterBackend.Services
             WeekMoveDataSheet11Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet12Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet13Async(WeekWorkBook, sourceData, operatorInputData);
+            WeekMoveDataSheet1Async(WeekWorkBook, sourceData, operatorInputData);//必须放在最后 因为需要用到前面12张表的数据
             return true;
         }
         /***********************数据处理***********************/
@@ -831,6 +833,62 @@ namespace CenterBackend.Services
             target.Cell12 = CalculateSum(productionDataCollection, x => x.TotalResult.AllAverage_4) ?? 0;
             target.Cell13 = CalculateSum(productionDataCollection, x => x.TotalResult.AllAverage_5) ?? 0;
         }
+        private static bool WeekMoveDataSheet1Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
+        {
+            WeekWorkBook.WorkSheet1 = Enumerable.Range(1, 1).Select(_ => new WorkSheet1()).ToList();
+
+            DateTime startTime;
+            DateTime endTime;
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+
+            startTime = currentWeekFirstDay;
+            endTime = startTime.AddDays(7);
+            int i = 0;
+            WeekWorkBook.WorkSheet1[i].Cell1 = WeekWorkBook.WorkSheet7[13].Cell1; //读取计算的收率
+
+            WeekWorkBook.WorkSheet1[i].Cell2 = WeekWorkBook.WorkSheet12[2].Cell1; //读取羟基单耗
+            WeekWorkBook.WorkSheet1[i].Cell3 = WeekWorkBook.WorkSheet12[2].Cell2; //读取氨单耗
+            WeekWorkBook.WorkSheet1[i].Cell4 = WeekWorkBook.WorkSheet12[2].Cell3; //读取硫酸单耗
+            //WeekWorkBook.WorkSheet1[i].Cell7 = CalculateAverage(sourceData, x => x.Cell13);   //	反应时间todo
+            WeekWorkBook.WorkSheet1[i].Cell21 = WeekWorkBook.WorkSheet12[2].Cell8; //读取硫酸单耗  //	废液单位产品排放量
+            if (sourceDatas != null)
+            {
+                var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+                WeekWorkBook.WorkSheet1[i].Cell5 = CalculateAverage(sourceData, x => x.Cell6);   //	羟基浓度 （配料后）
+                WeekWorkBook.WorkSheet1[i].Cell6 = CalculateAverage(sourceData, x => x.Cell23);   //	氨腈摩尔比
+
+                WeekWorkBook.WorkSheet1[i].Cell8 = CalculateAverage(sourceData, x => x.Cell27);   //	反应压力 
+                WeekWorkBook.WorkSheet1[i].Cell9 = CalculateAverage(sourceData, x => x.Cell21);   //	羟基加热温度
+                WeekWorkBook.WorkSheet1[i].Cell10 = CalculateAverage(sourceData, x => x.Cell25);  //	氨汽混合温度
+                WeekWorkBook.WorkSheet1[i].Cell11 = CalculateAverage(sourceData, x => x.Cell26);  //	管反热点温度
+                WeekWorkBook.WorkSheet1[i].Cell12 = CalculateAverage(sourceData, x => x.Cell62); //	预冷器结晶温度
+                WeekWorkBook.WorkSheet1[i].Cell13 = CalculateAverage(sourceData, x => x.Cell66);  //	一次结晶温度
+                WeekWorkBook.WorkSheet1[i].Cell14 = CalculateAverage(sourceData, x => x.Cell144);  //	降膜蒸发温度 新增的
+                WeekWorkBook.WorkSheet1[i].Cell15 = CalculateAverage(sourceData, x => x.Cell122);	//	二次结晶温度
+            }
+            if (operatorInputDatas != null)
+            {
+                var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+                WeekWorkBook.WorkSheet1[i].Cell16 = CalculateAverage(operatorInputData, x => x.Cell11);  //	二乙腈含量
+                WeekWorkBook.WorkSheet1[i].Cell17 = CalculateAverage(operatorInputData, x => x.Cell13);  //	羟基乙腈残余
+                WeekWorkBook.WorkSheet1[i].Cell18 = CalculateAverage(operatorInputData, x => x.Cell17);  //	pH值
+                WeekWorkBook.WorkSheet1[i].Cell19 = CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
+                WeekWorkBook.WorkSheet1[i].Cell20 = CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
+
+                WeekWorkBook.WorkSheet1[i].Cell22 = CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
+                WeekWorkBook.WorkSheet1[i].Cell23 = CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
+                WeekWorkBook.WorkSheet1[i].Cell24 = CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
+                WeekWorkBook.WorkSheet1[i].Cell25 = CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
+                WeekWorkBook.WorkSheet1[i].Cell26 = CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
+                WeekWorkBook.WorkSheet1[i].Cell27 = CalculateAverage(operatorInputData, x => x.Cell79); //	其它
+                WeekWorkBook.WorkSheet1[i].Cell28 = CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
+            }
+
+
+
+            return true;
+        }
+
         private static bool WeekMoveDataSheet2Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
             WeekWorkBook.WorkSheet2 = Enumerable.Range(1, 3).Select(_ => new WorkSheet2()).ToList();
@@ -1314,7 +1372,7 @@ namespace CenterBackend.Services
                     //materialDataCollection.MaterialDatas[3].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell4);
                     materialDataCollection.MaterialDatas[4].TotalResult.Usage = temp * 0.18218f / 1000;
                     materialDataCollection.MaterialDatas[5].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell112);
-                    //vmaterialDataCollection.MaterialDatas[6].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell4);
+                    materialDataCollection.MaterialDatas[6].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell143);//脱盐水消耗 使用cell143 自动采集
                     //materialDataCollection.MaterialDatas[7].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell4);
                     materialDataCollection.MaterialDatas[8].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell55) + CalculateFirstLastDifference(sourceData, x => x.Cell118);
                     materialDataCollection.MaterialDatas[9].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell134);
@@ -1322,9 +1380,10 @@ namespace CenterBackend.Services
                 if (operatorInputDatas != null)
                 {
                     var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    materialDataCollection.MaterialDatas[3].TotalResult.Usage = CalculateFirstLastDifference(operatorInputData, x => x.Cell71);
-                    materialDataCollection.MaterialDatas[6].TotalResult.Usage = CalculateFirstLastDifference(operatorInputData, x => x.Cell72);
-                    materialDataCollection.MaterialDatas[7].TotalResult.Usage = CalculateFirstLastDifference(operatorInputData, x => x.Cell73);
+                    var lowPressData = CalculateFirstLastDifference(operatorInputData, x => x.Cell71); //低压蒸汽消耗-手动录入
+                    var midellPressData = CalculateFirstLastDifference(operatorInputData, x => x.Cell72); //中压蒸汽消耗-手动录入
+                    materialDataCollection.MaterialDatas[3].TotalResult.Usage = lowPressData ?? 0 + midellPressData ?? 0;//蒸汽总消耗= 低压+中压
+                    materialDataCollection.MaterialDatas[7].TotalResult.Usage = CalculateFirstLastDifference(operatorInputData, x => x.Cell73);//电消耗
                 }
                 materialDataCollection.CalculateSum();
 

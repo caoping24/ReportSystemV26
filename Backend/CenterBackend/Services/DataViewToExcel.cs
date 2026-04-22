@@ -202,22 +202,9 @@ namespace CenterBackend.Services
         }
         private static bool WeekWriteExcel(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
-            //第一页
-            {
-                Calendar calendar = CultureInfo.InvariantCulture.Calendar;// 计算是当年第几周
-                int weekOfYear = calendar.GetWeekOfYear(
-                    weekWorkBookData.ReportedTime.Date,
-                    CalendarWeekRule.FirstDay,    // 周规则
-                    DayOfWeek.Monday              // 一周起始日（周一）
-
-                );
-                var temp = $"{weekWorkBookData.ReportedTime.Year}年{weekOfYear}周";
-                ISheet srcSheet;
-                srcSheet = srcWorkbook.GetSheetAt(0);
-                SetXlsxCellString(srcSheet, 1, 1, temp);
-            }
 
 
+            WeekWriteExcelSheet1(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet2(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet3(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet4(srcWorkbook, weekWorkBookData);
@@ -301,6 +288,35 @@ namespace CenterBackend.Services
                 {
                     SetXlsxCellValue(sheet, rowIdx + offset, colIdx, floatValue);
                 }
+            }
+        }
+
+
+        private static void WeekWriteExcelSheet1(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
+        {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(0);
+            //srcSheet.ForceFormulaRecalculation = false;
+            SetXlsxCellString(srcSheet, 2, 6, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+            //第一页
+            {
+                Calendar calendar = CultureInfo.InvariantCulture.Calendar;// 计算是当年第几周
+                int weekOfYear = calendar.GetWeekOfYear(
+                    weekWorkBookData.ReportedTime.Date,
+                    CalendarWeekRule.FirstDay,    // 周规则
+                    DayOfWeek.Monday              // 一周起始日（周一）
+
+                );
+                var temp = $"{weekWorkBookData.ReportedTime.Year}年{weekOfYear}周";
+                srcSheet = srcWorkbook.GetSheetAt(0);
+                SetXlsxCellString(srcSheet, 2, 7, temp);
+            }
+            var dataList = weekWorkBookData.WorkSheet1;
+            int i= 0;
+            if (dataList != null && dataList.Count > i && dataList[i] != null)
+            {
+                var dataItem = dataList[i];
+                WriteDataColumnsToExcel (dataItem, srcSheet, 3 + i, 6, 1, 28);
             }
         }
 

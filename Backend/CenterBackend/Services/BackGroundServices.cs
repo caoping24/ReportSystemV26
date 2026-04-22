@@ -108,9 +108,13 @@ namespace CenterBackend.Services
             comToSiemens.Cell9 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_3); //水分含量平均
             comToSiemens.Cell10 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_5); //未知物含量平均
 
-            var usageWater = DataToViewService.CalculateFirstLastDifference(operatorInputDatas, x => x.Cell72);//水消耗
+            var usageWater = DataToViewService.CalculateFirstLastDifference(sourceDatas, x => x.Cell143);//水消耗 修改为sourcedata中143 读取 
             var usageElectric = DataToViewService.CalculateFirstLastDifference(operatorInputDatas, x => x.Cell73);//电消耗
-            var usagesteam = DataToViewService.CalculateFirstLastDifference(operatorInputDatas, x => x.Cell71);//气消耗
+
+
+            var lowPressData = DataToViewService.CalculateFirstLastDifference(operatorInputDatas, x => x.Cell71); //低压蒸汽消耗-手动录入
+            var midellPressData = DataToViewService.CalculateFirstLastDifference(operatorInputDatas, x => x.Cell72); //中压蒸汽消耗-手动录入
+            var usagesteam = lowPressData ?? 0 + midellPressData ?? 0;//蒸汽总消耗= 低压+中压//气消耗 修改为低压和中压相加
 
             comToSiemens.Cell11 = usageWater;
             comToSiemens.Cell12 = usageElectric;
@@ -123,7 +127,7 @@ namespace CenterBackend.Services
 
             float standUsageWater = (usageWater ?? 0f) * 0.1229f;
             float standUsageElectric = (usageElectric ?? 0f) * 128.6f;
-            float standUsagesteam = (usagesteam ?? 0f) * 0.0857f;
+            float standUsagesteam = usagesteam * 0.0857f;
 
             float standUsageTotal = standUsageWater + standUsageElectric + standUsagesteam;
             var standUsagePerProduct = allProduction != null && allProduction != 0 ? standUsageTotal / allProduction : 0f;

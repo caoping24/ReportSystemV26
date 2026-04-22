@@ -22,23 +22,22 @@
 
   <ItemGroup>
     <COMReference Include="CCHMITAGS">
+      <WrapperTool>tlbimp</WrapperTool>
       <VersionMinor>0</VersionMinor>
       <VersionMajor>1</VersionMajor>
       <Guid>9a7a73c1-1a5d-4184-87eb-4e391bb56515</Guid>
       <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
       <Isolated>True</Isolated>
       <EmbedInteropTypes>true</EmbedInteropTypes>
-      <Private>True</Private>
     </COMReference>
     <COMReference Include="CCHMIRUNTIME">
+      <WrapperTool>tlbimp</WrapperTool>
       <VersionMinor>0</VersionMinor>
       <VersionMajor>1</VersionMajor>
       <Guid>1bb46049-5331-4ac5-b09b-194199f07fa6</Guid>
       <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
       <Isolated>True</Isolated>
-      <EmbedInteropTypes>true</EmbedInteropTypes>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
       <Private>True</Private>
     </COMReference>
   </ItemGroup>

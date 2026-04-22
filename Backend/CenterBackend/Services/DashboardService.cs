@@ -293,8 +293,8 @@ namespace CenterBackend.Services
             }
             else
             {
-                coreChartDto.Card1 = CalculateFirstLastDifference(dataList, x => x.Cell71);//蒸汽消耗
-                coreChartDto.Card2 = CalculateFirstLastDifference(dataList, x => x.Cell72);//脱盐水消耗
+                coreChartDto.Card1 = CalculateFirstLastDifference(dataList, x => x.Cell71);//低压蒸汽消耗
+                coreChartDto.Card2 = CalculateFirstLastDifference(dataList, x => x.Cell72);//中压蒸汽消耗
                 coreChartDto.Card3 = CalculateFirstLastDifference(dataList, x => x.Cell73);//电量消耗
             }
 
@@ -305,7 +305,7 @@ namespace CenterBackend.Services
         {
             var result = await GetLineOperateDataAsync(DateTime.Now, x => x.Cell71);
             if (result.Series != null && result.Series.Count > 0)
-                result.Series[0].Name = "蒸汽总消耗(t)";
+                result.Series[0].Name = "低压蒸汽消耗(t)";
             return result;
         }
 
@@ -313,7 +313,7 @@ namespace CenterBackend.Services
         {
             var result = await GetLineOperateDataAsync(DateTime.Now, x => x.Cell72);
             if (result.Series != null && result.Series.Count > 0)
-                result.Series[0].Name = "脱盐水总消耗((m³))";
+                result.Series[0].Name = "中压蒸汽消耗(t)";
             return result;
         }
 
