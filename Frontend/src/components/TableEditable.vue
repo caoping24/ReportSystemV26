@@ -10,10 +10,10 @@
           size="large"
           :tabBarStyle="{ marginBottom: 0 }" 
         >
-          <a-tab-pane 
-            v-for="page in totalPages" 
-            :key="page"
-            :tab="`检测数据 ${page}`"
+          <a-tab-pane
+            v-for="page in tablePages"
+            :key="page.key"
+            :tab="page.tab"
           />
         </a-tabs>
       </div>
@@ -54,10 +54,10 @@
     <component 
       :is="currentComponent" 
       ref="tableEditableRef"
-      :key="currentPage" 
+      :key="activeKey"
       class="table-editable-content"
       :selected-date="selectedDate"
-      :type="tabTypeMap[activeKey]"  
+      :type="currentTab.type"
     />
   </div>
 </template>
@@ -76,38 +76,39 @@ const loadTableEditableComponent = (page: number) => {
 };
 
 // 2. 分页状态管理 + 标签页与type的映射
-const totalPages = ref(6); 
-const currentPage = ref(1);
-const activeKey = ref<string>("1"); 
-// 标签页key对应接口type参数（可根据实际业务调整）
-const tabTypeMap = ref<Record<string, number>>({
-  '1': 1,  // 第一个标签对应type=1
-  '2': 2, 
-  '3': 3,
-  '4': 4,
-  '5': 5,
-  '6': 6
-});
+interface EditableTab {
+  key: string;
+  tab: string;
+  componentPage: number;
+  type: number;
+}
 
-// 监听activeKey变化，同步更新currentPage
-watch(activeKey, (newKey) => {
-  const page = Number(newKey);
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
+const tablePages: EditableTab[] = [
+  { key: "1", tab: "检测数据 1", componentPage: 1, type: 1 },
+  { key: "2", tab: "检测数据 2", componentPage: 2, type: 2 },
+  { key: "3", tab: "检测数据 3", componentPage: 3, type: 3 },
+  { key: "4", tab: "检测数据 4", componentPage: 4, type: 4 },
+  { key: "5", tab: "检测数据 5", componentPage: 5, type: 5 },
+  { key: "waste", tab: "废液", componentPage: 6, type: 7 },
+  { key: "6", tab: "检测数据 6", componentPage: 6, type: 6 },
+];
+
+const activeKey = ref<string>("1");
+const currentTab = computed(() => {
+  return tablePages.find((item) => item.key === activeKey.value) || tablePages[0];
 });
 
 // 计算当前要渲染的子组件
 const currentComponent = computed(() => {
-  return loadTableEditableComponent(currentPage.value);
+  return loadTableEditableComponent(currentTab.value.componentPage);
 });
 
 // 处理标签切换事件
 const handleTabChange = (key: string) => {
-  const page = Number(key);
-  if (page < 1 || page > totalPages.value) return;
+  const targetTab = tablePages.find((item) => item.key === key);
+  if (!targetTab) return;
   activeKey.value = key; 
-  message.success(`切换到第 ${page} 个可编辑表格`);
+  message.success(`切换到${targetTab.tab}`);
 };
 
 // 3. 日期选择器核心逻辑
@@ -171,18 +172,18 @@ const handleQuery = async () => {
 
     if (typeof currentInstance.fetchTableData === "function") {
       await currentInstance.fetchTableData();
-      ElMessage.success(`第 ${currentPage.value} 个表格【${selectedDate.value}】数据加载成功`);
+      ElMessage.success(`${currentTab.value.tab}【${selectedDate.value}】数据加载成功`);
     } else {
       ElMessage.error("当前表格无查询方法");
     }
   } catch (error) {
     console.error("表格查询失败：", error);
-    ElMessage.error(`第 ${currentPage.value} 个表格查询失败，请重试`);
+    ElMessage.error(`${currentTab.value.tab}查询失败，请重试`);
   }
 };
 
 // 6. 监听标签切换，自动查询当前日期数据
-watch(currentPage, () => {
+watch(activeKey, () => {
   nextTick(() => handleQuery());
 });
 

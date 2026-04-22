@@ -21,10 +21,10 @@ namespace CenterBackend.Controllers
         }
 
         /// <summary>
-        /// ·ÖÒ³¼ÇÂ¼ÁĞ±í
+        /// åˆ†é¡µè®°å½•åˆ—è¡¨
         /// </summary>
-        /// <param name="request">·ÖÒ³²ÎÊı</param>
-        /// <returns>·ÖÒ³½á¹û</returns>
+        /// <param name="request">åˆ†é¡µå‚æ•°</param>
+        /// <returns>åˆ†é¡µç»“æœ</returns>
         [HttpGet("GetReportByPage")]
         public async Task<ActionResult<PaginationResult<ReportRecord>>> GetReportByPage([FromQuery] PaginationRequest request)
         {
@@ -32,19 +32,19 @@ namespace CenterBackend.Controllers
             {
                 var result = await _reportRecordService.GetReportsByPageAsync(request);
 
-                if (result?.Data != null && result.Data.Count != 0)// ReportedTime ¾ùÎª "yyyy-MM-dd" ¸ñÊ½£¬°´¸ÃÈÕÆÚ½µĞòÅÅĞò£¨×îĞÂÔÚÇ°£©
+                if (result?.Data != null && result.Data.Count != 0)// ReportedTime å‡ä¸º "yyyy-MM-dd" æ ¼å¼ï¼ŒæŒ‰è¯¥æ—¥æœŸé™åºæ’åºï¼ˆæœ€æ–°åœ¨å‰ï¼‰
                 {
                     result.Data = result.Data
                         .OrderByDescending(r => r.ReportedTime)
                         .ToList();
                 }
 
-                return Ok(result); // ·µ»Ø200 + ·ÖÒ³½á¹û
+                return Ok(result); // è¿”å›200 + åˆ†é¡µç»“æœ
             }
             catch (Exception ex)
             {
-                // Òì³£´¦Àí£¨Êµ¼ÊÏîÄ¿¿É·â×°È«¾ÖÒì³£¹ıÂËÆ÷£©
-                return StatusCode(500, new { message = "²éÑ¯Ê§°Ü", detail = ex.Message });
+                // å¼‚å¸¸å¤„ç†ï¼ˆå®é™…é¡¹ç›®å¯å°è£…å…¨å±€å¼‚å¸¸è¿‡æ»¤å™¨ï¼‰
+                return StatusCode(500, new { message = "æŸ¥è¯¢å¤±è´¥", detail = ex.Message });
             }
         }
 
@@ -56,40 +56,40 @@ namespace CenterBackend.Controllers
             {
                 if (type <= _mockHeaderMains.Count && type >= 0 ) 
                 {
-                    return Ok(_mockHeaderMains[type - 1]); // ·µ»Ø200 
+                    return Ok(_mockHeaderMains[type - 1]); // è¿”å›200
                 }
                 else
                 {
-                    return BadRequest(new { message = "´«ÈëType²»ºÏ·¨"});
+                    return BadRequest(new { message = "ä¼ å…¥Typeä¸åˆæ³•"});
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "²éÑ¯Ê§°Ü", detail = ex.Message });
+                return StatusCode(500, new { message = "æŸ¥è¯¢å¤±è´¥", detail = ex.Message });
             }
         }
 
         [HttpGet("HourData")]
         public async Task<ActionResult<List<HourDataDto>>> GetHourData(string date, string type)
         {
-            // 1. Ğ£ÑéÈÕÆÚ¸ñÊ½
+            // 1. æ ¡éªŒæ—¥æœŸæ ¼å¼
             //if (!DateTime.TryParseExact(getHourDatasDto.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var queryDate))
             //{
-            //    return BadRequest(new { message = "ÈÕÆÚ¸ñÊ½´íÎó£¬Çë´«ÈëYYYY-MM-DD¸ñÊ½" });
+            //    return BadRequest(new { message = "æ—¥æœŸæ ¼å¼é”™è¯¯ï¼Œè¯·ä¼ å…¥YYYY-MM-DDæ ¼å¼" });
             //}
             try
             {
 
                 var resultList = await _reportRecordService.getHourDataTableOne(date, type);
 
-                // Ö±½Ó·µ»Ø½á¹ûÁĞ±í
+                // ç›´æ¥è¿”å›ç»“æœåˆ—è¡¨
                 return Ok(resultList);
             }
             catch (Exception ex)
             {
-                // Éú²ú»·¾³½¨ÒéÌí¼ÓÈÕÖ¾¼ÇÂ¼
-                // _logger.LogError(ex, "²éÑ¯Ğ¡Ê±Êı¾İÊ§°Ü£¬ÈÕÆÚ£º{QueryDate}", getHourDatasDto.Date);
-                return StatusCode(500, new { message = "²éÑ¯Ê§°Ü", detail = ex.Message });
+                // ç”Ÿäº§ç¯å¢ƒå»ºè®®æ·»åŠ æ—¥å¿—è®°å½•
+                // _logger.LogError(ex, "æŸ¥è¯¢å°æ—¶æ•°æ®å¤±è´¥ï¼Œæ—¥æœŸï¼š{QueryDate}", getHourDatasDto.Date);
+                return StatusCode(500, new { message = "æŸ¥è¯¢å¤±è´¥", detail = ex.Message });
             }
         }
 
@@ -97,17 +97,17 @@ namespace CenterBackend.Controllers
         [HttpPost("SaveCell")]
         public async Task<ActionResult<List<TableHeaderDto>>> SaveCell([FromBody] SaveCellRequestDto request)
         {
-            // Ğ£Ñé±ØÌî²ÎÊı
+            // æ ¡éªŒå¿…å¡«å‚æ•°
             if (string.IsNullOrEmpty(request.Date)
                 || string.IsNullOrEmpty(request.Prop)
                 || request.Hour < 0 || request.Hour > 23)
             {
-                return StatusCode(500, new { message = "²ÎÊı²»ºÏ·¨" });
+                return StatusCode(500, new { message = "å‚æ•°ä¸åˆæ³•" });
             }
 
             //if (string.IsNullOrEmpty(request.Value))
             //{
-            //    return StatusCode(200, new { message = "Êı¾İÎª¿Õ" });
+            //    return StatusCode(200, new { message = "æ•°æ®ä¸ºç©º" });
             //}
 
             try
@@ -118,44 +118,44 @@ namespace CenterBackend.Controllers
                         prop: request.Prop,
                         valueStr: request.Value);
 
-                return Ok(); // ·µ»Ø200 
+                return Ok(); // è¿”å›200
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "²éÑ¯Ê§°Ü", detail = ex.Message });
+                return StatusCode(500, new { message = "æŸ¥è¯¢å¤±è´¥", detail = ex.Message });
             }
         }
 
 
         private readonly List<TableHeaderMainDto> _mockHeaderMains = new()
 {
-    // ±í1
+    // è¡¨1
     new TableHeaderMainDto
     {
-        // ·Ö×é±íÍ·£º½«¼ì²âÖ¸±ê¹éÎªÒ»¸ö·Ö×é
+        // åˆ†ç»„è¡¨å¤´ï¼šå°†æ£€æµ‹æŒ‡æ ‡å½’ä¸ºä¸€ä¸ªåˆ†ç»„
         groupHeaders = new List<GroupHeader>
         {
             new GroupHeader
             {
                 Props = new List<string> { "Cell1", "Cell2", "Cell3", "Cell4", "Cell5" },
-                Label = "ÉÁ·¢Æ÷ÀäÄıÒº¼ì²âÊı",
+                Label = "é—ªå‘å™¨å†·å‡æ¶²æ£€æµ‹æ•°",
                 Unit = ""
             }
         },
-        // ÆÕÍ¨±íÍ·£ºÓëÔ­½á¹¹Ò»ÖÂ
+        // æ™®é€šè¡¨å¤´ï¼šä¸åŸç»“æ„ä¸€è‡´
         tableHeaders = new List<TableHeaderDto>
         {
-            new TableHeaderDto { Prop = "hour", Label = "Ğ¡Ê±", Unit = "" },
+            new TableHeaderDto { Prop = "hour", Label = "å°æ—¶", Unit = "" },
             new TableHeaderDto { Prop = "Cell1", Label = "COD(mg/L)", Unit = "mg/L" },
-            new TableHeaderDto { Prop = "Cell2", Label = "TCN/×Üëæ(mg/L)", Unit = "mg/L" },
-            new TableHeaderDto { Prop = "Cell3", Label = "NH3-N°±µª(mg/L)", Unit = "mg/L" },
-            new TableHeaderDto { Prop = "Cell4", Label = "HCHO¼×È©(mg/L)", Unit = "mg/L" },
-            new TableHeaderDto { Prop = "Cell5", Label = "ÉÁ·¢Æ÷ÀäÄıÒºpH", Unit = "" },
+            new TableHeaderDto { Prop = "Cell2", Label = "TCN/æ€»è…ˆ(mg/L)", Unit = "mg/L" },
+            new TableHeaderDto { Prop = "Cell3", Label = "NH3-Næ°¨æ°®(mg/L)", Unit = "mg/L" },
+            new TableHeaderDto { Prop = "Cell4", Label = "HCHOç”²é†›(mg/L)", Unit = "mg/L" },
+            new TableHeaderDto { Prop = "Cell5", Label = "é—ªå‘å™¨å†·å‡æ¶²pH", Unit = "" },
         }
     },
  
 
-   // ±í2
+   // è¡¨2
     new TableHeaderMainDto
     {
         groupHeaders = new List<GroupHeader>
@@ -163,26 +163,26 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell11", "Cell12", "Cell13", "Cell14", "Cell15", "Cell16" ,"Cell17", "Cell18"},
-                Label = "·´Ó¦Òº¼ì²âÊı¾İ¼ÇÂ¼±í",
+                Label = "ååº”æ¶²æ£€æµ‹æ•°æ®è®°å½•è¡¨",
                 Unit = ""
             },
         },
         tableHeaders = new List<TableHeaderDto>
         {
-            new TableHeaderDto { Prop = "hour", Label = "Ğ¡Ê±", Unit = "" },
-            new TableHeaderDto { Prop = "Cell11", Label = "¶şÒÒëæº¬Á¿-»¯·Ö£¨%£©", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell12", Label = "¶şÒÒëæº¬Á¿-É«Æ×£¨%£©", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell13", Label = "ôÇ»ùÒÒëæ²ĞÓà£¨%£©", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell14", Label = "ôÇ»ùÒÒëæ²ĞÓà£¨g/L£©", Unit = "g/L" },
-            new TableHeaderDto { Prop = "Cell15", Label = "¸Ê°±ëæ£¨g/L£©", Unit = "g/L" },
-            new TableHeaderDto { Prop = "Cell16", Label = "ÈıÒÒëæ£¨g/L£©", Unit = "g/L" },
-            new TableHeaderDto { Prop = "Cell17", Label = "·´Ó¦Òº¼ì²âÊı¾İpH", Unit = "" },
-            new TableHeaderDto { Prop = "Cell18", Label = "·´Ó¦Òº±ÈÖØ(kg/m3)", Unit = "" },
+            new TableHeaderDto { Prop = "hour", Label = "å°æ—¶", Unit = "" },
+            new TableHeaderDto { Prop = "Cell11", Label = "äºŒä¹™è…ˆå«é‡-åŒ–åˆ†ï¼ˆ%ï¼‰", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell12", Label = "äºŒä¹™è…ˆå«é‡-è‰²è°±ï¼ˆ%ï¼‰", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell13", Label = "ç¾ŸåŸºä¹™è…ˆæ®‹ä½™ï¼ˆ%ï¼‰", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell14", Label = "ç¾ŸåŸºä¹™è…ˆæ®‹ä½™ï¼ˆg/Lï¼‰", Unit = "g/L" },
+            new TableHeaderDto { Prop = "Cell15", Label = "ç”˜æ°¨è…ˆï¼ˆg/Lï¼‰", Unit = "g/L" },
+            new TableHeaderDto { Prop = "Cell16", Label = "ä¸‰ä¹™è…ˆï¼ˆg/Lï¼‰", Unit = "g/L" },
+            new TableHeaderDto { Prop = "Cell17", Label = "ååº”æ¶²æ£€æµ‹æ•°æ®pH", Unit = "" },
+            new TableHeaderDto { Prop = "Cell18", Label = "ååº”æ¶²æ¯”é‡(kg/m3)", Unit = "" },
         }
     },
 
 
-    // ±í3
+    // è¡¨3
     new TableHeaderMainDto
     {
         groupHeaders = new List<GroupHeader>
@@ -190,37 +190,37 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell21", "Cell22", "Cell23", "Cell24", "Cell25", "Cell26" },
-                Label = "Ò»´Î½á¾§Îï/Ò»´Î²úÆ·",
+                Label = "ä¸€æ¬¡ç»“æ™¶ç‰©/ä¸€æ¬¡äº§å“",
                 Unit = ""
             },
             new GroupHeader
             {
                 Props = new List<string> { "Cell31", "Cell32", "Cell33", "Cell34", "Cell35", "Cell36" },
-                Label = "¶ş´Î½á¾§Îï/¶ş´Î²úÆ·",
+                Label = "äºŒæ¬¡ç»“æ™¶ç‰©/äºŒæ¬¡äº§å“",
                 Unit = ""
             }
         },
         tableHeaders = new List<TableHeaderDto>
         {
-            new TableHeaderDto { Prop = "hour", Label = "Ğ¡Ê±", Unit = "" },
-            new TableHeaderDto { Prop = "Cell21", Label = "¶şÒÒëæº¬Á¿-»¯·Ö (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell22", Label = "¶şÒÒëæº¬Á¿-É«Æ× (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell23", Label = "Ë®·Öº¬Á¿ (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell24", Label = "¶şÒÒëæ + Ë® (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell25", Label = "Î´ÖªÎïº¬Á¿ (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell26", Label = "²úÁ¿ (kg)", Unit = "kg" },
-            new TableHeaderDto { Prop = "Cell31", Label = "¶şÒÒëæº¬Á¿-»¯·Ö (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell32", Label = "¶şÒÒëæº¬Á¿-É«Æ× (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell33", Label = "Ë®·Öº¬Á¿ (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell34", Label = "¶şÒÒëæ + Ë® (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell35", Label = "Î´ÖªÎïº¬Á¿ (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell36", Label = "²úÁ¿ (kg)", Unit = "kg" },
+            new TableHeaderDto { Prop = "hour", Label = "å°æ—¶", Unit = "" },
+            new TableHeaderDto { Prop = "Cell21", Label = "äºŒä¹™è…ˆå«é‡-åŒ–åˆ† (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell22", Label = "äºŒä¹™è…ˆå«é‡-è‰²è°± (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell23", Label = "æ°´åˆ†å«é‡ (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell24", Label = "äºŒä¹™è…ˆ + æ°´ (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell25", Label = "æœªçŸ¥ç‰©å«é‡ (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell26", Label = "äº§é‡ (kg)", Unit = "kg" },
+            new TableHeaderDto { Prop = "Cell31", Label = "äºŒä¹™è…ˆå«é‡-åŒ–åˆ† (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell32", Label = "äºŒä¹™è…ˆå«é‡-è‰²è°± (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell33", Label = "æ°´åˆ†å«é‡ (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell34", Label = "äºŒä¹™è…ˆ + æ°´ (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell35", Label = "æœªçŸ¥ç‰©å«é‡ (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell36", Label = "äº§é‡ (kg)", Unit = "kg" },
       
         }
     },
   
 
-    // ±í4
+    // è¡¨4
     new TableHeaderMainDto
     {
         groupHeaders = new List<GroupHeader>
@@ -228,23 +228,23 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell41", "Cell42", "Cell43", "Cell44", "Cell45" },
-                Label = "Ò»´ÎÄ¸Òº³É·Ö¼ì²â",
+                Label = "ä¸€æ¬¡æ¯æ¶²æˆåˆ†æ£€æµ‹",
                 Unit = ""
             }
         },
         tableHeaders = new List<TableHeaderDto>
         {
-            new TableHeaderDto { Prop = "hour", Label = "Ğ¡Ê±", Unit = "" },
-            new TableHeaderDto { Prop = "Cell41", Label = "¶şÒÒëæº¬Á¿-»¯·Ö (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell42", Label = "¶şÒÒëæº¬Á¿-É«Æ× (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell43", Label = "ôÇ»ùÒÒ¾¦²ĞÓà-»¯·Ö (%)", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell44", Label = "ôÇ»ùÒÒ¾¦²ĞÓà-É«Æ× (g/L)", Unit = "g/L" },
-            new TableHeaderDto { Prop = "Cell45", Label = "Áòï§ (g/L)", Unit = "g/L" },
+            new TableHeaderDto { Prop = "hour", Label = "å°æ—¶", Unit = "" },
+            new TableHeaderDto { Prop = "Cell41", Label = "äºŒä¹™è…ˆå«é‡-åŒ–åˆ† (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell42", Label = "äºŒä¹™è…ˆå«é‡-è‰²è°± (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell43", Label = "ç¾ŸåŸºä¹™ç›æ®‹ä½™-åŒ–åˆ† (%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell44", Label = "ç¾ŸåŸºä¹™ç›æ®‹ä½™-è‰²è°± (g/L)", Unit = "g/L" },
+            new TableHeaderDto { Prop = "Cell45", Label = "ç¡«é“µ (g/L)", Unit = "g/L" },
         }
     },
   
 
-  // ±í5
+  // è¡¨5
     new TableHeaderMainDto
     {
         groupHeaders = new List<GroupHeader>
@@ -252,44 +252,44 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell51", "Cell52", "Cell53", "Cell54", "Cell55", "Cell56" },
-                Label = "Ä¸ÒºÍÑÉ«Ç°¼ì²âÊı¾İ",
+                Label = "æ¯æ¶²è„±è‰²å‰æ£€æµ‹æ•°æ®",
                 Unit = ""
             },
             new GroupHeader
             {
                 Props = new List<string> { "Cell57", "Cell58", "Cell59", "Cell60", "Cell61", "Cell62" },
-                Label = "Ä¸ÒºÍÑÉ«ºó¼ì²âÊı¾İ",
+                Label = "æ¯æ¶²è„±è‰²åæ£€æµ‹æ•°æ®",
                 Unit = ""
             },
             new GroupHeader
             {
                 Props = new List<string> { "Cell63", "Cell64" },
-                Label = "·ÏÒº/ºÄ²ÄÏûºÄ",
+                Label = "åºŸæ¶²/è€—ææ¶ˆè€—",
                 Unit = ""
             }
         },
         tableHeaders = new List<TableHeaderDto>
         {
-            new TableHeaderDto { Prop = "hour", Label = "Ğ¡Ê±", Unit = "" },
-            new TableHeaderDto {Prop =  "Cell51", Label = "¶şÒÒëæº¬Á¿ (»¯·Ö£¨%£©)" },
-            new TableHeaderDto { Prop = "Cell52", Label = "¶şÒÒëæº¬Á¿ (É«Æ×£¨%£©)" },
-            new TableHeaderDto { Prop = "Cell53", Label = "ôÇ»ùÒÒëæ²ĞÓà (%)" },
-            new TableHeaderDto { Prop = "Cell54", Label = "ôÇ»ùÒÒëæ²ĞÓà (g/L)" },
-            new TableHeaderDto { Prop = "Cell55", Label = "Áòï§ (g/L)" },
-            new TableHeaderDto { Prop = "Cell56", Label = "Í¸¹âÂÊ (%)" },
-            new TableHeaderDto { Prop = "Cell57", Label = "¶şÒÒëæº¬Á¿ (»¯·Ö£¨%£©)" },
-            new TableHeaderDto { Prop = "Cell58", Label = "¶şÒÒëæº¬Á¿ (É«Æ×£¨%£©)" },
-            new TableHeaderDto { Prop = "Cell59", Label = "ôÇ»ùÒÒëæ²ĞÓà (%)" },
-            new TableHeaderDto { Prop = "Cell60", Label = "ôÇ»ùÒÒëæ²ĞÓà (g/L)" },
-            new TableHeaderDto { Prop = "Cell61", Label = "Áòï§ (g/L)" },
-            new TableHeaderDto { Prop = "Cell62", Label = "Í¸¹âÂÊ (%)" },
-            new TableHeaderDto { Prop = "Cell63", Label = "·ÏÒºÖĞ¶şÒÒ¾¦º¬Á¿ %" },
-            new TableHeaderDto { Prop = "Cell64", Label = "»îĞÔÌ¿ÏûºÄ (kg)" },
+            new TableHeaderDto { Prop = "hour", Label = "å°æ—¶", Unit = "" },
+            new TableHeaderDto {Prop =  "Cell51", Label = "äºŒä¹™è…ˆå«é‡ (åŒ–åˆ†ï¼ˆ%ï¼‰)" },
+            new TableHeaderDto { Prop = "Cell52", Label = "äºŒä¹™è…ˆå«é‡ (è‰²è°±ï¼ˆ%ï¼‰)" },
+            new TableHeaderDto { Prop = "Cell53", Label = "ç¾ŸåŸºä¹™è…ˆæ®‹ä½™ (%)" },
+            new TableHeaderDto { Prop = "Cell54", Label = "ç¾ŸåŸºä¹™è…ˆæ®‹ä½™ (g/L)" },
+            new TableHeaderDto { Prop = "Cell55", Label = "ç¡«é“µ (g/L)" },
+            new TableHeaderDto { Prop = "Cell56", Label = "é€å…‰ç‡ (%)" },
+            new TableHeaderDto { Prop = "Cell57", Label = "äºŒä¹™è…ˆå«é‡ (åŒ–åˆ†ï¼ˆ%ï¼‰)" },
+            new TableHeaderDto { Prop = "Cell58", Label = "äºŒä¹™è…ˆå«é‡ (è‰²è°±ï¼ˆ%ï¼‰)" },
+            new TableHeaderDto { Prop = "Cell59", Label = "ç¾ŸåŸºä¹™è…ˆæ®‹ä½™ (%)" },
+            new TableHeaderDto { Prop = "Cell60", Label = "ç¾ŸåŸºä¹™è…ˆæ®‹ä½™ (g/L)" },
+            new TableHeaderDto { Prop = "Cell61", Label = "ç¡«é“µ (g/L)" },
+            new TableHeaderDto { Prop = "Cell62", Label = "é€å…‰ç‡ (%)" },
+            new TableHeaderDto { Prop = "Cell63", Label = "åºŸæ¶²ä¸­äºŒä¹™ç›å«é‡ %" },
+            new TableHeaderDto { Prop = "Cell64", Label = "æ´»æ€§ç‚­æ¶ˆè€— (kg)" },
         }
     },
    
 
-   // ±í6
+   // è¡¨6
     new TableHeaderMainDto
     {
         groupHeaders = new List<GroupHeader>
@@ -297,16 +297,41 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell71", "Cell72", "Cell73" },
-                Label = "¹«ÓÃ¹¤³ÌÏûºÄ",
+                Label = "å…¬ç”¨å·¥ç¨‹æ¶ˆè€—",
                 Unit = ""
             }
         },
         tableHeaders = new List<TableHeaderDto>
         {
-            new TableHeaderDto { Prop = "hour", Label = "Ğ¡Ê±", Unit = "" },
-            new TableHeaderDto { Prop = "Cell71", Label = "ÕôÆû×ÜÏûºÄ£¨t£©" },
-            new TableHeaderDto { Prop = "Cell72", Label = "ÍÑÑÎË®ÏûºÄ£¨t£©" },
-            new TableHeaderDto { Prop = "Cell73", Label = "µçÏûºÄ£¨KWh£©" },
+            new TableHeaderDto { Prop = "hour", Label = "å°æ—¶", Unit = "" },
+            new TableHeaderDto { Prop = "Cell71", Label = "è’¸æ±½æ€»æ¶ˆè€—ï¼ˆtï¼‰" },
+            new TableHeaderDto { Prop = "Cell72", Label = "è„±ç›æ°´æ¶ˆè€—ï¼ˆtï¼‰" },
+            new TableHeaderDto { Prop = "Cell73", Label = "ç”µæ¶ˆè€—ï¼ˆKWhï¼‰" },
+        }
+    },
+
+   // è¡¨7ï¼šåºŸæ¶²
+    new TableHeaderMainDto
+    {
+        groupHeaders = new List<GroupHeader>
+        {
+            new GroupHeader
+            {
+                Props = new List<string> { "Cell74", "Cell75", "Cell76", "Cell77", "Cell78", "Cell79", "Cell80" },
+                Label = "åºŸæ¶²",
+                Unit = ""
+            }
+        },
+        tableHeaders = new List<TableHeaderDto>
+        {
+            new TableHeaderDto { Prop = "hour", Label = "å°æ—¶", Unit = "" },
+            new TableHeaderDto { Prop = "Cell74", Label = "ç¾ŸåŸºä¹™è…ˆ%", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell75", Label = "ç¡«é“µ%", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell76", Label = "äºŒä¹™è…ˆ%", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell77", Label = "ç”˜æ°¨è…ˆ%", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell78", Label = "ä¸‰ä¹™è…ˆ%", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell79", Label = "å…¶å®ƒ%", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell80", Label = "æ°´åˆ†%", Unit = "%" },
         }
     }
     
