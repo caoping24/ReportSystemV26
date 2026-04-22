@@ -9,6 +9,7 @@ using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
 using Org.BouncyCastle.Asn1.Ocsp;
+using System.Globalization;
 
 namespace CenterBackend.Services
 {
@@ -201,6 +202,22 @@ namespace CenterBackend.Services
         }
         private static bool WeekWriteExcel(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
+            //第一页
+            {
+                Calendar calendar = CultureInfo.InvariantCulture.Calendar;// 计算是当年第几周
+                int weekOfYear = calendar.GetWeekOfYear(
+                    weekWorkBookData.ReportedTime.Date,
+                    CalendarWeekRule.FirstDay,    // 周规则
+                    DayOfWeek.Monday              // 一周起始日（周一）
+
+                );
+                var temp = $"{weekWorkBookData.ReportedTime.Year}年{weekOfYear}周";
+                ISheet srcSheet;
+                srcSheet = srcWorkbook.GetSheetAt(0);
+                SetXlsxCellString(srcSheet, 1, 1, temp);
+            }
+
+
             WeekWriteExcelSheet2(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet3(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet4(srcWorkbook, weekWorkBookData);

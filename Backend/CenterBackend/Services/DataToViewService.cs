@@ -157,7 +157,7 @@ namespace CenterBackend.Services
                     var currentVal = source1[i].Cell14;
                     var prevData = source1[i - 1]?.Cell14;
                     if (currentVal != null && prevData != null)
-                        target[i].Cell14 = (currentVal - prevData) / 1000;
+                        target[i].Cell14 = (currentVal - prevData);
                 }
                 target[i].Cell15 = source1[i].Cell15;
                 if (i != 0)// 每小时的差值
@@ -165,7 +165,7 @@ namespace CenterBackend.Services
                     var currentVal = source1[i].Cell16;
                     var prevData = source1[i - 1]?.Cell16;
                     if (currentVal != null && prevData != null)
-                        target[i].Cell16 = (currentVal - prevData) / 1000;
+                        target[i].Cell16 = (currentVal - prevData);
                 }
                 target[i].Cell17 = source1[i].Cell17;
                 target[i].Cell18 = source1[i].Cell18;
@@ -326,7 +326,7 @@ namespace CenterBackend.Services
                     var currentVal = source1[i].Cell112;
                     var prevData = source1[i - 1]?.Cell112;
                     if (currentVal != null && prevData != null)
-                        target[i].Cell112 = (currentVal - prevData) / 1000;
+                        target[i].Cell112 = (currentVal - prevData);//蒸汽本身就是吨
                 }
                 target[i].Cell113 = source1[i].Cell113;
                 target[i].Cell114 = source1[i].Cell114;
@@ -468,7 +468,7 @@ namespace CenterBackend.Services
                 //第一列
                 target[i].Cell1 = productionDataCollection.DayResult.AllProduction;
                 target[i].Cell2 = productionDataCollection.DayResult.AllYield;
-                //target[i].Cell3 = (productionDataCollection.DayResult.AllProduction >= shiftsProductionAverage) ? 5 : 6;//Wingdings 3 字体 5:上箭头 6 :下箭头   公式可以做在excel中
+                target[i].Cell3 = (productionDataCollection.DayResult.AllProduction >= shiftsProductionAverage) ? 5 : 6;//Wingdings 3 字体 5:上箭头 6 :下箭头   公式可以做在excel中
                 target[i].Cell4 = productionDataCollection.DayResult.AllProduction - shiftsProductionAverage;
                 target[i].Cell5 = productionDataCollection.DayResult.AllAverage_3;
                 target[i].Cell6 = productionDataCollection.DayResult.AllAverage_5;
@@ -508,10 +508,10 @@ namespace CenterBackend.Services
                 }
                 //第二列
                 //target[i].Cell34 = //手填基准值
-                target[i].Cell35 = CalculateAverage(sourcedataPart, x => x.Cell24);//累计摩尔比
+                target[i].Cell35 = CalculateAverage(sourcedataPart, x => x.Cell23);//累计摩尔比
                 //target[i].Cell36 = //公式做在模板中 累计摩尔比与手填基准值的差值  上下箭头表示
 
-                target[i].Cell37 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell20) / 12;//累计除以当班时间
+                target[i].Cell37 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell20) / 12 / 1000 ;//累计除以当班时间 还要换算成m³/h
                 target[i].Cell38 = CalculateAverage(sourcedataPart, x => x.Cell6);
                 target[i].Cell39 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell14) / 12;
                 target[i].Cell40 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell16) / 12;
@@ -538,7 +538,7 @@ namespace CenterBackend.Services
                 //target[i].Cell60 = 0;//excel中计算
                 target[i].Cell61 = CalculateAverage(sourcedataPart, x => x.Cell40);
                 target[i].Cell62 = CalculateAverage(sourcedataPart, x => x.Cell39);
-                target[i].Cell63 = CalculateAverage(sourcedataPart, x => x.Cell53);//闪发器液位没有统计  只有冷凝液罐的液位
+                //target[i].Cell63 = CalculateAverage(sourcedataPart, x => x.Cell53);//闪发器液位没有统计  只有冷凝液罐的液位
                 target[i].Cell64 = CalculateAverage(operatorInputdataPart, x => x.Cell1);
                 target[i].Cell65 = CalculateAverage(operatorInputdataPart, x => x.Cell2);
                 target[i].Cell66 = CalculateAverage(operatorInputdataPart, x => x.Cell3);
@@ -548,7 +548,7 @@ namespace CenterBackend.Services
                 
                 target[i].Cell69 = CalculateAverage(sourcedataPart, x => x.Cell70);
                 target[i].Cell70 = CalculateAverage(sourcedataPart, x => x.Cell66);
-                //target[i].Cell71 = (target[i].Cell70 ?? 0f) - (target[i].Cell69 ?? 0f);//excel中计算差值
+                target[i].Cell71 = (target[i].Cell70 ?? 0f) - (target[i].Cell69 ?? 0f);//差值
                 target[i].Cell72 = CalculateAverage(sourcedataPart, x => x.Cell67);
                 target[i].Cell73 = CalculateAverage(sourcedataPart, x => x.Cell65);
                 target[i].Cell74 = productionDataCollection.DayResult.FirstYield;
@@ -557,7 +557,7 @@ namespace CenterBackend.Services
 
                 target[i].Cell77 = CalculateAverage(sourcedataPart, x => x.Cell125);
                 target[i].Cell78 = CalculateAverage(sourcedataPart, x => x.Cell122);
-                //target[i].Cell79 = (target[i].Cell78 ?? 0f) - (target[i].Cell77 ?? 0f);excel中计算差值
+                target[i].Cell79 = (target[i].Cell78 ?? 0f) - (target[i].Cell77 ?? 0f);//差值
                 target[i].Cell80 = CalculateAverage(sourcedataPart, x => x.Cell121);
                 //target[i].Cell81 = //二次结晶没有PH
                 target[i].Cell82 = productionDataCollection.DayResult.SecondYield;
@@ -568,13 +568,13 @@ namespace CenterBackend.Services
                 target[i].Cell86 = CalculateAverage(sourcedataPart, x => x.Cell108);
                 target[i].Cell87 = CalculateAverage(sourcedataPart, x => x.Cell92);
                 //target[i].Cell88 =//低蒸液位没有统计
-                target[i].Cell89 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell107);
+                target[i].Cell89 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell106);
                 target[i].Cell90 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell107) / 12;
-                target[i].Cell91 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell122);
-                target[i].Cell92 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell122) / 12;
+                target[i].Cell91 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell115);
+                target[i].Cell92 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell116) / 12;
                 target[i].Cell93 = CalculateAverage(sourcedataPart, x => x.Cell114);
                 //target[i].Cell94 = 0;//浓缩比 excel中计算
-                target[i].Cell95 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell112) / 12; ;
+                target[i].Cell95 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell112) ;
                 target[i].Cell96 = CalculateAverage(sourcedataPart, x => x.Cell112);
                 //float temp1, temp2, temp3;
                 //temp1 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell107) ?? 0f;
@@ -619,15 +619,15 @@ namespace CenterBackend.Services
             productionDataCollection = CalculateForSheet3(startTime, operatorInputDatas);
             float rangeYield = productionDataCollection.TotalResult.AllYield;//获取每日折百产量
 
-            const float qualifiedCell1 = 0.515f;//羟基乙腈浓度
-            const float diffCell1 = 0.0103f;
-            const float qualifiedCell2 = 0.515f;//氨化反应热点温度
-            const float diffCell2 = 0.0103f;
-            const float qualifiedCell3 = 0.515f;//一次结晶温度
-            const float diffCell3 = 0.0103f;
-            const float qualifiedCell4 = 0.515f;//羟基浓度
-            const float diffCell4 = 0.0103f;
-            const float qualifiedCell5 = 0.515f;//氨/腈摩尔比
+            const float qualifiedCell1 = 415;//羟基乙腈浓度
+            const float diffCell1 = 5;
+            const float qualifiedCell2 = 162;//氨化反应热点温度
+            const float diffCell2 = 5;
+            const float qualifiedCell3 = 20;//一次结晶温度
+            const float diffCell3 = 3;
+            //const float qualifiedCell4 = 0.515f;//羟基浓度
+            //const float diffCell4 = 0.0103f;
+            const float qualifiedCell5 = 0.530f;//氨/腈摩尔比
             const float diffCell5 = 0.0103f;
 
             float minRange = 0;
@@ -649,14 +649,12 @@ namespace CenterBackend.Services
             rerult = CountValueInRange(sourceDatas, x => x.Cell66, minRange, maxRange);
             target.Cell3 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
-            maxRange = qualifiedCell4 + diffCell4;
-            minRange = qualifiedCell4 - diffCell4;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell6, minRange, maxRange);
-            target.Cell4 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
+
+            target.Cell4 = target.Cell1;//这两个现在是同一个数据
 
             maxRange = qualifiedCell5 + diffCell5;
             minRange = qualifiedCell5 - diffCell5;
-            rerult = CountRatioInRange(sourceDatas, x => x.Cell20, x => x.Cell14, minRange, maxRange);
+            rerult = CountValueInRange(sourceDatas, x => x.Cell23, minRange, maxRange);
             target.Cell5 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
             var count1 = productionDataCollection.DayShiftData.Where(x => x.Cell41 >= 0.9);
