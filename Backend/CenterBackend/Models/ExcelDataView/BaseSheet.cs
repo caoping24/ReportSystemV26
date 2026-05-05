@@ -30,7 +30,6 @@ namespace CenterBackend.Models.ExcelDataView
             get => ReportedTime.ToString("yyyy-MM-dd");
         }
     }
-
     public enum SheetType
     {
         DayReport,
