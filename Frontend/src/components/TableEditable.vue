@@ -3,23 +3,17 @@
     <!-- 标签栏 + 日期选择器/按钮 容器 -->
     <div class="tabs-header">
       <div class="tabs-container">
-        <a-tabs 
-          v-model:activeKey="activeKey" 
+        <a-tabs
+          v-model:activeKey="activeKey"
           @change="handleTabChange"
           type="card"
           size="large"
-          :tabBarStyle="{ marginBottom: 0 }" 
+          :tabBarStyle="{ marginBottom: 0 }"
         >
-          <a-tab-pane 
-            v-for="page in totalPages" 
-            :key="page"
-            :tab="page === 1 ? '闪发器冷凝液' 
-                : page === 2 ? '反应液' 
-                : page === 3 ? '一次/二次结晶物/产品' 
-                : page === 4 ? '一次母液' 
-                : page === 5 ? '母液脱色前后/废液' 
-                : page === 6 ? '能源消耗' 
-                : `录入数据 ${page}`"
+          <a-tab-pane
+            v-for="page in tablePages"
+            :key="page.key"
+            :tab="page.tab"
           />
         </a-tabs>
       </div>
@@ -57,8 +51,8 @@
     </div>
 
     <!-- 动态渲染子组件：新增传递type参数 -->
-    <component 
-      :is="currentComponent" 
+    <component
+      :is="currentComponent"
       ref="tableEditableRef"
       :key="activeKey"
       class="table-editable-content"
@@ -90,13 +84,13 @@ interface EditableTab {
 }
 
 const tablePages: EditableTab[] = [
-  { key: "1", tab: "检测数据 1", componentPage: 1, type: 1 },
-  { key: "2", tab: "检测数据 2", componentPage: 2, type: 2 },
-  { key: "3", tab: "检测数据 3", componentPage: 3, type: 3 },
-  { key: "4", tab: "检测数据 4", componentPage: 4, type: 4 },
-  { key: "5", tab: "检测数据 5", componentPage: 5, type: 5 },
-  { key: "waste", tab: "废液", componentPage: 6, type: 7 },
-  { key: "6", tab: "检测数据 6", componentPage: 6, type: 6 },
+  { key: "1", tab: "闪发器冷凝液", componentPage: 1, type: 1 },
+  { key: "2", tab: "反应液", componentPage: 2, type: 2 },
+  { key: "3", tab: "一次/二次结晶物/产品", componentPage: 3, type: 3 },
+  { key: "4", tab: "一次母液", componentPage: 4, type: 4 },
+  { key: "5", tab: "母液脱色前后/废液", componentPage: 5, type: 5 },
+  { key: "6", tab: "废液", componentPage: 6, type: 7 },
+  { key: "7", tab: "能源消耗", componentPage: 6, type: 6 },
 ];
 
 const activeKey = ref<string>("1");
