@@ -296,8 +296,8 @@ namespace CenterBackend.Services
         {
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(0);
-            //srcSheet.ForceFormulaRecalculation = false;
-            SetXlsxCellString(srcSheet, 2, 6, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+            srcSheet.ForceFormulaRecalculation = true;
+            SetXlsxCellString(srcSheet, 2, 8, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
             //第一页
             {
                 Calendar calendar = CultureInfo.InvariantCulture.Calendar;// 计算是当年第几周
@@ -309,14 +309,14 @@ namespace CenterBackend.Services
                 );
                 var temp = $"{weekWorkBookData.ReportedTime.Year}年{weekOfYear}周";
                 srcSheet = srcWorkbook.GetSheetAt(0);
-                SetXlsxCellString(srcSheet, 2, 7, temp);
+                SetXlsxCellString(srcSheet, 2, 9, temp);
             }
             var dataList = weekWorkBookData.WorkSheet1;
             int i= 0;
             if (dataList != null && dataList.Count > i && dataList[i] != null)
             {
                 var dataItem = dataList[i];
-                WriteDataColumnsToExcel (dataItem, srcSheet, 3 + i, 6, 1, 28);
+                WriteDataColumnsToExcel (dataItem, srcSheet, 3 + i, 8, 1, 28);
             }
         }
 
