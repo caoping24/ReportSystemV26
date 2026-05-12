@@ -467,32 +467,38 @@ namespace CenterBackend.Services
 
                 var shiftsProductionSum = productionDataCollection.DayResult.AllProduction + productionDataCollection.NightResult.AllProduction;
                 var shiftsProductionAverage = shiftsProductionSum / 2;
-                //第一列
-                target[i].Cell1 = productionDataCollection.DayResult.AllProduction;
-                target[i].Cell2 = productionDataCollection.DayResult.AllYield;
-                target[i].Cell3 = (productionDataCollection.DayResult.AllProduction >= shiftsProductionAverage) ? 5 : 6;//Wingdings 3 字体 5:上箭头 6 :下箭头   公式可以做在excel中
-                target[i].Cell4 = productionDataCollection.DayResult.AllProduction - shiftsProductionAverage;
-                target[i].Cell5 = productionDataCollection.DayResult.AllAverage_3;
-                target[i].Cell6 = productionDataCollection.DayResult.AllAverage_5;
 
-                target[i].Cell7 = productionDataCollection.DayResult.FirstProduction;
-                target[i].Cell8 = productionDataCollection.DayResult.FirstYield;
-                target[i].Cell9 = productionDataCollection.DayResult.FirstAverage_1;
+
+                var shiftResult = i == 0
+                    ? productionDataCollection.DayResult
+                    : productionDataCollection.NightResult;
+
+                //第一列
+                target[i].Cell1 = shiftResult.AllProduction;
+                target[i].Cell2 = shiftResult.AllYield;
+                //target[i].Cell3 = (shiftResult.AllProduction >= shiftsProductionAverage) ? 5 : 6;//Wingdings 3 字体 5:上箭头 6 :下箭头   公式可以做在excel中
+                target[i].Cell4 = shiftResult.AllProduction - shiftsProductionAverage;
+                target[i].Cell5 = shiftResult.AllAverage_3;
+                target[i].Cell6 = shiftResult.AllAverage_5;
+
+                target[i].Cell7 = shiftResult.FirstProduction;
+                target[i].Cell8 = shiftResult.FirstYield;    
+                target[i].Cell9 = shiftResult.FirstAverage_1;
                 //target[i].Cell10 = ;
                 //target[i].Cell11 = ;
-                target[i].Cell12 = productionDataCollection.DayResult.FirstAverage_3;
+                target[i].Cell12 = shiftResult.FirstAverage_3;
                 //target[i].Cell13 = ;
                 //target[i].Cell14 = ;
-                target[i].Cell15 = productionDataCollection.DayResult.FirstAverage_5;
+                target[i].Cell15 = shiftResult.FirstAverage_5;
                 //target[i].Cell16 = ;
                 //target[i].Cell17 = ;
 
-                target[i].Cell18 = productionDataCollection.DayResult.SecondProduction;
-                target[i].Cell19 = productionDataCollection.DayResult.SecondYield;
-                target[i].Cell20 = productionDataCollection.DayResult.SecondAverage_1;
-                target[i].Cell21 = productionDataCollection.DayResult.SecondAverage_3;
-                target[i].Cell22 = productionDataCollection.DayResult.SecondAverage_5;
-                target[i].Cell23 = (shiftsProductionSum != 0) ? productionDataCollection.DayResult.SecondProduction / shiftsProductionSum : 0; //占比
+                target[i].Cell18 = shiftResult.SecondProduction;
+                target[i].Cell19 = shiftResult.SecondYield;
+                target[i].Cell20 = shiftResult.SecondAverage_1;
+                target[i].Cell21 = shiftResult.SecondAverage_3;
+                target[i].Cell22 = shiftResult.SecondAverage_5;
+                target[i].Cell23 = (shiftsProductionSum != 0) ? shiftResult.SecondProduction / shiftsProductionSum : 0; //占比
 
                 if (materialDataCollection != null)
                 {
@@ -553,18 +559,18 @@ namespace CenterBackend.Services
                 target[i].Cell71 = (target[i].Cell70 ?? 0f) - (target[i].Cell69 ?? 0f);//差值
                 target[i].Cell72 = CalculateAverage(sourcedataPart, x => x.Cell67);
                 target[i].Cell73 = CalculateAverage(sourcedataPart, x => x.Cell65);
-                target[i].Cell74 = productionDataCollection.DayResult.FirstYield;
-                target[i].Cell75 = productionDataCollection.DayResult.FirstAverage_2;
-                target[i].Cell76 = productionDataCollection.DayResult.FirstAverage_5;
+                target[i].Cell74 = shiftResult.FirstYield;
+                target[i].Cell75 = shiftResult.FirstAverage_2;
+                target[i].Cell76 = shiftResult.FirstAverage_5;
 
                 target[i].Cell77 = CalculateAverage(sourcedataPart, x => x.Cell125);
                 target[i].Cell78 = CalculateAverage(sourcedataPart, x => x.Cell122);
                 target[i].Cell79 = (target[i].Cell78 ?? 0f) - (target[i].Cell77 ?? 0f);//差值
                 target[i].Cell80 = CalculateAverage(sourcedataPart, x => x.Cell121);
                 //target[i].Cell81 = //二次结晶没有PH
-                target[i].Cell82 = productionDataCollection.DayResult.SecondYield;
-                target[i].Cell83 = productionDataCollection.DayResult.SecondAverage_2;
-                target[i].Cell84 = productionDataCollection.DayResult.SecondAverage_5;
+                target[i].Cell82 = shiftResult.SecondYield;
+                target[i].Cell83 = shiftResult.SecondAverage_2;
+                target[i].Cell84 = shiftResult.SecondAverage_5;
 
                 target[i].Cell85 = CalculateAverage(sourcedataPart, x => x.Cell110);
                 target[i].Cell86 = CalculateAverage(sourcedataPart, x => x.Cell108);

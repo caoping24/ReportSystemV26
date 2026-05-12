@@ -108,7 +108,7 @@ namespace CenterBackend.Models.CalculateData
         {
             // 1. 白班
             //一次
-            MulColumn(collection. DayShiftData, x => x.Cell21, x => x.Cell26, setValue3: (d, result) => d.Cell27 = result);
+            MulColumn(collection.DayShiftData, x => x.Cell21, x => x.Cell26, setValue3: (d, result) => d.Cell27 = result);
             //二次
             MulColumn(collection.DayShiftData, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell37 = result);
             //合计
@@ -136,6 +136,19 @@ namespace CenterBackend.Models.CalculateData
         private static void CalculateTotalCells(this ProductionDataCollection collection)
         {
             //白班
+            //2026年5月12日增加一次和二次结晶计算
+            collection.DayResult.FirstAverage_1 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell21, x => x.Cell26);
+            collection.DayResult.FirstAverage_3 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell23, x => x.Cell26);
+            collection.DayResult.FirstAverage_5 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell25, x => x.Cell26);
+            collection.DayResult.FirstProduction = SumRow(collection.DayShiftData, x => x.Cell26);
+            collection.DayResult.FirstYield = SumRow(collection.DayShiftData, x => x.Cell27);
+
+            collection.DayResult.SecondAverage_1 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell31, x => x.Cell36);
+            collection.DayResult.SecondAverage_3 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell33, x => x.Cell36);
+            collection.DayResult.SecondAverage_5 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell35, x => x.Cell36);
+            collection.DayResult.SecondProduction = SumRow(collection.DayShiftData, x => x.Cell36);
+            collection.DayResult.SecondYield = SumRow(collection.DayShiftData, x => x.Cell37);
+
             collection.DayResult.AllProduction = SumRow(collection.DayShiftData, x => x.Cell46);
             collection.DayResult.AllYield = SumRow(collection.DayShiftData, x => x.Cell47);
             collection.DayResult.AllAverage_1 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell41, x => x.Cell46);
@@ -144,6 +157,19 @@ namespace CenterBackend.Models.CalculateData
             collection.DayResult.AllAverage_4 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell44, x => x.Cell46);
 
             //夜班
+            //2026年5月12日增加一次和二次结晶计算
+            collection.NightResult.FirstAverage_1 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell21, x => x.Cell26);
+            collection.NightResult.FirstAverage_3 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell23, x => x.Cell26);
+            collection.NightResult.FirstAverage_5 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell25, x => x.Cell26);
+            collection.NightResult.FirstProduction = SumRow(collection.NightShiftData, x => x.Cell26);
+            collection.NightResult.FirstYield = SumRow(collection.NightShiftData, x => x.Cell27);
+
+            collection.NightResult.SecondAverage_1 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell31, x => x.Cell36);
+            collection.NightResult.SecondAverage_3 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell33, x => x.Cell36);
+            collection.NightResult.SecondAverage_5 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell35, x => x.Cell36);
+            collection.NightResult.SecondProduction = SumRow(collection.NightShiftData, x => x.Cell36);
+            collection.NightResult.SecondYield = SumRow(collection.NightShiftData, x => x.Cell37);
+
             collection.NightResult.AllProduction = SumRow(collection.NightShiftData, x => x.Cell46);
             collection.NightResult.AllYield = SumRow(collection.NightShiftData, x => x.Cell47);
             collection.NightResult.AllAverage_1 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell41, x => x.Cell46);

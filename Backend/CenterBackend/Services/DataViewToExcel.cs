@@ -137,12 +137,12 @@ namespace CenterBackend.Services
             SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
 
             SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 2, dayList.Cell8 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell9 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 4, dayList.Cell10 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell11 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 6, dayList.Cell12 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell8 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell9 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell10 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 9, dayList.Cell11 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 11, dayList.Cell12 ?? 0f);
+            SetXlsxCellValue(srcSheet, 21, 13, dayList.Cell13 ?? 0f);
 
             return true;
         }
