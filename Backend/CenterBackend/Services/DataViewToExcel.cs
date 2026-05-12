@@ -106,7 +106,8 @@ namespace CenterBackend.Services
             var shiftsList = dayWorkBookData.ShiftsAnalysis;
             if (shiftsList.Count == 0)
                 return false;
-            srcSheet = srcWorkbook.GetSheetAt(4);                                       //实际要写的表
+            srcSheet = srcWorkbook.GetSheetAt(4);
+            srcSheet.ForceFormulaRecalculation = true; 
             SetXlsxCellString(srcSheet,5, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
             SetXlsxCellString(srcSheet,26, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
             for (int i = 0; i < 2; i++)
@@ -380,7 +381,7 @@ namespace CenterBackend.Services
                 if (dataList != null && dataList.Count > i && dataList[i] != null)
                 {
                     var dataItem = dataList[i];
-                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 1, 1, 8);
+                    WriteDataRowsToExcel(dataItem, srcSheet, 6 + i, 1, 1, 8);
                 }
             }
         }
@@ -409,7 +410,7 @@ namespace CenterBackend.Services
 
             var dataList = weekWorkBookData.WorkSheet7;
             var baseTime = weekWorkBookData.ReportedTime;
-            for (int i = 0; i < 14; i++)
+            for (int i = 0; i < 3; i++)
             {
                 if (dataList != null && dataList.Count > i && dataList[i] != null)
                 {
