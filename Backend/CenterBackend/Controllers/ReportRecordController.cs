@@ -263,8 +263,9 @@ namespace CenterBackend.Controllers
             },
             new GroupHeader
             {
-                Props = new List<string> { "Cell63", "Cell64" },
-                Label = "废液/耗材消耗",
+               
+                Props = new List<string> {  "Cell64" },// Props = new List<string> { "Cell63", "Cell64" },
+                Label = "耗材消耗",
                 Unit = ""
             }
         },
@@ -283,7 +284,7 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell60", Label = "羟基乙腈残余 (g/L)" },
             new TableHeaderDto { Prop = "Cell61", Label = "硫铵 (g/L)" },
             new TableHeaderDto { Prop = "Cell62", Label = "透光率 (%)" },
-            new TableHeaderDto { Prop = "Cell63", Label = "废液中二乙睛含量 %" },
+            //new TableHeaderDto { Prop = "Cell63", Label = "废液中二乙睛含量 %" },//弃用，废液成分 有单独的一页
             new TableHeaderDto { Prop = "Cell64", Label = "活性炭消耗 (kg)" },
         }
     },
@@ -318,7 +319,7 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell74", "Cell75", "Cell76", "Cell77", "Cell78", "Cell79", "Cell80" },
-                Label = "废液",
+                Label = "废液检测数据",
                 Unit = ""
             }
         },

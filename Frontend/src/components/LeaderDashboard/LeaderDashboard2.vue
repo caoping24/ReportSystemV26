@@ -5,41 +5,41 @@
       <div class="production-cards">
         <!-- 指标1-5：正常展示数据 -->
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="一次结晶温度(℃)" :value="productionData.card1" :precision="2" suffix="">
+          <a-statistic title="一次结晶温度(℃)" :value="productionData.card1 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="一次结晶产量(kg)" :value="productionData.card2" :precision="2" suffix="">
+          <a-statistic title="一次结晶产量(kg)" :value="productionData.card2 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="低蒸结晶进料量(m³)" :value="productionData.card3" :precision="2" suffix=" ">
+          <a-statistic title="低蒸结晶进料量(m³)" :value="productionData.card3 ?? '无数据'" :precision="2" suffix=" ">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="低蒸结晶出料量(m³)" :value="productionData.card4" :precision="2" suffix="">
+          <a-statistic title="低蒸结晶出料量(m³)" :value="productionData.card4 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="低蒸结晶温度(℃)" :value="productionData.card5" :precision="2" suffix="">
+          <a-statistic title="低蒸结晶温度(℃)" :value="productionData.card5 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
 
         <!-- 指标6：空白卡片，仅保留标题和图标 -->
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="二次结晶温度(℃)" :value="productionData.card6" :precision="2" suffix="">
+          <a-statistic title="二次结晶温度(℃)" :value="productionData.card6 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
 
         <!-- 指标7：空白卡片，仅保留标题和图标 -->
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="二次结晶产量(kg)" :value="productionData.card7" :precision="2" suffix="">
+          <a-statistic title="二次结晶产量(kg)" :value="productionData.card7 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>

@@ -5,27 +5,27 @@
       <div class="production-cards">
         <!-- 指标1-5：正常展示数据 -->
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="羟基流量(L/h)" :value="productionData.card1" :precision="2" suffix="">
+          <a-statistic title="羟基流量(L/h)" :value="productionData.card1 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="气氨流量(kg/h)" :value="productionData.card2" :precision="2" suffix="">
+          <a-statistic title="气氨流量(kg/h)" :value="productionData.card2 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="摩尔比" :value="productionData.card3" :precision="2" suffix=" ">
+          <a-statistic title="摩尔比" :value="productionData.card3 ?? '无数据'" :precision="2" suffix=" ">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="配料蒸汽流量(m³/h)" :value="productionData.card4" :precision="2" suffix="">
+          <a-statistic title="配料蒸汽流量(m³/h)" :value="productionData.card4 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="反应器热点温度(℃)" :value="productionData.card5" :precision="2" suffix="">
+          <a-statistic title="反应器热点温度(℃)" :value="productionData.card5 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
