@@ -21,7 +21,7 @@ namespace CenterBackend.Controllers
             }
             catch (Exception)
             {
-                // 异常处理（实际项目可封装全局异常过滤器）
+                // 异常处理(实际项目可封装全局异常过滤器)
                 return ResultUtils<CoreChartDto>.Error();
             }
         }
@@ -106,7 +106,7 @@ namespace CenterBackend.Controllers
             }
             catch (Exception)
             {
-                // 异常处理（实际项目可封装全局异常过滤器）
+                // 异常处理(实际项目可封装全局异常过滤器)
                 return ResultUtils<CoreChartDto>.Error();
             }
         }
@@ -191,7 +191,7 @@ namespace CenterBackend.Controllers
             }
             catch (Exception)
             {
-                // 异常处理（实际项目可封装全局异常过滤器）
+                // 异常处理(实际项目可封装全局异常过滤器)
                 return ResultUtils<CoreChartDto>.Error();
             }
         }
@@ -250,6 +250,14 @@ namespace CenterBackend.Controllers
             {
                 return ResultUtils<LineChartDataDto>.Error();
             }
+        }
+        [HttpGet("Now")]
+        public IActionResult Now()
+        {
+            return Ok(new
+            {
+                serverTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            });
         }
 
     }

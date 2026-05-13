@@ -217,7 +217,7 @@ namespace CenterBackend.Services
             WeekWriteExcelSheet10(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet11(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet12(srcWorkbook, weekWorkBookData);
-            WeekWriteExcelSheet13(srcWorkbook, weekWorkBookData);
+            //WeekWriteExcelSheet13(srcWorkbook, weekWorkBookData);2026年5月14日 弃用
             return true;
         }
 
@@ -298,20 +298,9 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(0);
             srcSheet.ForceFormulaRecalculation = true;
-            SetXlsxCellString(srcSheet, 2, 6, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
-            //第一页
-            {
-                Calendar calendar = CultureInfo.InvariantCulture.Calendar;// 计算是当年第几周
-                int weekOfYear = calendar.GetWeekOfYear(
-                    weekWorkBookData.ReportedTime.Date,
-                    CalendarWeekRule.FirstDay,    // 周规则
-                    DayOfWeek.Monday              // 一周起始日（周一）
+            SetXlsxCellString(srcSheet, 2, 6, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 7, weekWorkBookData.WeekNumberInYear);
 
-                );
-                var temp = $"{weekWorkBookData.ReportedTime.Year}年{weekOfYear}周";
-                srcSheet = srcWorkbook.GetSheetAt(0);
-                SetXlsxCellString(srcSheet, 2, 7, temp);
-            }
             var dataList = weekWorkBookData.WorkSheet1;
             int i= 0;
             if (dataList != null && dataList.Count > i && dataList[i] != null)
@@ -326,7 +315,8 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(1);
             //srcSheet.ForceFormulaRecalculation = false;
-            SetXlsxCellString(srcSheet, 4, 1, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+            SetXlsxCellString(srcSheet, 2, 7, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 9, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet2;
             for (int i = 0; i < 3; i++)
             {
@@ -342,14 +332,15 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(2);
             //srcSheet.ForceFormulaRecalculation = false;
-            SetXlsxCellString(srcSheet, 4, 1, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+            SetXlsxCellString(srcSheet, 2, 3, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 5, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet3;
             for (int i = 0; i < 3; i++)
             {
                 if (dataList != null && dataList.Count > i && dataList[i] != null)
                 {
                     var dataItem = dataList[i];
-                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 1, 1, 5);
+                    WriteDataRowsToExcel(dataItem, srcSheet, 6 + i, 1, 1, 5);
                 }
             }
         }
@@ -358,7 +349,8 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(3);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 2, 5, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 7, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet4;
             for (int i = 0; i < 3; i++)
             {
@@ -373,8 +365,9 @@ namespace CenterBackend.Services
         {
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(4);
-            //srcSheet.ForceFormulaRecalculation = false;
-
+            srcSheet.ForceFormulaRecalculation = true;
+            SetXlsxCellString(srcSheet, 2, 6, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 8, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet5;
             for (int i = 0; i < 3; i++)
             {
@@ -391,7 +384,8 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(5);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 2, 2, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 4, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet6;
             for (int i = 0; i < 3; i++)
             {
@@ -407,7 +401,8 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(6);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 2, 1, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 3, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet7;
             var baseTime = weekWorkBookData.ReportedTime;
             for (int i = 0; i < 3; i++)
@@ -424,7 +419,8 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(7);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 2, 9, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 11, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet8;
             var baseTime = GetWeekFirstDay(weekWorkBookData.ReportedTime);
             for (int i = 0; i < 9; i++)
@@ -450,7 +446,8 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(8);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 2, 3, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 5, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet9;
             for (int i = 0; i < 2; i++)
             {
@@ -467,7 +464,8 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(9);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 2, 1, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 3, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet10;
             for (int i = 0; i < 2; i++)
             {
@@ -492,7 +490,8 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(10);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 2, 2, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 4, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet11;
             for (int i = 0; i < 3; i++)
             {
@@ -511,7 +510,8 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(11);
             //srcSheet.ForceFormulaRecalculation = false;
-
+            SetXlsxCellString(srcSheet, 3, 8, weekWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 3, 10, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet12;
             for (int i = 0; i < 3; i++)
             {
@@ -522,30 +522,31 @@ namespace CenterBackend.Services
                 }
             }
         }
-        private static void WeekWriteExcelSheet13(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
-        {
-            ISheet srcSheet;
-            srcSheet = srcWorkbook.GetSheetAt(12);
-            //srcSheet.ForceFormulaRecalculation = false;
-            SetXlsxCellString(srcSheet, 6, 1, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
-            var dataList = weekWorkBookData.WorkSheet13;
-            for (int i = 0; i < 14; i++)
-            {
-                if (dataList != null && dataList.Count > i && dataList[i] != null)
-                {
-                    var dataItem = dataList[i];
-                    WriteDataRowsToExcel(dataItem, srcSheet, 7 + i, 2, 1, 8);
-                }
-            }
-            var baseDate = weekWorkBookData.ReportedTime;
-            for (var j = 0; j < 7; j++)
-            {
-                DateTime currentDate = baseDate.AddDays(j);
-                string dateText = currentDate.ToString("yyyy-MM-dd");
-                SetXlsxCellString(srcSheet, 7 + (2 * j), 1, $"{dateText}");
-            }
+        //弃用
+        //private static void WeekWriteExcelSheet13(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
+        //{
+        //    ISheet srcSheet;
+        //    srcSheet = srcWorkbook.GetSheetAt(12);
+        //    //srcSheet.ForceFormulaRecalculation = false;
+        //    SetXlsxCellString(srcSheet, 6, 1, weekWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+        //    var dataList = weekWorkBookData.WorkSheet13;
+        //    for (int i = 0; i < 14; i++)
+        //    {
+        //        if (dataList != null && dataList.Count > i && dataList[i] != null)
+        //        {
+        //            var dataItem = dataList[i];
+        //            WriteDataRowsToExcel(dataItem, srcSheet, 7 + i, 2, 1, 8);
+        //        }
+        //    }
+        //    var baseDate = weekWorkBookData.ReportedTime;
+        //    for (var j = 0; j < 7; j++)
+        //    {
+        //        DateTime currentDate = baseDate.AddDays(j);
+        //        string dateText = currentDate.ToString("yyyy-MM-dd");
+        //        SetXlsxCellString(srcSheet, 7 + (2 * j), 1, $"{dateText}");
+        //    }
 
-        }
+        //}
 
 
         private static DateTime GetWeekFirstDay(DateTime dt)

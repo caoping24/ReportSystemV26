@@ -15,7 +15,7 @@
         public List<WorkSheet10> WorkSheet10 { get; set; } = [];
         public List<WorkSheet11> WorkSheet11 { get; set; } = [];
         public List<WorkSheet12> WorkSheet12 { get; set; } = [];
-        public List<WorkSheet13> WorkSheet13 { get; set; } = [];
+        //public List<WorkSheet13> WorkSheet13 { get; set; } = [];2026年5月14日 弃用
     }
 
     public class WorkSheet1
@@ -181,16 +181,17 @@
         public float? Cell9 { get; set; }
         public float? Cell10 { get; set; }
     }
-    public class WorkSheet13
-    {
-        public DateTime TimePoint { get; set; }
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
-        public float? Cell8 { get; set; }
-    }
+    //2026年5月14日 弃用
+    //public class WorkSheet13
+    //{
+    //    public DateTime TimePoint { get; set; }
+    //    public float? Cell1 { get; set; }
+    //    public float? Cell2 { get; set; }
+    //    public float? Cell3 { get; set; }
+    //    public float? Cell4 { get; set; }
+    //    public float? Cell5 { get; set; }
+    //    public float? Cell6 { get; set; }
+    //    public float? Cell7 { get; set; }
+    //    public float? Cell8 { get; set; }
+    //}
 }

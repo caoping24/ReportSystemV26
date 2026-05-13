@@ -267,11 +267,30 @@ const fetchLineChartData5 = async () => {
 // 图表初始化函数（复用通用配置）
 const getBaseChartOption = (title: string, yAxisName: string, color: string, data: LineChartData) => {
   const xAxisData = data.xAxis.length ? data.xAxis : ["暂无数据"];
-  const seriesData = data.series.length ? data.series : [{ name: "数据", data: [0] }];
+  const seriesData = data.series.length ? data.series : [{ name: "暂无数据", data: [0] }];
   return {
     title: { text: title, left: "center", top: 10, textStyle: { fontSize: 16, fontWeight: 600 } },
     color: [color],
-    tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow" },
+      formatter: (params: any[]) => {
+        const hourOffset = Number(params?.[0]?.axisValue);
+
+        const base = new Date();
+        base.setDate(base.getDate() - 1);
+        base.setHours(8, 0, 0, 0); // 昨日 08:00:00
+
+        const t = new Date(base.getTime() + hourOffset * 3600_000);
+
+        const pad2 = (n: number) => String(n).padStart(2, "0");
+        const fmt = (d: Date) =>
+          `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+
+        const header = fmt(t);
+        const lines = params.map(p => `${p.marker}${p.seriesName}: ${p.data}`);
+        return [header, ...lines].join("<br/>");
+      }
+  
+  },
     legend: { orient: "horizontal", top: 40, left: "center" },
     toolbox: { show: true, feature: { saveAsImage: { show: true, title: "下载图片", type: "png" } }, right: 10, top: 10 },
     grid: { left: "3%", right: "4%", bottom: "3%", top: "70px", containLabel: true },

@@ -93,7 +93,7 @@ namespace CenterBackend.Services
             WeekMoveDataSheet10Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet11Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet12Async(WeekWorkBook, sourceData, operatorInputData);
-            WeekMoveDataSheet13Async(WeekWorkBook, sourceData, operatorInputData);
+            //WeekMoveDataSheet13Async(WeekWorkBook, sourceData, operatorInputData);2026年5月14日 弃用
             WeekMoveDataSheet1Async(WeekWorkBook, sourceData, operatorInputData);//必须放在最后 因为需要用到前面12张表的数据
             return true;
         }
@@ -865,7 +865,7 @@ namespace CenterBackend.Services
             if (sourceDatas != null)
             {
                 var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                WeekWorkBook.WorkSheet1[i].Cell5 = CalculateAverage(sourceData, x => x.Cell6);   //	羟基浓度 （配料后）
+                WeekWorkBook.WorkSheet1[i].Cell5 = CalculateAverage(sourceData, x => x.Cell6);   //	羟基浓度 (配料后)
                 WeekWorkBook.WorkSheet1[i].Cell6 = CalculateAverage(sourceData, x => x.Cell23);   //	氨腈摩尔比
 
                 var averageFlow = CalculateAverage(sourceData, x => x.Cell19) ?? 0;//羟基平均流量
@@ -1360,16 +1360,7 @@ namespace CenterBackend.Services
                     endTime = startTime.AddDays(7);
                 }
 
-                float rangeYield = 0;
-                if (operatorInputDatas != null)
-                {
-                    productionDataCollection = CalculateForSheet3(startTime, operatorInputDatas);
-                    rangeYield = productionDataCollection.TotalResult.AllYield;//获取每日折百产量
-                }
-                for (var y = 0; y < 10; y++)//填充折百产量
-                {
-                    materialDataCollection.MaterialDatas[y].TotalResult.Yield = rangeYield;
-                }
+
 
                 if (sourceDatas != null)//填充消耗
                 {
@@ -1393,79 +1384,86 @@ namespace CenterBackend.Services
                     var midellPressData = CalculateFirstLastDifference(operatorInputData, x => x.Cell72); //中压蒸汽消耗-手动录入
                     materialDataCollection.MaterialDatas[3].TotalResult.Usage = lowPressData ?? 0 + midellPressData ?? 0;//蒸汽总消耗= 低压+中压
                     materialDataCollection.MaterialDatas[7].TotalResult.Usage = CalculateFirstLastDifference(operatorInputData, x => x.Cell73);//电消耗
+
+                    float rangeYield = 0;
+                    productionDataCollection = CalculateForSheet3(startTime, operatorInputDatas);
+                    rangeYield = productionDataCollection.TotalResult.AllYield;//获取每日折百产量
+                    for (var y = 0; y < 10; y++)//填充折百产量
+                    {
+                        materialDataCollection.MaterialDatas[y].TotalResult.Yield = rangeYield;
+                    }
                 }
                 //materialDataCollection.CalculateSum();//这里不要计算 ，会覆盖前面的结果，计算是白班晚班分开计算使用的
 
-                for (var j = 0; j < WeekWorkBook.WorkSheet12.Count; j++)//赋值
-                {
-                    WeekWorkBook.WorkSheet12[j].Cell1 = materialDataCollection.MaterialDatas[0].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[j].Cell2 = materialDataCollection.MaterialDatas[1].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[j].Cell3 = materialDataCollection.MaterialDatas[2].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[j].Cell4 = materialDataCollection.MaterialDatas[3].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[j].Cell5 = materialDataCollection.MaterialDatas[4].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[j].Cell6 = materialDataCollection.MaterialDatas[5].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[j].Cell7 = materialDataCollection.MaterialDatas[6].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[j].Cell8 = materialDataCollection.MaterialDatas[7].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[j].Cell8 = materialDataCollection.MaterialDatas[8].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[j].Cell9 = materialDataCollection.MaterialDatas[9].TotalResult.Specific;
+
+                    WeekWorkBook.WorkSheet12[i].Cell1 = materialDataCollection.MaterialDatas[0].TotalResult.Specific;
+                    WeekWorkBook.WorkSheet12[i].Cell2 = materialDataCollection.MaterialDatas[1].TotalResult.Specific;
+                    WeekWorkBook.WorkSheet12[i].Cell3 = materialDataCollection.MaterialDatas[2].TotalResult.Specific;
+                    WeekWorkBook.WorkSheet12[i].Cell4 = materialDataCollection.MaterialDatas[3].TotalResult.Specific;
+                    WeekWorkBook.WorkSheet12[i].Cell5 = materialDataCollection.MaterialDatas[4].TotalResult.Specific;
+                    WeekWorkBook.WorkSheet12[i].Cell6 = materialDataCollection.MaterialDatas[5].TotalResult.Specific;
+                    WeekWorkBook.WorkSheet12[i].Cell7 = materialDataCollection.MaterialDatas[6].TotalResult.Specific;
+                    WeekWorkBook.WorkSheet12[i].Cell8 = materialDataCollection.MaterialDatas[7].TotalResult.Specific;
+                    WeekWorkBook.WorkSheet12[i].Cell9 = materialDataCollection.MaterialDatas[8].TotalResult.Specific;
+                    WeekWorkBook.WorkSheet12[i].Cell10 = materialDataCollection.MaterialDatas[9].TotalResult.Specific;
 
 
-                }
             }
 
             return true;
         }
-        private static bool WeekMoveDataSheet13Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
-        {
+        //2026年5月14日 弃用
+        //private static bool WeekMoveDataSheet13Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
+        //{
 
-            WeekWorkBook.WorkSheet13 = Enumerable.Range(1, 14).Select(_ => new WorkSheet13()).ToList();
+        //    WeekWorkBook.WorkSheet13 = Enumerable.Range(1, 14).Select(_ => new WorkSheet13()).ToList();
 
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-            ProductionDataCollection ProductionDataCollection= new();
-            for (var i = 0; i < 7; i++)
-            {
-                var startTime = currentWeekFirstDay.AddDays(i);
-                var endTime = startTime.AddDays(1);
+        //    DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+        //    ProductionDataCollection ProductionDataCollection= new();
+        //    for (var i = 0; i < 7; i++)
+        //    {
+        //        var startTime = currentWeekFirstDay.AddDays(i);
+        //        var endTime = startTime.AddDays(1);
 
-                if (operatorInputDatas != null)
-                {
-                    ProductionDataCollection =  CalculateForSheet3(startTime, operatorInputDatas);
-                }
+        //        if (operatorInputDatas != null)
+        //        {
+        //            ProductionDataCollection =  CalculateForSheet3(startTime, operatorInputDatas);
+        //        }
 
-                if (sourceDatas != null)
-                {
-                    var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    var dayShift = sourceData.Where(x => x.ReportedTime < startTime.AddHours(12)).ToList();
-                    WeekWorkBook.WorkSheet13[2 * i].TimePoint = startTime;
-                    WeekWorkBook.WorkSheet13[2 * i].Cell1 = CalculateQualifiedRate(dayShift, x => x.Cell23, true, 0.515f, 0.05f);
-                    WeekWorkBook.WorkSheet13[2 * i].Cell2 = CalculateQualifiedRate(dayShift, x => x.Cell3, true, 410f, 5f);
-                    WeekWorkBook.WorkSheet13[2 * i].Cell3 = CalculateQualifiedRate(dayShift, x => x.Cell6, true, 168f, 2f);
-                    WeekWorkBook.WorkSheet13[2 * i].Cell4 = CalculateQualifiedRate(dayShift, x => x.Cell66, false, 20, 0);
-                    //WeekWorkBook.WorkSheet13[2 * i].Cell5 = 
-                    WeekWorkBook.WorkSheet13[2 * i].Cell6 = ProductionDataCollection.DayResult.AllProduction;
-                    WeekWorkBook.WorkSheet13[2 * i].Cell7 = ProductionDataCollection.DayResult.AllYield;
-                    WeekWorkBook.WorkSheet13[2 * i].Cell8 = ProductionDataCollection.DayResult.AllAverage_1;
+        //        if (sourceDatas != null)
+        //        {
+        //            var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+        //            var dayShift = sourceData.Where(x => x.ReportedTime < startTime.AddHours(12)).ToList();
+        //            WeekWorkBook.WorkSheet13[2 * i].TimePoint = startTime;
+        //            WeekWorkBook.WorkSheet13[2 * i].Cell1 = CalculateQualifiedRate(dayShift, x => x.Cell23, true, 0.515f, 0.05f);
+        //            WeekWorkBook.WorkSheet13[2 * i].Cell2 = CalculateQualifiedRate(dayShift, x => x.Cell3, true, 410f, 5f);
+        //            WeekWorkBook.WorkSheet13[2 * i].Cell3 = CalculateQualifiedRate(dayShift, x => x.Cell6, true, 168f, 2f);
+        //            WeekWorkBook.WorkSheet13[2 * i].Cell4 = CalculateQualifiedRate(dayShift, x => x.Cell66, false, 20, 0);
+        //            //WeekWorkBook.WorkSheet13[2 * i].Cell5 = 
+        //            WeekWorkBook.WorkSheet13[2 * i].Cell6 = ProductionDataCollection.DayResult.AllProduction;
+        //            WeekWorkBook.WorkSheet13[2 * i].Cell7 = ProductionDataCollection.DayResult.AllYield;
+        //            WeekWorkBook.WorkSheet13[2 * i].Cell8 = ProductionDataCollection.DayResult.AllAverage_1;
 
-                    var nightShift = sourceData.Where(x => x.ReportedTime >= startTime.AddHours(12)).ToList();
-                    WeekWorkBook.WorkSheet13[2 * i + 1].TimePoint = startTime.AddHours(12);
-                    WeekWorkBook.WorkSheet13[2 * i + 1].Cell1 = CalculateQualifiedRate(nightShift, x => x.Cell23, true, 0.515f, 0.05f);
-                    WeekWorkBook.WorkSheet13[2 * i + 1].Cell2 = CalculateQualifiedRate(nightShift, x => x.Cell3, true, 410f, 5f);
-                    WeekWorkBook.WorkSheet13[2 * i + 1].Cell3 = CalculateQualifiedRate(nightShift, x => x.Cell6, true, 168f, 2f);
-                    WeekWorkBook.WorkSheet13[2 * i + 1].Cell4 = CalculateQualifiedRate(nightShift, x => x.Cell66, false, 20, 0);
-                    //WeekWorkBook.WorkSheet13[2 * i + 1].Cell5 =
-                    WeekWorkBook.WorkSheet13[2 * i + 1].Cell6 = ProductionDataCollection.NightResult.AllProduction;
-                    WeekWorkBook.WorkSheet13[2 * i + 1].Cell7 = ProductionDataCollection.NightResult.AllYield;
-                    WeekWorkBook.WorkSheet13[2 * i + 1].Cell8 = ProductionDataCollection.NightResult.AllAverage_1;
-                }
-            }
-            return true;
-        }
+        //            var nightShift = sourceData.Where(x => x.ReportedTime >= startTime.AddHours(12)).ToList();
+        //            WeekWorkBook.WorkSheet13[2 * i + 1].TimePoint = startTime.AddHours(12);
+        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell1 = CalculateQualifiedRate(nightShift, x => x.Cell23, true, 0.515f, 0.05f);
+        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell2 = CalculateQualifiedRate(nightShift, x => x.Cell3, true, 410f, 5f);
+        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell3 = CalculateQualifiedRate(nightShift, x => x.Cell6, true, 168f, 2f);
+        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell4 = CalculateQualifiedRate(nightShift, x => x.Cell66, false, 20, 0);
+        //            //WeekWorkBook.WorkSheet13[2 * i + 1].Cell5 =
+        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell6 = ProductionDataCollection.NightResult.AllProduction;
+        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell7 = ProductionDataCollection.NightResult.AllYield;
+        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell8 = ProductionDataCollection.NightResult.AllAverage_1;
+        //        }
+        //    }
+        //    return true;
+        //}
         /***********************辅助方法***********************/
         /// <summary>
-        /// 统计单个字段值落在 [minRange, maxRange] 范围内的数量（跳过null）
+        /// 统计单个字段值落在 [minRange, maxRange] 范围内的数量(跳过null)
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="selector">字段选择器（如 x => x.Cell26）</param>
+        /// <param name="selector">字段选择器(如 x => x.Cell26)</param>
         /// <param name="minRange">区间下限</param>
         /// <param name="maxRange">区间上限</param>
         public static (int nonNullTotal, int qualifiedCount) CountValueInRange<T>(IEnumerable<T> data, Func<T, float?> selector, float minRange, float maxRange)
@@ -1484,7 +1482,7 @@ namespace CenterBackend.Services
             return (nonNullTotal, qualifiedCount);
         }
         /// <summary>
-        /// 统计两个字段的比值落在 [minRange, maxRange] 范围内的数量（跳过null、避免除零）
+        /// 统计两个字段的比值落在 [minRange, maxRange] 范围内的数量(跳过null、避免除零)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="selector1">字段选择器 分子</param>
@@ -1574,7 +1572,7 @@ namespace CenterBackend.Services
             float difference = lastValue - firstValue;
             return difference;
         }
-        /// <param name="mode">mode：模式开关（true = 区间校验 [min,max]，false = 上限校验 [≤max]）</param>
+        /// <param name="mode">mode：模式开关(true = 区间校验 [min,max]，false = 上限校验 [≤max])</param>
         public static float? CalculateQualifiedRate<T>(IEnumerable<T> data, Func<T, float?> selector, bool mode, float qualifiedValue, float qualifiedValuediff)
         {
             var maxQualifiedValue = qualifiedValue + qualifiedValuediff;
@@ -1594,7 +1592,7 @@ namespace CenterBackend.Services
                 ? nonNullValues.Count(value => value >= minQualifiedValue && value <= maxQualifiedValue)
                 // mode=false：值 ≤ max 为合格
                 : nonNullValues.Count(value => value <= maxQualifiedValue);
-            float qualifiedRate = (qualifiedCount / (float)nonNullValues.Count) * 100f;// 计算合格利率（合格数/总有效数 * 100%），保留3位小数
+            float qualifiedRate = (qualifiedCount / (float)nonNullValues.Count) * 100f;// 计算合格利率(合格数/总有效数 * 100%)，保留3位小数
             return (float)Math.Round(qualifiedRate, 3);
         }
         public static float? CalculateSum<T>(IEnumerable<T> data, Func<T, float?> selector)//非null值的总和
@@ -1604,7 +1602,7 @@ namespace CenterBackend.Services
             var nonNullValues = data        //筛选非null的float值
                 .Select(selector)           // 提取float?字段
                 .Where(x => x.HasValue)     // 过滤掉null值
-                .Select(x => x.GetValueOrDefault())      // 转换为float（非可空）
+                .Select(x => x.GetValueOrDefault())      // 转换为float(非可空)
                 .ToList();
             return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;//计算总和
         }

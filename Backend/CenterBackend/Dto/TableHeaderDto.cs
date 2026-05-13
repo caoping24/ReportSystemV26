@@ -38,10 +38,10 @@ namespace CenterBackend.Dto
         public int Hour { get; set; }
         public string Date { get; set; } = string.Empty;
         public bool IsNextDay { get; set; }
-        // 动态字段（Cell1-Cell29），用字典适配灵活字段
+        // 动态字段(Cell1-Cell29)，用字典适配灵活字段
         public Dictionary<string, string> Cells { get; set; } = new Dictionary<string, string>();
 
-        // 适配前端直接取值（如row.Cell1），需转换为动态对象/扩展属性
+        // 适配前端直接取值(如row.Cell1)，需转换为动态对象/扩展属性
         // 也可直接定义Cell1-Cell29属性，示例用字典兼顾灵活性
         public string this[string key]
         {

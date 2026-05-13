@@ -18,15 +18,18 @@
         </a-tabs>
       </div>
       <!-- 新增：刷新按钮（居右） -->
-      <a-button 
-        type="primary" 
-        @click="handleRefresh"
-        :loading="refreshLoading"
-        class="refresh-btn"
-        title="刷新当前页面"
-      >
-        刷新
-      </a-button>
+      <a-tag 
+        color="default"
+        style="
+            margin-left: 10px;
+            font-size: 14px;
+            padding: 3px 12px;
+            border-radius: 6px;
+            letter-spacing: 1px;
+            background: #f5f7fa;
+            border: 1px solid #e5e6eb;">
+      {{ serverTime }}
+      </a-tag>
     </div>
     <!-- 动态渲染的组件（原有逻辑不变） -->
     <component 
@@ -40,9 +43,37 @@
 
 <script lang="ts" setup>
 // 原有导入逻辑完全保留
-import { ref, computed, defineAsyncComponent, watch, nextTick } from "vue";
+import { ref, computed, defineAsyncComponent, watch, nextTick, onMounted, onUnmounted } from "vue";
 import { message } from "ant-design-vue";
+// 2026年5月14日新增：获取服务器时间的API导入
+import { getServerTime } from "@/api/Dashboard";
+const serverTime = ref("");
+let serverNow: Date | null = null;
+let timer: number | undefined;
 
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+function format(d: Date) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+onMounted(async () => {
+  const res = await getServerTime(); // 你现在已经有这个 API
+  const s = res.data.serverTime as string; // 按你的返回字段名调整
+
+  serverNow = new Date(s.replace(" ", "T"));
+  serverTime.value = format(serverNow);
+
+  timer = window.setInterval(() => {
+    if (!serverNow) return;
+    serverNow = new Date(serverNow.getTime() + 1000);
+    serverTime.value = format(serverNow);
+  }, 1000);
+});
+onUnmounted(() => {
+  if (timer) window.clearInterval(timer);
+});
+//
 // 1. 原有异步导入子组件逻辑（完全不变）
 const loadDashboardComponent = (page: number) => {
   return defineAsyncComponent(() => 
@@ -123,6 +154,7 @@ watch(currentPage, () => {
 </script>
 
 <style scoped>
+
 /* 新增：标签栏+刷新按钮布局样式 */
 .tabs-header {
   display: flex;

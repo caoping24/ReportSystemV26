@@ -1,5 +1,11 @@
 import myAxios from "@/request";
-
+//2026年5月14日新增获取时间
+export function getServerTime() {
+  return myAxios.request({
+    url: "/api/Dashboard/Now",
+    method: "GET",
+  });
+}
 export const GetPage1CoreChart1 = async () => {
   return myAxios.request({
     url: "/api/Dashboard/GetPage1CoreChart1",

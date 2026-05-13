@@ -56,7 +56,7 @@ namespace CenterBackend.Services
             var nonNullValues = data        //筛选非null的float值
                 .Select(selector)           // 提取float?字段
                 .Where(x => x.HasValue)     // 过滤掉null值
-                .Select(x => x.GetValueOrDefault())      // 转换为float（非可空）
+                .Select(x => x.GetValueOrDefault())      // 转换为float(非可空)
                 .ToList();
             return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;//计算总和
         }
@@ -68,7 +68,7 @@ namespace CenterBackend.Services
 
             int totalHours = (int)Math.Ceiling((endTime - startTime).TotalHours);
             string[] xAxis = Enumerable.Range(0, totalHours)
-                                       .Select(i => (i % 24).ToString())
+                                       .Select(i => ((i % 24) + 8).ToString())
                                        .ToArray();
 
             List<SourceData> dataList = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);

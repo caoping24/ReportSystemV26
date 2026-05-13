@@ -26,15 +26,15 @@ namespace CenterBackend
             app.Run();
         }
 
-        // 对外提供的工厂方法：构建 WebApplication（但不 Run）
-        // contentRootPath 可用于在外部（如 WPF）指定静态文件所在的目录
+        // 对外提供的工厂方法：构建 WebApplication(但不 Run)
+        // contentRootPath 可用于在外部(如 WPF)指定静态文件所在的目录
         public static WebApplication BuildWebApplication(string[]? args = null, string? contentRootPath = null, int port = 5260)
         {
             var builder = WebApplication.CreateBuilder(args ?? Array.Empty<string>());
 
             if (!string.IsNullOrEmpty(contentRootPath))
             {
-                // 指定 ContentRoot（确保 wwwroot 可被找到）
+                // 指定 ContentRoot(确保 wwwroot 可被找到)
                 builder.Environment.ContentRootPath = contentRootPath;
             }
 
@@ -62,7 +62,7 @@ namespace CenterBackend
 
             builder.Services.AddHangfireServer();
 
-            // 你的任务服务（确保已注册）
+            // 你的任务服务(确保已注册)
             builder.Services.AddScoped<IBackGroundServices, BackGroundServices>();
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -76,7 +76,7 @@ namespace CenterBackend
             builder.Services.AddScoped<IReportRecordService, ReportRecordService>();
             builder.Services.AddScoped<IUserService, UserService>();
 
-            // 注册日志服务（单例），FileLogger 会使用 IWebHostEnvironment.ContentRootPath 定位到 wwwroot/log
+            // 注册日志服务(单例)，FileLogger 会使用 IWebHostEnvironment.ContentRootPath 定位到 wwwroot/log
             builder.Services.AddSingleton<IAppLogger, FileLogger>();
 
             // 显式注册控制器所在的程序集，确保在 ReportServer 进程内也能发现控制器
@@ -139,7 +139,7 @@ namespace CenterBackend
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "报表系统API", Version = "v1" });
             });
 
-            // Kestrel 绑定到 loopback（本机），避免 ListenAnyIP 导致防火墙弹窗
+            // Kestrel 绑定到 loopback(本机)，避免 ListenAnyIP 导致防火墙弹窗
             builder.WebHost.UseKestrel(options =>
             {
                 // 【核心修正】从 ListenLocalhost 改为 ListenAnyIP，允许局域网访问
@@ -153,7 +153,7 @@ namespace CenterBackend
 
 
             //启动定时任务
-            // 启动定时任务（用 DI API，避免 JobStorage.Current 未初始化）
+            // 启动定时任务(用 DI API，避免 JobStorage.Current 未初始化)
             var tz = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
             var opt = new RecurringJobOptions { TimeZone = tz };
 
@@ -182,7 +182,7 @@ namespace CenterBackend
 
 
 
-            // 临时请求日志（便于确认请求是否到达服务器；可上线前移除）
+            // 临时请求日志(便于确认请求是否到达服务器；可上线前移除)
             app.Use(async (ctx, next) =>
             {
                 Console.WriteLine($"[REQ] {ctx.Request.Method} {ctx.Request.Path}");

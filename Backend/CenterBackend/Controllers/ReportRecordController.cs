@@ -32,7 +32,7 @@ namespace CenterBackend.Controllers
             {
                 var result = await _reportRecordService.GetReportsByPageAsync(request);
 
-                if (result?.Data != null && result.Data.Count != 0)// ReportedTime 均为 "yyyy-MM-dd" 格式，按该日期降序排序（最新在前）
+                if (result?.Data != null && result.Data.Count != 0)// ReportedTime 均为 "yyyy-MM-dd" 格式，按该日期降序排序(最新在前)
                 {
                     result.Data = result.Data
                         .OrderByDescending(r => r.ReportedTime)
@@ -43,7 +43,7 @@ namespace CenterBackend.Controllers
             }
             catch (Exception ex)
             {
-                // 异常处理（实际项目可封装全局异常过滤器）
+                // 异常处理(实际项目可封装全局异常过滤器)
                 return StatusCode(500, new { message = "查询失败", detail = ex.Message });
             }
         }
@@ -170,12 +170,12 @@ namespace CenterBackend.Controllers
         tableHeaders = new List<TableHeaderDto>
         {
             new TableHeaderDto { Prop = "hour", Label = "小时", Unit = "" },
-            new TableHeaderDto { Prop = "Cell11", Label = "二乙腈含量-化分（%）", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell12", Label = "二乙腈含量-色谱（%）", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell13", Label = "羟基乙腈残余（%）", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell14", Label = "羟基乙腈残余（g/L）", Unit = "g/L" },
-            new TableHeaderDto { Prop = "Cell15", Label = "甘氨腈（g/L）", Unit = "g/L" },
-            new TableHeaderDto { Prop = "Cell16", Label = "三乙腈（g/L）", Unit = "g/L" },
+            new TableHeaderDto { Prop = "Cell11", Label = "二乙腈含量-化分(%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell12", Label = "二乙腈含量-色谱(%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell13", Label = "羟基乙腈残余(%)", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell14", Label = "羟基乙腈残余(g/L)", Unit = "g/L" },
+            new TableHeaderDto { Prop = "Cell15", Label = "甘氨腈(g/L)", Unit = "g/L" },
+            new TableHeaderDto { Prop = "Cell16", Label = "三乙腈(g/L)", Unit = "g/L" },
             new TableHeaderDto { Prop = "Cell17", Label = "反应液pH", Unit = "" },
             //new TableHeaderDto { Prop = "Cell18", Label = "反应液比重(kg/m3)", Unit = "" }, 2026年5月11日 移除
         }
@@ -272,20 +272,20 @@ namespace CenterBackend.Controllers
         tableHeaders = new List<TableHeaderDto>
         {
             new TableHeaderDto { Prop = "hour", Label = "小时", Unit = "" },
-            new TableHeaderDto {Prop =  "Cell51", Label = "二乙腈含量 (化分（%）)" },
-            new TableHeaderDto { Prop = "Cell52", Label = "二乙腈含量 (色谱（%）)" },
+            new TableHeaderDto {Prop =  "Cell51", Label = "二乙腈含量 (化分(%))" },
+            new TableHeaderDto { Prop = "Cell52", Label = "二乙腈含量 (色谱(%))" },
             new TableHeaderDto { Prop = "Cell53", Label = "羟基乙腈残余 (%)" },
             new TableHeaderDto { Prop = "Cell54", Label = "羟基乙腈残余 (g/L)" },
             new TableHeaderDto { Prop = "Cell55", Label = "硫铵 (g/L)" },
             new TableHeaderDto { Prop = "Cell56", Label = "透光率 (%)" },
-            new TableHeaderDto { Prop = "Cell57", Label = "二乙腈含量 (化分（%）)" },
-            new TableHeaderDto { Prop = "Cell58", Label = "二乙腈含量 (色谱（%）)" },
+            new TableHeaderDto { Prop = "Cell57", Label = "二乙腈含量 (化分(%))" },
+            new TableHeaderDto { Prop = "Cell58", Label = "二乙腈含量 (色谱(%))" },
             new TableHeaderDto { Prop = "Cell59", Label = "羟基乙腈残余 (%)" },
             new TableHeaderDto { Prop = "Cell60", Label = "羟基乙腈残余 (g/L)" },
             new TableHeaderDto { Prop = "Cell61", Label = "硫铵 (g/L)" },
             new TableHeaderDto { Prop = "Cell62", Label = "透光率 (%)" },
             //new TableHeaderDto { Prop = "Cell63", Label = "废液中二乙睛含量 %" },//弃用，废液成分 有单独的一页
-            new TableHeaderDto { Prop = "Cell64", Label = "活性炭消耗 (kg)" },
+            new TableHeaderDto { Prop = "Cell64", Label = "活性炭使用量 (kg)" },
         }
     },
    
@@ -305,9 +305,9 @@ namespace CenterBackend.Controllers
         tableHeaders = new List<TableHeaderDto>
         {
             new TableHeaderDto { Prop = "hour", Label = "小时", Unit = "" },
-            new TableHeaderDto { Prop = "Cell71", Label = "低压蒸汽消耗（t）" },
-            new TableHeaderDto { Prop = "Cell72", Label = "中压蒸汽消耗（t）" },
-            new TableHeaderDto { Prop = "Cell73", Label = "电消耗（KWh）" },
+            new TableHeaderDto { Prop = "Cell71", Label = "低压蒸汽(抄表)(t)" },
+            new TableHeaderDto { Prop = "Cell72", Label = "中压蒸汽(抄表)(t)" },
+            new TableHeaderDto { Prop = "Cell73", Label = "电能(抄表)(KWh)" },
         }
     },
 
@@ -326,13 +326,13 @@ namespace CenterBackend.Controllers
         tableHeaders = new List<TableHeaderDto>
         {
             new TableHeaderDto { Prop = "hour", Label = "小时", Unit = "" },
-            new TableHeaderDto { Prop = "Cell74", Label = "羟基乙腈%", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell75", Label = "硫铵%", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell76", Label = "二乙腈%", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell77", Label = "甘氨腈%", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell78", Label = "三乙腈%", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell79", Label = "其它%", Unit = "%" },
-            new TableHeaderDto { Prop = "Cell80", Label = "水分%", Unit = "%" },
+            new TableHeaderDto { Prop = "Cell74", Label = "羟基乙腈(%)", Unit = "" },
+            new TableHeaderDto { Prop = "Cell75", Label = "硫铵(%)", Unit = "" },
+            new TableHeaderDto { Prop = "Cell76", Label = "二乙腈(%)", Unit = "" },
+            new TableHeaderDto { Prop = "Cell77", Label = "甘氨腈(%)", Unit = "" },
+            new TableHeaderDto { Prop = "Cell78", Label = "三乙腈(%)", Unit = "" },
+            new TableHeaderDto { Prop = "Cell79", Label = "其它(%)", Unit = "" },
+            new TableHeaderDto { Prop = "Cell80", Label = "水分(%)", Unit = "" },
         }
     }
     

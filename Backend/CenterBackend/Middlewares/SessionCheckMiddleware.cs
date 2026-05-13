@@ -12,14 +12,14 @@ namespace CenterBackend.Middlewares
     public class SessionCheckMiddleware
     {
         private readonly RequestDelegate _next;
-        // 无需检查Session的接口路径（根据你的业务调整，排除公开接口）
+        // 无需检查Session的接口路径(根据你的业务调整，排除公开接口)
         private readonly List<string> _excludePaths = new()
         {
-            "/api/user/login",    // 登录接口（替换为你实际的登录接口路径）
-            "/api/user/register", // 注册接口（如有）
-            "/swagger",           // Swagger文档（开发环境保留）
-            "/health",            // 健康检查接口（如有）
-            "/api/file/upload",// 示例：无需鉴权的文件上传接口（根据实际调整）
+            "/api/user/login",    // 登录接口(替换为你实际的登录接口路径)
+            "/api/user/register", // 注册接口(如有)
+            "/swagger",           // Swagger文档(开发环境保留)
+            "/health",            // 健康检查接口(如有)
+            "/api/file/upload",// 示例：无需鉴权的文件上传接口(根据实际调整)
             "/api/user/current"
         };
 
@@ -38,16 +38,16 @@ namespace CenterBackend.Middlewares
 
             if (!isExcluded)
             {
-                // 3. 检查Session中是否存在有效用户标识（核心：UserId为Session存储的用户唯一标识）
+                // 3. 检查Session中是否存在有效用户标识(核心：UserId为Session存储的用户唯一标识)
 
                 var userObj = context.Session.GetString(UserConstant.USER_LOGIN_STATE);
                 if (userObj == null)
                 {
-                    // 4. Session过期/未登录：返回401响应（与你的异常返回格式保持一致）
+                    // 4. Session过期/未登录：返回401响应(与你的异常返回格式保持一致)
                     context.Response.ContentType = "application/json";
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 
-                    // 适配你现有异常返回格式（Code+Message）
+                    // 适配你现有异常返回格式(Code+Message)
                     var errorResponse = new
                     {
                         Code = (int)HttpStatusCode.Unauthorized,
@@ -68,7 +68,7 @@ namespace CenterBackend.Middlewares
     }
 
     /// <summary>
-    /// 中间件扩展方法（方便注册）
+    /// 中间件扩展方法(方便注册)
     /// </summary>
     public static class SessionCheckMiddlewareExtensions
     {
