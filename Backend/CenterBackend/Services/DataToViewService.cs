@@ -670,13 +670,8 @@ namespace CenterBackend.Services
             rerult = CountValueInRange(sourceDatas, x => x.Cell23, minRange, maxRange);
             target.Cell5 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
 
-            var count1 = productionDataCollection.DayShiftData.Where(x => x.Cell41 >= 0.9);
-            var count2 = productionDataCollection.NightShiftData.Where(x => x.Cell41 >= 0.9);
-            float? production1 = CalculateSum(count1, x => x.Cell46);
-            float? production2 = CalculateSum(count2, x=>x.Cell46);
-            float sum = productionDataCollection.TotalResult.AllProduction;
-            const float Epsilon = 0.0001f;//处理浮点数精度
-            target.Cell6 = Math.Abs(sum) > Epsilon ? (production1 ?? 0f + production1 ?? 0f) / sum : 0;
+
+            target.Cell6 = productionDataCollection.TotalResult.AllAverage_1 * 0.01f;//当日收率
 
             target.Cell7 = productionDataCollection.TotalResult.AllProduction;
             target.Cell8 = productionDataCollection.TotalResult.AllYield;
@@ -861,7 +856,7 @@ namespace CenterBackend.Services
             WeekWorkBook.WorkSheet1[i].Cell3 = WeekWorkBook.WorkSheet12[2].Cell2; //读取氨单耗
             WeekWorkBook.WorkSheet1[i].Cell4 = WeekWorkBook.WorkSheet12[2].Cell3; //读取硫酸单耗
 
-            WeekWorkBook.WorkSheet1[i].Cell21 = WeekWorkBook.WorkSheet12[2].Cell8; //读取硫酸单耗  //	废液单位产品排放量
+            WeekWorkBook.WorkSheet1[i].Cell21 = WeekWorkBook.WorkSheet12[2].Cell8;//	废液单位产品排放量
             if (sourceDatas != null)
             {
                 var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
@@ -869,11 +864,11 @@ namespace CenterBackend.Services
                 WeekWorkBook.WorkSheet1[i].Cell6 = CalculateAverage(sourceData, x => x.Cell23);   //	氨腈摩尔比
 
                 var averageFlow = CalculateAverage(sourceData, x => x.Cell19) ?? 0;//羟基平均流量
-                WeekWorkBook.WorkSheet1[i].Cell7 = ResidenceTimeSeconds(15, 20, averageFlow * 1000);   //	反应时间 15mm内径 20m长的管道 体积流量L换算成m³
+                WeekWorkBook.WorkSheet1[i].Cell7 = ResidenceTimeSeconds(15, 22, averageFlow * 1000);   //	反应时间 15mm内径 22m长的管道 体积流量L换算成m³
 
-                WeekWorkBook.WorkSheet1[i].Cell8 = CalculateAverage(sourceData, x => x.Cell27);   //	反应压力 
+                WeekWorkBook.WorkSheet1[i].Cell8 = CalculateAverage(sourceData, x => x.Cell24);   //	反应压力 PT-05311
                 WeekWorkBook.WorkSheet1[i].Cell9 = CalculateAverage(sourceData, x => x.Cell21);   //	羟基加热温度
-                WeekWorkBook.WorkSheet1[i].Cell10 = CalculateAverage(sourceData, x => x.Cell25);  //	氨汽混合温度
+                WeekWorkBook.WorkSheet1[i].Cell10 = CalculateAverage(sourceData, x => x.Cell17);  //	氨汽混合温度TT05143
                 WeekWorkBook.WorkSheet1[i].Cell11 = CalculateAverage(sourceData, x => x.Cell26);  //	管反热点温度
                 WeekWorkBook.WorkSheet1[i].Cell12 = CalculateAverage(sourceData, x => x.Cell62); //	预冷器结晶温度
                 WeekWorkBook.WorkSheet1[i].Cell13 = CalculateAverage(sourceData, x => x.Cell66);  //	一次结晶温度
@@ -897,8 +892,6 @@ namespace CenterBackend.Services
                 WeekWorkBook.WorkSheet1[i].Cell27 = CalculateAverage(operatorInputData, x => x.Cell79); //	其它
                 WeekWorkBook.WorkSheet1[i].Cell28 = CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
             }
-
-
 
             return true;
         }

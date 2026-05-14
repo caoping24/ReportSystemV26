@@ -20,7 +20,7 @@
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="废液排放量((m³))" :value="productionData.card4 ?? '无数据'" :precision="2" suffix="">
+          <a-statistic title="废液排放量(m³)" :value="productionData.card4 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>

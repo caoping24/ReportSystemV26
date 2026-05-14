@@ -216,9 +216,9 @@ namespace CenterBackend.Services
             {
                 coreChartDto.Card1 = CalculateAverage(dataList, x => x.Cell66);//一次结晶温度
 
-                coreChartDto.Card3 = CalculateFirstLastDifference(dataList, x => x.Cell107);//低蒸结晶进料量
-                coreChartDto.Card4 = CalculateFirstLastDifference(dataList, x => x.Cell116);//低蒸结晶出料量
-                coreChartDto.Card5 = CalculateAverage(dataList, x => x.Cell108);//低蒸结晶温度
+                coreChartDto.Card3 = CalculateFirstLastDifference(dataList, x => x.Cell145);//降膜蒸发进料量FT-101
+                coreChartDto.Card4 = CalculateFirstLastDifference(dataList, x => x.Cell146);//降膜蒸发出料量FR-102
+                coreChartDto.Card5 = CalculateAverage(dataList, x => x.Cell144);//降膜蒸发温度
                 coreChartDto.Card6 = CalculateAverage(dataList, x => x.Cell122);//二次结晶温度
             }
             if (dataList2 == null || dataList2.Count == 0)
@@ -243,9 +243,9 @@ namespace CenterBackend.Services
 
         public async Task<LineChartDataDto> GetPage2LineChart2()
         {
-            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell108);
+            var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell144);//新增的数据采集点位，降膜蒸发温度
             if (result.Series != null && result.Series.Count > 0)
-                result.Series[0].Name = "低蒸结晶温度(℃)";
+                result.Series[0].Name = "降膜蒸发温度(℃)";
             return result;
         }
 
@@ -293,9 +293,16 @@ namespace CenterBackend.Services
             }
             else
             {
-                coreChartDto.Card1 = CalculateFirstLastDifference(dataList, x => x.Cell71);//低压蒸汽消耗
-                coreChartDto.Card2 = CalculateFirstLastDifference(dataList, x => x.Cell72);//中压蒸汽消耗
-                coreChartDto.Card3 = CalculateFirstLastDifference(dataList, x => x.Cell73);//电量消耗
+                float? difference;
+                //低压蒸汽消耗
+                difference = CalculateFirstLastDifference(dataList, x => x.Cell71);
+                coreChartDto.Card1 = difference > 0 ? difference : null;
+                //中压蒸汽消耗
+                difference = CalculateFirstLastDifference(dataList, x => x.Cell72);
+                coreChartDto.Card2 = difference > 0 ? difference : null;
+                //电量消耗
+                difference = CalculateFirstLastDifference(dataList, x => x.Cell73);
+                coreChartDto.Card3 = difference > 0 ? difference : null;
             }
 
             return coreChartDto;
@@ -329,7 +336,7 @@ namespace CenterBackend.Services
         {
             var result = await GetLineSourceDataAsync(DateTime.Now, x => x.Cell133);
             if (result.Series != null && result.Series.Count > 0)
-                result.Series[0].Name = "废液排放量(m³)";
+                result.Series[0].Name = "废液排放流量(m³)";
             return result;
         }
 

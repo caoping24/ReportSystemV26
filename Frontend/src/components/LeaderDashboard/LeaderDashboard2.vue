@@ -15,17 +15,17 @@
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="低蒸结晶进料量(m³)" :value="productionData.card3 ?? '无数据'" :precision="2" suffix=" ">
+          <a-statistic title="降膜蒸发进料量(kg)" :value="productionData.card3 ?? '无数据'" :precision="2" suffix=" ">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="低蒸结晶出料量(m³)" :value="productionData.card4 ?? '无数据'" :precision="2" suffix="">
+          <a-statistic title="降膜蒸发出料量(kg)" :value="productionData.card4 ?? '无数据'" :precision="2" suffix=" ">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
         <a-card class="production-card" :loading="isLoading" hoverable>
-          <a-statistic title="低蒸结晶温度(℃)" :value="productionData.card5 ?? '无数据'" :precision="2" suffix="">
+          <a-statistic title="降膜蒸发温度(℃)" :value="productionData.card5 ?? '无数据'" :precision="2" suffix="">
             <template #prefix><CalendarOutlined class="stat-icon" /></template>
           </a-statistic>
         </a-card>
