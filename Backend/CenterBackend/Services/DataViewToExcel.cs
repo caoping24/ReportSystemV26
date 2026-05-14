@@ -127,7 +127,7 @@ namespace CenterBackend.Services
             if (dayList == null)
                 return false;
             srcSheet = srcWorkbook.GetSheetAt(5);                                       //实际要写的表
-            SetXlsxCellString(srcSheet, 3, 2, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));  //记录日期
+            SetXlsxCellString(srcSheet, 3, 3, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));  //记录日期
             SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
             SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
             SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
@@ -155,7 +155,7 @@ namespace CenterBackend.Services
             if (dayList == null)
                 return false;
             srcSheet = srcWorkbook.GetSheetAt(0);                                       //实际要写的表
-            //SetXlsxCellString(srcSheet, 51, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
+            SetXlsxCellString(srcSheet, 3, 3, monthWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
             SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
             SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
             SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
@@ -174,7 +174,6 @@ namespace CenterBackend.Services
             SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
             return true;
         }
-
         private static bool YearWriteExcel(XSSFWorkbook srcWorkbook, YearWorkBook yearWorkBookData)
         {
             ISheet srcSheet;
@@ -182,7 +181,7 @@ namespace CenterBackend.Services
             if (dayList == null)
                 return false;
             srcSheet = srcWorkbook.GetSheetAt(0);                                       //实际要写的表
-            //SetXlsxCellString(srcSheet, 51, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
+            SetXlsxCellString(srcSheet, 3, 3, yearWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
             SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
             SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
             SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);

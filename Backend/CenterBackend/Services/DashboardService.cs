@@ -68,7 +68,7 @@ namespace CenterBackend.Services
 
             int totalHours = (int)Math.Ceiling((endTime - startTime).TotalHours);
             string[] xAxis = Enumerable.Range(0, totalHours)
-                                       .Select(i => ((i % 24) + 8).ToString())
+                                       .Select(i => ((i + 8) % 24).ToString())
                                        .ToArray();
 
             List<SourceData> dataList = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);

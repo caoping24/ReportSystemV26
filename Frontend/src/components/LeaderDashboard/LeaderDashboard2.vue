@@ -268,23 +268,23 @@ const getBaseChartOption = (title: string, yAxisName: string, color: string, dat
     title: { text: title, left: "center", top: 10, textStyle: { fontSize: 16, fontWeight: 600 } },
     color: [color],
       tooltip: { trigger: "axis", axisPointer: { type: "shadow" },
-formatter: (params: any[]) => {
-    const hourStr = String(params?.[0]?.axisValue); // "8","9","10"...
-    const hour = parseInt(hourStr, 10);
+        formatter: (params: any[]) => {
+            const hourStr = String(params?.[0]?.axisValue); // "8","9","10"...
+            const hour = parseInt(hourStr, 10);
 
-    const t = new Date();
-    // hour>=8 认为是昨天；否则认为是今天（用于跨午夜的“昨日8点到现在”窗口）
-    if (hour >= 8) t.setDate(t.getDate() - 1);
-    t.setHours(hour, 0, 0, 0);
+            const t = new Date();
+            // hour>=8 认为是昨天；否则认为是今天（用于跨午夜的“昨日8点到现在”窗口）
+            if (hour >= 8) t.setDate(t.getDate() - 1);
+            t.setHours(hour, 0, 0, 0);
 
-    const pad2 = (n: number) => String(n).padStart(2, "0");
-    const fmt = (d: Date) =>
-      `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+            const pad2 = (n: number) => String(n).padStart(2, "0");
+            const fmt = (d: Date) =>
+              `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 
-    const header = fmt(t);
-    const lines = params.map(p => `${p.marker}${p.seriesName}: ${p.data}`);
-    return [header, ...lines].join("<br/>");
-  }
+            const header = fmt(t);
+            const lines = params.map(p => `${p.marker}${p.seriesName}: ${p.data}`);
+            return [header, ...lines].join("<br/>");
+          }
     },
     legend: { orient: "horizontal", top: 40, left: "center" },
     toolbox: { show: true, feature: { saveAsImage: { show: true, title: "下载图片", type: "png" } }, right: 10, top: 10 },
