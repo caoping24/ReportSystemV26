@@ -107,6 +107,10 @@ namespace ReportServer
             menu.Items.Add(logMenuItem);
             //测试归档
             menu.Items.Add(new ToolStripSeparator());
+            var testComItem = new ToolStripMenuItem("测试连接");
+            testComItem.Click += async (_, __) => await TestWinccComAsync();
+            menu.Items.Add(testComItem);
+
             var testMenuItem = new ToolStripMenuItem("测试归档");
             testMenuItem.Click += async (_, __) => await TestWinccDataWriteAsync();
             menu.Items.Add(testMenuItem);
@@ -246,6 +250,28 @@ namespace ReportServer
                 System.Windows.MessageBox.Show($"打开日志文件夹失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        private async Task TestWinccComAsync()
+        {
+            try
+            {
+                if (_host == null || _host.Services == null)// 校验DI容器是否就绪
+                {
+                    System.Windows.MessageBox.Show("DI容器未初始化，无法执行测试！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                using var scope = _host.Services.CreateScope(); // 创建作用域（适配Scoped生命周期）
+                var tagReadServices = scope.ServiceProvider.GetRequiredService<ITagReadServices>();
+                bool result = await tagReadServices.GetConnectStatus();
+                System.Windows.MessageBox.Show(result ? "s7连接正常!" : "s7连接断开!", "测试结果", MessageBoxButton.OK,
+                    result ? MessageBoxImage.Information : MessageBoxImage.Warning
+                );// 反馈执行结果
+            }
+            catch (Exception ex)// 异常兜底
+            {
+                System.Windows.MessageBox.Show($"测试执行异常：{ex.Message}\n{ex.StackTrace}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private async Task TestWinccDataWriteAsync()
         {
             try

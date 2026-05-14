@@ -102,7 +102,7 @@ namespace ReportServer.Services.UserService
             return Task.FromResult<TagMap?>(null);
         }
 
-        private static async Task<bool> GetConnectStatus()
+        public  async Task<bool> GetConnectStatus()
         {
             CCHMIRUNTIME.HMIRuntime? hmi = null;
             CCHMIRUNTIME.IHMITagSet? tagSet = null;

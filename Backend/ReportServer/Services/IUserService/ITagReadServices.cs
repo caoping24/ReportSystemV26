@@ -6,5 +6,6 @@ namespace ReportServer.Services.IUserService
     {
         Task<List<TagMap>> ReadAllTagsAsync();
         Task<TagMap?> ReadSingleTagsAsync(string tagName);
+        Task<bool> GetConnectStatus();
     }
 }
