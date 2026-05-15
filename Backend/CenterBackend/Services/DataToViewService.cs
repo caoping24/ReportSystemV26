@@ -88,11 +88,7 @@ namespace CenterBackend.Services
             WeekMoveDataSheet5Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet6Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet7Async(WeekWorkBook, sourceData, operatorInputData);
-            WeekMoveDataSheet8Async(WeekWorkBook, sourceData, operatorInputData);
-            WeekMoveDataSheet9Async(WeekWorkBook, sourceData, operatorInputData);
-            WeekMoveDataSheet10Async(WeekWorkBook, sourceData, operatorInputData);
-            WeekMoveDataSheet11Async(WeekWorkBook, sourceData, operatorInputData);
-            WeekMoveDataSheet12Async(WeekWorkBook, sourceData, operatorInputData);
+
             //WeekMoveDataSheet13Async(WeekWorkBook, sourceData, operatorInputData);2026年5月14日 弃用
             WeekMoveDataSheet1Async(WeekWorkBook, sourceData, operatorInputData);//必须放在最后 因为需要用到前面12张表的数据
             return true;
@@ -852,11 +848,11 @@ namespace CenterBackend.Services
             int i = 0;
             WeekWorkBook.WorkSheet1[i].Cell1 = WeekWorkBook.WorkSheet7[2].Cell1; //读取计算的收率
 
-            WeekWorkBook.WorkSheet1[i].Cell2 = WeekWorkBook.WorkSheet12[2].Cell1; //读取羟基单耗
-            WeekWorkBook.WorkSheet1[i].Cell3 = WeekWorkBook.WorkSheet12[2].Cell2; //读取氨单耗
-            WeekWorkBook.WorkSheet1[i].Cell4 = WeekWorkBook.WorkSheet12[2].Cell3; //读取硫酸单耗
+            //WeekWorkBook.WorkSheet1[i].Cell2 = WeekWorkBook.WorkSheet12[2].Cell1; //读取羟基单耗
+            //WeekWorkBook.WorkSheet1[i].Cell3 = WeekWorkBook.WorkSheet12[2].Cell2; //读取氨单耗
+            //WeekWorkBook.WorkSheet1[i].Cell4 = WeekWorkBook.WorkSheet12[2].Cell3; //读取硫酸单耗
 
-            WeekWorkBook.WorkSheet1[i].Cell21 = WeekWorkBook.WorkSheet12[2].Cell8;//	废液单位产品排放量
+            //WeekWorkBook.WorkSheet1[i].Cell21 = WeekWorkBook.WorkSheet12[2].Cell8;//	废液单位产品排放量
             if (sourceDatas != null)
             {
                 var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
@@ -897,560 +893,207 @@ namespace CenterBackend.Services
         }
         private static bool WeekMoveDataSheet2Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
-            WeekWorkBook.WorkSheet2 = Enumerable.Range(1, 3).Select(_ => new WorkSheet2()).ToList();
-
+            WeekWorkBook.WorkSheet2 = Enumerable.Range(1, 7).Select(_ => new WorkSheet2()).ToList();
+            var datalist = WeekWorkBook.WorkSheet2;
             DateTime startTime;
             DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
 
-            for (var i = 0; i < 3; i++)
+            for (var i = 0; i < 7; i++)
             {
-                if (i == 0)
+                startTime = currentWeekFirstDay.AddDays(i);
+                endTime = startTime.AddDays(1);
+                var dataItem = datalist[i];
+                dataItem.TimePoint = startTime;
+                if (operatorInputDatas != null)
                 {
-                    startTime = currentWeekFirstDay.AddDays(-14);
-                    endTime = startTime.AddDays(7);
-                }
-                else if (i == 1)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
-
-                if (sourceDatas != null)
-                { 
-                    var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    if(sourceData.Count == 0)
+                    var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+                    if (operatorInputData.Count == 0)
                         continue;
-                    WeekWorkBook.WorkSheet2[i].Cell1 = CalculateAverage(sourceData, x => x.Cell13);
-                    WeekWorkBook.WorkSheet2[i].Cell2 = CalculateAverage(sourceData, x => x.Cell15);
-                    WeekWorkBook.WorkSheet2[i].Cell3 = CalculateAverage(sourceData, x => x.Cell19);
-                    WeekWorkBook.WorkSheet2[i].Cell4 = CalculateAverage(sourceData, x => x.Cell22);
-                    WeekWorkBook.WorkSheet2[i].Cell5 = CalculateAverage(sourceData, x => x.Cell24);
-                    WeekWorkBook.WorkSheet2[i].Cell6 = CalculateAverage(sourceData, x => x.Cell25);
-                    WeekWorkBook.WorkSheet2[i].Cell7 = CalculateAverage(sourceData, x => x.Cell26);
-                    WeekWorkBook.WorkSheet2[i].Cell8 = CalculateAverage(sourceData, x => x.Cell27);
-                    WeekWorkBook.WorkSheet2[i].Cell9 = CalculateAverage(sourceData, x => x.Cell28);
+                    
+                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell1);
+                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell2);
+                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell3);
+                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell4);
+                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell5);
                 }
             }
             return true;
         }
         private static bool WeekMoveDataSheet3Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
-            WeekWorkBook.WorkSheet3 = Enumerable.Range(1, 3).Select(_ => new WorkSheet3()).ToList();
-
+            WeekWorkBook.WorkSheet3 = Enumerable.Range(1, 7).Select(_ => new WorkSheet3()).ToList();
+            var datalist = WeekWorkBook.WorkSheet3;
             DateTime startTime;
             DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-            for (var i = 0; i < 3; i++)
+
+            for (var i = 0; i < 7; i++)
             {
-                if (i == 0)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-14);
-                    endTime = startTime.AddDays(-7);
-                }
-                else if (i == 1)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
+                startTime = currentWeekFirstDay.AddDays(i);
+                endTime = startTime.AddDays(1);
+                var dataItem = datalist[i];
+                dataItem.TimePoint = startTime;
                 if (operatorInputDatas != null)
-                { 
+                {
                     var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-
-                    WeekWorkBook.WorkSheet3[i].Cell1 = CalculateAverage(operatorInputData, x => x.Cell11);
-                    WeekWorkBook.WorkSheet3[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell12);
-                    WeekWorkBook.WorkSheet3[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell13);
-                    WeekWorkBook.WorkSheet3[i].Cell4 = CalculateAverage(operatorInputData, x => x.Cell14);
-                    WeekWorkBook.WorkSheet3[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell17);
+                    if (operatorInputData.Count == 0)
+                        continue;
+                    
+                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell11);
+                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell12);
+                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell13);
+                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell14);
+                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell15);
+                    dataItem.Cell6 = CalculateAverage(operatorInputData, x => x.Cell16);
+                    dataItem.Cell7 = CalculateAverage(operatorInputData, x => x.Cell17);
+                    dataItem.Cell7 = CalculateAverage(operatorInputData, x => x.Cell18);
                 }
             }
             return true;
         }
         private static bool WeekMoveDataSheet4Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
-            WeekWorkBook.WorkSheet4 = Enumerable.Range(1, 3).Select(_ => new WorkSheet4()).ToList();
+            //WeekWorkBook.WorkSheet4 = Enumerable.Range(1, 3).Select(_ => new WorkSheet4()).ToList();
 
-            DateTime startTime;
-            DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            //DateTime startTime;
+            //DateTime endTime;
+            //DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
 
-            for (var i = 0; i < 3; i++)
-            {
-                if (i == 0)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-14);
-                    endTime = startTime.AddDays(7);
-                }
-                else if (i == 1)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
+            //for (var i = 0; i < 3; i++)
+            //{
+            //    if (i == 0)
+            //    {
+            //        startTime = currentWeekFirstDay.AddDays(-14);
+            //        endTime = startTime.AddDays(7);
+            //    }
+            //    else if (i == 1)
+            //    {
+            //        startTime = currentWeekFirstDay.AddDays(-7);
+            //        endTime = startTime.AddDays(7);
+            //    }
+            //    else
+            //    {
+            //        startTime = currentWeekFirstDay;
+            //        endTime = startTime.AddDays(7);
+            //    }
 
-                if (sourceDatas != null)
-                { 
-                    var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+            //    if (sourceDatas != null)
+            //    { 
+            //        var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
 
-                    WeekWorkBook.WorkSheet4[i].Cell6 = CalculateAverage(sourceData, x => x.Cell92);
-                    WeekWorkBook.WorkSheet4[i].Cell7 = CalculateAverage(sourceData, x => x.Cell106);
-                }
+            //        WeekWorkBook.WorkSheet4[i].Cell6 = CalculateAverage(sourceData, x => x.Cell92);
+            //        WeekWorkBook.WorkSheet4[i].Cell7 = CalculateAverage(sourceData, x => x.Cell106);
+            //    }
 
-                if (operatorInputDatas != null)
-                { 
-                    var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+            //    if (operatorInputDatas != null)
+            //    { 
+            //        var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
 
-                    WeekWorkBook.WorkSheet4[i].Cell1 = CalculateAverage(operatorInputData, x => x.Cell1);
-                    WeekWorkBook.WorkSheet4[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell2);
-                    WeekWorkBook.WorkSheet4[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell3);
-                    WeekWorkBook.WorkSheet4[i].Cell4 = CalculateAverage(operatorInputData, x => x.Cell4);
-                    WeekWorkBook.WorkSheet4[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell5);
-                }
-            }
+            //        WeekWorkBook.WorkSheet4[i].Cell1 = CalculateAverage(operatorInputData, x => x.Cell1);
+            //        WeekWorkBook.WorkSheet4[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell2);
+            //        WeekWorkBook.WorkSheet4[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell3);
+            //        WeekWorkBook.WorkSheet4[i].Cell4 = CalculateAverage(operatorInputData, x => x.Cell4);
+            //        WeekWorkBook.WorkSheet4[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell5);
+            //    }
+            //}
             return true;
         }
         private static bool WeekMoveDataSheet5Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
-            WeekWorkBook.WorkSheet5 = Enumerable.Range(1, 3).Select(_ => new WorkSheet5()).ToList();
-
+            WeekWorkBook.WorkSheet5 = Enumerable.Range(1, 7).Select(_ => new WorkSheet5()).ToList();
+            var datalist = WeekWorkBook.WorkSheet5;
             DateTime startTime;
             DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-            for (var i = 0; i < 3; i++)
-            {
-                if (i == 0)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-14);
-                    endTime = startTime.AddDays(7);
 
-                }
-                else if (i == 1)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
-                
+            for (var i = 0; i < 7; i++)
+            {
+                startTime = currentWeekFirstDay.AddDays(i);
+                endTime = startTime.AddDays(1);
+                var dataItem = datalist[i];
+                dataItem.TimePoint = startTime;
                 if (operatorInputDatas != null)
-                { 
+                {
                     var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
- 
-                    WeekWorkBook.WorkSheet5[i].Cell1 = CalculateAverage(operatorInputData, x => x.Cell21);
-                    WeekWorkBook.WorkSheet5[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell23);
-                    //WeekWorkBook.WorkSheet5[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell24);//自动计算
-                    //WeekWorkBook.WorkSheet5[i].Cell4 = CalculateAverage(operatorInputData, x => x.Cell25);
-                    WeekWorkBook.WorkSheet5[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell31);
-                    WeekWorkBook.WorkSheet5[i].Cell6 = CalculateAverage(operatorInputData, x => x.Cell33);
-                    //WeekWorkBook.WorkSheet5[i].Cell7 = CalculateAverage(operatorInputData, x => x.Cell34);//自动计算
-                    //WeekWorkBook.WorkSheet5[i].Cell8 = CalculateAverage(operatorInputData, x => x.Cell35);
+                    if (operatorInputData.Count == 0)
+                        continue;
+                    
+                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell41);
+                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell42);
+                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell43);
+                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell44);
+                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell45);
                 }
             }
             return true;
         }
         private static bool WeekMoveDataSheet6Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
-            WeekWorkBook.WorkSheet6 = Enumerable.Range(1, 3).Select(_ => new WorkSheet6()).ToList();
-
+            WeekWorkBook.WorkSheet6 = Enumerable.Range(1, 7).Select(_ => new WorkSheet6()).ToList();
+            var datalist = WeekWorkBook.WorkSheet6;
             DateTime startTime;
             DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-            for (var i = 0; i < 3; i++)
+
+            for (var i = 0; i < 7; i++)
             {
-                if (i == 0)
+                startTime = currentWeekFirstDay.AddDays(i);
+                endTime = startTime.AddDays(1);
+                var dataItem = datalist[i];
+                dataItem.TimePoint = startTime;
+                if (operatorInputDatas != null)
                 {
-                    startTime = currentWeekFirstDay.AddDays(-14);
-                    endTime = startTime.AddDays(7);
+                    var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+                    if (operatorInputData.Count == 0)
+                        continue;
+                    
+                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell51);
+                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell52);
+                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell53);
+                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell54);
+                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell55);
+                    dataItem.Cell6 = CalculateAverage(operatorInputData, x => x.Cell56);
+                    dataItem.Cell7 = CalculateAverage(operatorInputData, x => x.Cell57);
+                    dataItem.Cell8 = CalculateAverage(operatorInputData, x => x.Cell58);
+                    dataItem.Cell9 = CalculateAverage(operatorInputData, x => x.Cell59);
+                    dataItem.Cell10 = CalculateAverage(operatorInputData, x => x.Cell60);
+                    dataItem.Cell11 = CalculateAverage(operatorInputData, x => x.Cell61);
+                    dataItem.Cell12 = CalculateAverage(operatorInputData, x => x.Cell62);
+                    dataItem.Cell13 = CalculateAverage(operatorInputData, x => x.Cell63);
+                    dataItem.Cell14 = CalculateAverage(operatorInputData, x => x.Cell64);
                 }
-                else if (i == 1)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
-                var productionDataCollections = CalculateForSheet3TimeRange(startTime, endTime, operatorInputDatas);
-                WeekWorkBook.WorkSheet6[i].Cell1 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_1);
-                WeekWorkBook.WorkSheet6[i].Cell2 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_2);
             }
             return true;
+
         }
         private static bool WeekMoveDataSheet7Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
-            WeekWorkBook.WorkSheet7 = Enumerable.Range(1, 3).Select(_ => new WorkSheet7()).ToList();
+            WeekWorkBook.WorkSheet7 = Enumerable.Range(1, 7).Select(_ => new WorkSheet7()).ToList();
+            var datalist = WeekWorkBook.WorkSheet7;
             DateTime startTime;
             DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
 
-            for (var i = 0; i < 3; i++) 
-            {
-                if (i == 0)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-14);
-                    endTime = startTime.AddDays(7);
-                }
-                else if (i == 1)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
-                var productionDataCollections = CalculateForSheet3TimeRange(startTime, endTime, operatorInputDatas);
-                WeekWorkBook.WorkSheet7[i].Cell1 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_1);
-                WeekWorkBook.WorkSheet7[i].Cell2 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllProduction);
-            }
-
-            return true;
-        }
-        private static bool WeekMoveDataSheet8Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
-        {
-            WeekWorkBook.WorkSheet8 = Enumerable.Range(1, 9).Select(_ => new WorkSheet8()).ToList();
-
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-            ProductionDataCollection ProductionDataCollection = new();
             for (var i = 0; i < 7; i++)
             {
-                var startTime = currentWeekFirstDay.AddDays(i);
-                var endTime = startTime.AddDays(1);
-  
+                startTime = currentWeekFirstDay.AddDays(i);
+                endTime = startTime.AddDays(1);
+                var dataItem = datalist[i];
+                dataItem.TimePoint = startTime;
                 if (operatorInputDatas != null)
                 {
                     var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    WeekWorkBook.WorkSheet8[i].Cell1 = CalculateAverage(operatorInputData, x => x.Cell11);
-                    WeekWorkBook.WorkSheet8[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell13);
-                    WeekWorkBook.WorkSheet8[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell17);
-                    WeekWorkBook.WorkSheet8[i].Cell10 = CalculateAverage(operatorInputData, x => x.Cell74);//废液中二乙睛含量 改为Cell74
-
-                    ProductionDataCollection = CalculateForSheet3(startTime, operatorInputDatas);
-
-                    WeekWorkBook.WorkSheet8[i].Cell4 = ProductionDataCollection.TotalResult.AllAverage_1;
-                    WeekWorkBook.WorkSheet8[i].Cell5 = ProductionDataCollection.TotalResult.AllAverage_3;
-                    WeekWorkBook.WorkSheet8[i].Cell6 = ProductionDataCollection.TotalResult.AllAverage_4;
-                    float temp = WeekWorkBook.WorkSheet8[i].Cell6 ?? 0f;
-                    WeekWorkBook.WorkSheet8[i].Cell7 = 100 - temp;
-                    WeekWorkBook.WorkSheet8[i].Cell8 = ProductionDataCollection.TotalResult.AllProduction;
-                    WeekWorkBook.WorkSheet8[i].Cell9 = ProductionDataCollection.TotalResult.AllYield;
-
-                }
-            }
-            for (var i = 7; i < 9; i++)
-            {
-                var startTime = currentWeekFirstDay;
-                if (i == 7) startTime = currentWeekFirstDay.AddDays(-7);
-                var endTime = startTime.AddDays(7);
-
-                List<ProductionDataCollection> productionDataCollections = [];
-                if (operatorInputDatas != null)
-                {
-                    var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    WeekWorkBook.WorkSheet8[i].Cell1 = CalculateAverage(operatorInputData, x => x.Cell11);
-                    WeekWorkBook.WorkSheet8[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell13);
-                    WeekWorkBook.WorkSheet8[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell17);
-                    WeekWorkBook.WorkSheet8[i].Cell10 = CalculateAverage(operatorInputData, x => x.Cell74);//废液中二乙睛含量 改为Cell74
-
-                    productionDataCollections = CalculateForSheet3TimeRange(startTime, endTime, operatorInputDatas);
-                    WeekWorkBook.WorkSheet8[i].Cell4 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_1);
-                    WeekWorkBook.WorkSheet8[i].Cell5 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_3);
-                    WeekWorkBook.WorkSheet8[i].Cell6 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_4);
-                    float temp = WeekWorkBook.WorkSheet8[i].Cell6 ?? 0f;
-                    WeekWorkBook.WorkSheet8[i].Cell7 = 100 - temp;
-                    WeekWorkBook.WorkSheet8[i].Cell8 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllProduction);
-                    WeekWorkBook.WorkSheet8[i].Cell9 = CalculateAverage(productionDataCollections, x => x.TotalResult.AllYield);
-                }
-
-            }
-
-            return true;
-        }
-        private static bool WeekMoveDataSheet9Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
-        {
-            WeekWorkBook.WorkSheet9 = Enumerable.Range(1, 2).Select(_ => new WorkSheet9()).ToList();
-
-            DateTime startTime;
-            DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-            for (var i = 0; i < 2; i++)
-            {
-                if (i == 0)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
-                if (sourceDatas != null)
-                {
-                    var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    WeekWorkBook.WorkSheet9[i].Cell1 = CalculateFirstLastDifference(sourceData, x => x.Cell107) / 1000;
-                    WeekWorkBook.WorkSheet9[i].Cell2 = CalculateAverage(sourceData, x => x.Cell116) / 1000;
-                    float input = WeekWorkBook.WorkSheet9[i].Cell1 ?? 0f;
-                    float output = WeekWorkBook.WorkSheet9[i].Cell2 ?? 0f;
-                    if (output != 0) WeekWorkBook.WorkSheet9[i].Cell3 = input / output;
-
-                    WeekWorkBook.WorkSheet9[i].Cell4 = CalculateAverage(sourceData, x => x.Cell114);
-                    WeekWorkBook.WorkSheet9[i].Cell5 = CalculateAverage(sourceData, x => x.Cell112);
-                }
-                if (operatorInputDatas != null)
-                {
-                    var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    WeekWorkBook.WorkSheet9[i].Cell6 = CalculateAverage(operatorInputData, x => x.Cell51);
-                    WeekWorkBook.WorkSheet9[i].Cell7 = CalculateAverage(operatorInputData, x => x.Cell53);
-                    WeekWorkBook.WorkSheet9[i].Cell8 = CalculateAverage(operatorInputData, x => x.Cell55);
+                    if (operatorInputData.Count == 0)
+                        continue;
+                    
+                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell71);
+                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell72);
+                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell73);
                 }
             }
             return true;
         }
-        private static bool WeekMoveDataSheet10Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
-        {
-            WeekWorkBook.WorkSheet10 = Enumerable.Range(1, 2).Select(_ => new WorkSheet10()).ToList();
-
-            DateTime startTime;
-            DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-            for (var i = 0; i < 2; i++)
-            {
-                if (i == 0)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
-                float? total = 0;
-                if (sourceDatas != null)
-                {
-                    var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    if (sourceData != null && sourceData.Count != 0)
-                    {
-                        total = CalculateFirstLastDifference(sourceData, x => x.Cell105);//本时间段脱色液进料总量 
-                    }
-                }
-                if (operatorInputDatas != null)
-                {
-                    var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    if (total != null)
-                    {
-                        var difference = CalculateSum(operatorInputData, x => x.Cell64);//活性炭每次的消耗量
-                        if (difference != null)
-                            WeekWorkBook.WorkSheet10[i].Cell1 = difference == 0 ? 0f : (total / difference);//活性炭单耗
-                    }
-                    WeekWorkBook.WorkSheet10[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell62);
-                    if (i != 0)
-                    {
-                        WeekWorkBook.WorkSheet10[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell51);
-                        WeekWorkBook.WorkSheet10[i].Cell4 = CalculateAverage(operatorInputData, x => x.Cell52);
-                        WeekWorkBook.WorkSheet10[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell55);
-                        WeekWorkBook.WorkSheet10[i].Cell6 = CalculateAverage(operatorInputData, x => x.Cell57);
-                        WeekWorkBook.WorkSheet10[i].Cell7 = CalculateAverage(operatorInputData, x => x.Cell59);
-                        WeekWorkBook.WorkSheet10[i].Cell8 = CalculateAverage(operatorInputData, x => x.Cell61);
-                    }
-                }
-            }
-            return true;
-        }
-        private static bool WeekMoveDataSheet11Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
-        {
-            WeekWorkBook.WorkSheet11 = Enumerable.Range(1, 3).Select(_ => new WorkSheet11()).ToList();
-
-            DateTime startTime;
-            DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-            for (var i = 0; i < 3; i++)
-            {
-                if (i == 0)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-14);
-                    endTime = startTime.AddDays(7);
-                }
-                else if (i == 1)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
-
-                if (sourceDatas != null)
-                {
-                    var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    WeekWorkBook.WorkSheet11[i].Cell5 = CalculateFirstLastDifference(sourceData, x => x.Cell134);//废液外排累计
-                }
-
-                if (operatorInputDatas != null)
-                {
-                    var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    var productionDataCollections = CalculateForSheet3TimeRange(startTime, endTime, operatorInputData);
-
-                    WeekWorkBook.WorkSheet11[i].Cell1 = CalculateAverage(operatorInputData, x => x.Cell51);
-                    WeekWorkBook.WorkSheet11[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell53);
-                    WeekWorkBook.WorkSheet11[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell55);
-
-                    var sum = CalculateSum(productionDataCollections, x => x.TotalResult.AllProduction);//产量
-                    WeekWorkBook.WorkSheet11[i].Cell4 = sum == 0 ? 0 : WeekWorkBook.WorkSheet11[i].Cell5 / sum;//废液外排单耗
-                }
-            }
-            return true;
-        }
-        private static bool WeekMoveDataSheet12Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
-        {
-            WeekWorkBook.WorkSheet12 = Enumerable.Range(1, 3).Select(_ => new WorkSheet12()).ToList();
-
-            DateTime startTime;
-            DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-
-            ProductionDataCollection productionDataCollection = new();
-            MaterialDataCollection materialDataCollection = new();
-            for (var i = 0; i < 3; i++) 
-            {
-                if (i == 0)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-14);
-                    endTime = startTime.AddDays(7);
-                }
-                else if (i == 1)
-                {
-                    startTime = currentWeekFirstDay.AddDays(-7);
-                    endTime = startTime.AddDays(7);
-                }
-                else
-                {
-                    startTime = currentWeekFirstDay;
-                    endTime = startTime.AddDays(7);
-                }
-
-
-
-                if (sourceDatas != null)//填充消耗
-                {
-                    var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    var temp = CalculateFirstLastDifference(sourceData, x => x.Cell4);//羟基乙腈
-                    materialDataCollection.MaterialDatas[0].TotalResult.Usage = temp;
-                    materialDataCollection.MaterialDatas[1].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell8);//液氨
-                    materialDataCollection.MaterialDatas[2].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell37);//稀硫酸
-
-                    materialDataCollection.MaterialDatas[4].TotalResult.Usage = temp * 0.18218f / 1000;//反应蒸汽
-                    materialDataCollection.MaterialDatas[5].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell112);//低蒸蒸汽
-                    materialDataCollection.MaterialDatas[6].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell143);//脱盐水消耗 使用cell143 自动采集
-
-                    materialDataCollection.MaterialDatas[8].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell55) + CalculateFirstLastDifference(sourceData, x => x.Cell118);//废水
-                    materialDataCollection.MaterialDatas[9].TotalResult.Usage = CalculateFirstLastDifference(sourceData, x => x.Cell134);//废液
-                }
-                if (operatorInputDatas != null)
-                {
-                    var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                    var lowPressData = CalculateFirstLastDifference(operatorInputData, x => x.Cell71); //低压蒸汽消耗-手动录入
-                    var midellPressData = CalculateFirstLastDifference(operatorInputData, x => x.Cell72); //中压蒸汽消耗-手动录入
-                    materialDataCollection.MaterialDatas[3].TotalResult.Usage = lowPressData ?? 0 + midellPressData ?? 0;//蒸汽总消耗= 低压+中压
-                    materialDataCollection.MaterialDatas[7].TotalResult.Usage = CalculateFirstLastDifference(operatorInputData, x => x.Cell73);//电消耗
-
-                    float rangeYield = 0;
-                    productionDataCollection = CalculateForSheet3(startTime, operatorInputDatas);
-                    rangeYield = productionDataCollection.TotalResult.AllYield;//获取每日折百产量
-                    for (var y = 0; y < 10; y++)//填充折百产量
-                    {
-                        materialDataCollection.MaterialDatas[y].TotalResult.Yield = rangeYield;
-                    }
-                }
-                //materialDataCollection.CalculateSum();//这里不要计算 ，会覆盖前面的结果，计算是白班晚班分开计算使用的
-
-
-                    WeekWorkBook.WorkSheet12[i].Cell1 = materialDataCollection.MaterialDatas[0].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[i].Cell2 = materialDataCollection.MaterialDatas[1].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[i].Cell3 = materialDataCollection.MaterialDatas[2].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[i].Cell4 = materialDataCollection.MaterialDatas[3].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[i].Cell5 = materialDataCollection.MaterialDatas[4].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[i].Cell6 = materialDataCollection.MaterialDatas[5].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[i].Cell7 = materialDataCollection.MaterialDatas[6].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[i].Cell8 = materialDataCollection.MaterialDatas[7].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[i].Cell9 = materialDataCollection.MaterialDatas[8].TotalResult.Specific;
-                    WeekWorkBook.WorkSheet12[i].Cell10 = materialDataCollection.MaterialDatas[9].TotalResult.Specific;
-
-
-            }
-
-            return true;
-        }
-        //2026年5月14日 弃用
-        //private static bool WeekMoveDataSheet13Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
-        //{
-
-        //    WeekWorkBook.WorkSheet13 = Enumerable.Range(1, 14).Select(_ => new WorkSheet13()).ToList();
-
-        //    DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-        //    ProductionDataCollection ProductionDataCollection= new();
-        //    for (var i = 0; i < 7; i++)
-        //    {
-        //        var startTime = currentWeekFirstDay.AddDays(i);
-        //        var endTime = startTime.AddDays(1);
-
-        //        if (operatorInputDatas != null)
-        //        {
-        //            ProductionDataCollection =  CalculateForSheet3(startTime, operatorInputDatas);
-        //        }
-
-        //        if (sourceDatas != null)
-        //        {
-        //            var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-        //            var dayShift = sourceData.Where(x => x.ReportedTime < startTime.AddHours(12)).ToList();
-        //            WeekWorkBook.WorkSheet13[2 * i].TimePoint = startTime;
-        //            WeekWorkBook.WorkSheet13[2 * i].Cell1 = CalculateQualifiedRate(dayShift, x => x.Cell23, true, 0.515f, 0.05f);
-        //            WeekWorkBook.WorkSheet13[2 * i].Cell2 = CalculateQualifiedRate(dayShift, x => x.Cell3, true, 410f, 5f);
-        //            WeekWorkBook.WorkSheet13[2 * i].Cell3 = CalculateQualifiedRate(dayShift, x => x.Cell6, true, 168f, 2f);
-        //            WeekWorkBook.WorkSheet13[2 * i].Cell4 = CalculateQualifiedRate(dayShift, x => x.Cell66, false, 20, 0);
-        //            //WeekWorkBook.WorkSheet13[2 * i].Cell5 = 
-        //            WeekWorkBook.WorkSheet13[2 * i].Cell6 = ProductionDataCollection.DayResult.AllProduction;
-        //            WeekWorkBook.WorkSheet13[2 * i].Cell7 = ProductionDataCollection.DayResult.AllYield;
-        //            WeekWorkBook.WorkSheet13[2 * i].Cell8 = ProductionDataCollection.DayResult.AllAverage_1;
-
-        //            var nightShift = sourceData.Where(x => x.ReportedTime >= startTime.AddHours(12)).ToList();
-        //            WeekWorkBook.WorkSheet13[2 * i + 1].TimePoint = startTime.AddHours(12);
-        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell1 = CalculateQualifiedRate(nightShift, x => x.Cell23, true, 0.515f, 0.05f);
-        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell2 = CalculateQualifiedRate(nightShift, x => x.Cell3, true, 410f, 5f);
-        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell3 = CalculateQualifiedRate(nightShift, x => x.Cell6, true, 168f, 2f);
-        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell4 = CalculateQualifiedRate(nightShift, x => x.Cell66, false, 20, 0);
-        //            //WeekWorkBook.WorkSheet13[2 * i + 1].Cell5 =
-        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell6 = ProductionDataCollection.NightResult.AllProduction;
-        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell7 = ProductionDataCollection.NightResult.AllYield;
-        //            WeekWorkBook.WorkSheet13[2 * i + 1].Cell8 = ProductionDataCollection.NightResult.AllAverage_1;
-        //        }
-        //    }
-        //    return true;
-        //}
         /***********************辅助方法***********************/
         /// <summary>
         /// 统计单个字段值落在 [minRange, maxRange] 范围内的数量(跳过null)
