@@ -1,85 +1,292 @@
-﻿using System.Collections;
+﻿using CenterReport.Repository.Models;
+using System.Collections;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace CenterBackend.Models.CalculateData
 {
     //**********************数据结构**********************
     //手写记录表 表6
-    public class MaterialDataCollection 
+    public class MaterialDailyCollection
     {
-        public List<SingleDay> MaterialDatas { get; set; } = Enumerable.Range(0, 10).Select(_ => new SingleDay()).ToList();
-    }
+        public const int DataCount = 19;//需要计算的数据数量
+        public List<MaterialData> MaterialDatas { get; private set; } = Enumerable.Range(0, DataCount).Select(_ => new MaterialData()).ToList();
 
-    public class SingleDay
-    {
-        public MaterialData DayShift { get; set; } = new MaterialData();
-        public MaterialData NightShift { get; set; } = new MaterialData();
-        public MaterialData TotalResult { get; set; } = new MaterialData();
 
-    }
-    public class MaterialData
-    {
-        private float? _usage = 0;
-        private float? _yield = 0;
-        private float? _specific = null;
-        public float? Usage
+        public float? Yield { get; private set; }//每天的折百产量
+        public MaterialDailyCollection(DateTime startTime, float? yield, List<SourceData> sourceData, List<OperatorInputData> operatorInputData) 
         {
-            get => _usage;
-            set
+            sourceData ??= new List<SourceData>();
+            operatorInputData ??= new List<OperatorInputData>();
+
+            Yield = yield;
+            var start = startTime.Date.AddHours(8);
+            var end = start.AddHours(25);//一天内范围 要多1个小时 才能包含25条数据
+
+            var DataListFromDCS = sourceData.Where(x => x.ReportedTime >= start && x.ReportedTime < end).ToList();//左闭右开
+            var DataListFromoperator = operatorInputData.Where(x => x.ReportedTime >= start && x.ReportedTime < end).ToList();//左闭右开
+            foreach (var config in MaterialConfigs.AllItems)
             {
-                if (_usage != value)
+                float? value = null;
+
+                // 根据配置的数据源 + 计算方式 自动计算
+                if (config.DataSourceType == DataSourceType.DCS)
                 {
-                    _usage = value;
-                    CalculateSpecific();
+                    value = config.CalculationType == CalculationType.FirstLastDifference
+                        ? MathTools.CalculateFirstLastDifference(DataListFromDCS, config.DcsSelector!)
+                        : MathTools.CalculateAverage(DataListFromDCS, config.DcsSelector!);
                 }
+                else if (config.DataSourceType == DataSourceType.Operator)
+                {
+                    value = config.CalculationType == CalculationType.FirstLastDifference
+                        ? MathTools.CalculateFirstLastDifference(DataListFromoperator, config.OperatorSelector!)
+                        : MathTools.CalculateAverage(DataListFromoperator, config.OperatorSelector!);
+
+                }
+                // 自动赋值到对应索引
+                var eachItem = MaterialDatas[config.Index];
+                eachItem.Index = config.Index;
+                eachItem.CalculationType = config.CalculationType;
+                eachItem.UsageOrAverage = value * config.Mul ?? 0; // 使用乘数修正
+                eachItem.Specific = RecalculateSpecific(eachItem);
             }
         }
-        public float? Yield
+
+        private float RecalculateSpecific(MaterialData item)
         {
-            get => _yield;
-            set
+            float temp;
+            if (item.CalculationType == CalculationType.FirstLastDifference)
             {
-                if (_yield != value)// 自动触发计算
-                {
-                    _yield = value;
-                    CalculateSpecific();
-                }
-            }
-        }
-        public float? Specific//内部计算赋值
-        {
-            get => _specific;
-            private set => _specific = value; // 禁止外部直接修改
-        }
-        private void CalculateSpecific()
-        {
-            if (Usage.HasValue && Yield.HasValue && Yield.Value != 0)
-            {
-                Specific = Usage.Value / Yield.Value;
+                if (item.UsageOrAverage.HasValue && Yield.HasValue && Yield.Value != 0)
+                    temp = item.UsageOrAverage.Value / Yield.Value;
+                else
+                    temp = 0;
             }
             else
             {
-                Specific = null;
+                temp = item.UsageOrAverage ?? 0;
             }
+            return temp;
         }
     }
 
-    public static class MaterialDataCollectionExtensions
+    public class MaterialData
     {
-        public static void CalculateSum(this MaterialDataCollection collection)
+        public int Index { get; set; }
+        public CalculationType CalculationType  { get; set; }
+        public float? UsageOrAverage { get; set; } = 0;
+        public float? Specific { get; set; }
+
+    }
+    // 枚举定义（统一复用）
+    public enum DataSourceType { DCS, Operator }
+    public enum AggregationType { Sum, Average }// 周聚合类型（Sum/Average）
+    public enum CalculationType { FirstLastDifference, Average}//数据收集类型  如果收集类型是  FirstLastDifference 每日统计要做单耗计算 如果是Average 则计算Average
+    public class MaterialItemConfig
+    {
+        public int Index { get; set; }               // 索引
+        public string Name { get; set; } = string.Empty; // 名称（便于维护）
+        public AggregationType AggregationType { get; set; } // 周聚合类型（Sum/Average）
+        public CalculationType CalculationType { get; set; } // 每日计算类型
+        public DataSourceType DataSourceType { get; set; }   // 数据源类型
+        public Func<SourceData, float?>? DcsSelector { get; set; } // DCS字段选择器
+        public Func<OperatorInputData, float?>? OperatorSelector { get; set; } // 人工录入字段选择器
+        public float Mul { get; set; } = 1;  // 单位修正乘数
+    }
+    public static class MaterialConfigs
+    {
+        public static readonly List<MaterialItemConfig> AllItems = new()
         {
-            if (collection == null)
-                throw new ArgumentNullException(nameof(collection), "物料数据集合不能为空");
-
-            if (collection.MaterialDatas == null)// 空列表防护：避免遍历null列表
-                return;
-            foreach (var singleDay in collection.MaterialDatas)
+            new MaterialItemConfig
             {
-                singleDay.TotalResult.Usage =
-                    (singleDay.DayShift.Usage ?? 0) + (singleDay.NightShift.Usage ?? 0);// TotalResult.Usage = 白班Usage + 夜班Usage
+                Index = 0,
+                Name = "羟基乙腈",
+                AggregationType = AggregationType.Sum,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.FirstLastDifference,
+                DcsSelector = x => x.Cell20, //用配后流量 可以方便和配后浓度一起计算单耗
+                Mul = 1,
 
-                singleDay.TotalResult.Yield =
-                    (singleDay.DayShift.Yield ?? 0) + (singleDay.NightShift.Yield ?? 0);// TotalResult.Yield = 白班Yield + 夜班Yield
+            },
+            new MaterialItemConfig
+            {
+                Index = 1,
+                Name = "液氨",
+                AggregationType = AggregationType.Sum,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.FirstLastDifference,
+                DcsSelector = x => x.Cell8,
+                Mul = 1000,
+            },
+            new MaterialItemConfig
+            {
+                Index = 2,
+                Name = "稀硫酸",
+                AggregationType = AggregationType.Sum,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.FirstLastDifference,
+                DcsSelector = x => x.Cell37,
+                Mul = 1730,
+            },
+            new MaterialItemConfig
+            {
+                Index = 3,
+                Name = "羟基浓度配料后",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell6,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 4,
+                Name = "氨腈摩尔比",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell23,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 5,
+                Name = "反应时间",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell20,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 6,
+                Name = "反应压力",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell24,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 7,
+                Name = "羟基加热温度",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell21,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 8,
+                Name = "氨汽混合温度",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell17,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 9,
+                Name = "管反热点温度",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell26,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 10,
+                Name = "预冷器结晶温度",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell62,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 11,
+                Name = "一次结晶温度",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell66,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 12,
+                Name = "降膜蒸发温度",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell144,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 13,
+                Name = "二次结晶温度",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.Average,
+                DcsSelector = x => x.Cell122,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 14,
+                Name = "脱盐水消耗",
+                AggregationType = AggregationType.Average,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.FirstLastDifference,
+                DcsSelector = x => x.Cell143,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 15,
+                Name = "废液排放",
+                AggregationType = AggregationType.Sum,
+                DataSourceType = DataSourceType.DCS,
+                CalculationType = CalculationType.FirstLastDifference,
+                DcsSelector = x => x.Cell134,
+                Mul = 1000,
+            },
+            new MaterialItemConfig
+            {
+                Index = 16,
+                Name = "低压蒸汽",
+                AggregationType = AggregationType.Sum,
+                DataSourceType = DataSourceType.Operator,
+                CalculationType = CalculationType.FirstLastDifference,
+                OperatorSelector = x => x.Cell71,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 17,
+                Name = "中压蒸汽",
+                AggregationType = AggregationType.Sum,
+                DataSourceType = DataSourceType.Operator,
+                CalculationType = CalculationType.FirstLastDifference,
+                OperatorSelector = x => x.Cell72,
+                Mul = 1,
+            },
+            new MaterialItemConfig
+            {
+                Index = 18,
+                Name = "电能消耗",
+                AggregationType = AggregationType.Sum,
+                DataSourceType = DataSourceType.Operator,
+                CalculationType = CalculationType.FirstLastDifference,
+                OperatorSelector = x => x.Cell73,
+                Mul = 1,
             }
-        }
+        };
     }
 }

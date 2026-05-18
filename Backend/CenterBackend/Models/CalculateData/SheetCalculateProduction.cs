@@ -1,319 +1,136 @@
-﻿using CenterReport.Repository.Models;
+﻿using CenterBackend.Models.ExcelDataView;
+using CenterReport.Repository.Models;
+using MathNet.Numerics.Optimization;
+using NPOI.SS.Formula.Functions;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Text.RegularExpressions;
+using static FastExpressionCompiler.ExpressionCompiler;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CenterBackend.Models.CalculateData
 {
     //**********************数据结构**********************
-    //手写记录表 表3
-    public class ProductionDataCollection
+    public class DailyProductionReport//sheet4
     {
-        public List<ProductionData> DayShiftData { get; set; } = [];
-        public List<ProductionData> NightShiftData { get; set; } = [];
-        public ProductionCalculationResult DayResult { get; set; } = new ProductionCalculationResult();
-        public ProductionCalculationResult NightResult { get; set; } = new ProductionCalculationResult();
-        public ProductionCalculationResult TotalResult { get; set; } = new ProductionCalculationResult();
+        public int MaxBatches => 2; // 白班 + 夜班
+        private readonly List<ShiftProductionData> _shiftBatches;
+        public IReadOnlyList<ShiftProductionData> ShiftBatches => _shiftBatches;
+        public DateTime TimePoint;
+        public float? Cell1 { get; } // 当日总收率
+        public float? Cell2 { get; } // 当日折百产量
+        public float? Cell3 { get; } // 当日产量
+        public DailyProductionReport(DateTime timeBase, List<SourceData> dataList1, List<OperatorInputData> dataList2)
+        {
+            _shiftBatches = new List<ShiftProductionData>();
+            dataList1 ??= new List<SourceData>();
+            dataList2 ??= new List<OperatorInputData>();
+            // 白班 8:00 ~ 20:00
+            var dayStart = timeBase.Date.AddHours(8);
+            var dayEnd = dayStart.AddHours(13);
+            var dayData1 = dataList1.Where(x => x.ReportedTime >= dayStart && x.ReportedTime < dayEnd).ToList();
+            var dayData2 = dataList2.Where(x => x.ReportedTime >= dayStart && x.ReportedTime < dayEnd).ToList();
+            _shiftBatches.Add(new ShiftProductionData(dayData1, dayData2));
+
+            // 夜班 20:00 ~ 次日 8:00
+            var nightStart = dayEnd;
+            var nightEnd = nightStart.AddHours(13);
+            var nightData1 = dataList1.Where(x => x.ReportedTime >= nightStart && x.ReportedTime < nightEnd).ToList();
+            var nightData2 = dataList2.Where(x => x.ReportedTime >= nightStart && x.ReportedTime < nightEnd).ToList();
+            _shiftBatches.Add(new ShiftProductionData(nightData1, nightData2));
+
+            // 构造时只计算一次（性能更好）
+            Cell1 = CalculateYield();
+            Cell2 = CalculateYieldWeight();
+            Cell3 = CalculateTotalWeight();
+            TimePoint = timeBase;
+        }
+
+        public float CalculateYield()
+        {
+            if (_shiftBatches.Count == 0) return 0;
+
+            var batch1 = _shiftBatches[0];
+            var batch2 = _shiftBatches[1];
+
+            float a = batch1.Cell2;
+            float b = batch1.Cell4;
+            float c = batch2.Cell2;
+            float d = batch2.Cell4;
+            float e = batch1.Cell5;
+
+            float denominator = b + d;
+            if (denominator == 0 || e == 0) return 0;
+
+            return (a + c) / denominator / e * 1.2f * 100;
+        }
+        public float CalculateYieldWeight()
+        {
+            return _shiftBatches.Sum(b => b.Cell2);
+        }
+        public float CalculateTotalWeight()
+        {
+            return _shiftBatches.Sum(b => b.Cell1);
+        }
+    }
+    public class ShiftProductionData
+    {
+        public int MaxBatches => 3;
+        private readonly List<ProductionData> _batches = new();
+        public IReadOnlyList<ProductionData> Batches => _batches;
+        public float Cell1 => _batches.Sum(b => b.Cell3 ?? 0); // 产量累计
+        public float Cell2 => _batches.Sum(b => b.Cell4 ?? 0); // 折百产量累计
+        public float Cell3 => Cell2;
+        public float Cell4 { get; } // 羟基用量
+        public float Cell5 { get; } // 羟基浓度
+        public float Cell6 => (Cell4 * Cell5 / 1000f); // 羟基折百
+        public float Cell7 => Cell6;
+        public float Cell8
+        {
+            get
+            {
+                if (Cell6 == 0) return 0;
+                return Cell2 / Cell6 * 1.2f / 10f;
+            }
+        }
+
+        public ShiftProductionData(List<SourceData> dataList1, List<OperatorInputData> dataList2)
+        {
+            Cell4 = MathTools.CalculateFirstLastDifference(dataList1, x => x.Cell20) /1000 ?? 0; //除以1000 L转立方
+            Cell5 = MathTools.CalculateAverage(dataList1, x => x.Cell6) ?? 0;
+
+            if (dataList2 == null) return;
+
+            foreach (var item in dataList2.Where(x => x != null))
+            {
+                var temp = new ProductionData(item);
+                if (!temp.IsEmpty)
+                    _batches.Add(temp);
+
+                if (_batches.Count >= MaxBatches)
+                    break;
+            }
+        }
     }
     public class ProductionData
     {
-        public DateTime ReportedTime { get; set; }
-        public float? Cell21 { get; set; }
-        public float? Cell22 { get; set; }
-        public float? Cell23 { get; set; }
-        public float? Cell24 { get; set; }
-        public float? Cell25 { get; set; }
-        public float? Cell26 { get; set; }
-        public float? Cell27 { get; set; }
-        //
-        public float? Cell31 { get; set; }
-        public float? Cell32 { get; set; }
-        public float? Cell33 { get; set; }
-        public float? Cell34 { get; set; }
-        public float? Cell35 { get; set; }
-        public float? Cell36 { get; set; }
-        public float? Cell37 { get; set; }
-        //
-        public float? Cell41 { get; set; }
-        public float? Cell42 { get; set; }
-        public float? Cell43 { get; set; }
-        public float? Cell44 { get; set; }
-        public float? Cell45 { get; set; }
-        public float? Cell46 { get; set; }
-        public float? Cell47 { get; set; }
-        // 从OperatorInputData提取Cell21~Cell37
-        public static ProductionData FromOperatorInput(OperatorInputData input)
+        public float? Cell1 { get; set; }
+        public float? Cell2 { get; set; }
+        public float? Cell3 { get; set; }
+        public float? Cell4 => (Cell1.HasValue && Cell3.HasValue)
+            ? Cell1.Value * Cell3.Value / 100
+            : null;
+        public ProductionData(OperatorInputData src)
         {
-            if (input == null) return new ProductionData();
-            return new ProductionData
-            {
-                ReportedTime = input.ReportedTime,
+            if (src == null) return;
 
-                Cell21 = input.Cell21,
-                Cell22 = input.Cell22,
-                Cell23 = input.Cell23,
-                Cell24 = input.Cell24,
-                Cell25 = input.Cell25,
-                Cell26 = input.Cell26,
-                Cell27 = input.Cell27,
-
-                Cell31 = input.Cell31,
-                Cell32 = input.Cell32,
-                Cell33 = input.Cell33,
-                Cell34 = input.Cell34,
-                Cell35 = input.Cell35,
-                Cell36 = input.Cell36,
-                Cell37 = input.Cell37
-            };
+            Cell1 = src.Cell21;
+            Cell2 = src.Cell23;
+            Cell3 = src.Cell26;
         }
+        public bool IsEmpty => Cell1 == null && Cell2 == null && Cell3 == null;
     }
 
-    public class ProductionCalculationResult
-    {
-        //一次
-        public float FirstAverage_1 { get; set; }
-        public float FirstAverage_2 { get; set; }
-        public float FirstAverage_3 { get; set; }
-        public float FirstAverage_4 { get; set; }
-        public float FirstAverage_5 { get; set; }
-        public float FirstProduction { get; set; }//总产量
-        public float FirstYield { get; set; }//总折百产量
-        //二次
-        public float SecondAverage_1 { get; set; }
-        public float SecondAverage_2 { get; set; }
-        public float SecondAverage_3 { get; set; }
-        public float SecondAverage_4 { get; set; }
-        public float SecondAverage_5 { get; set; }
-        public float SecondProduction { get; set; }//总产量
-        public float SecondYield { get; set; }//总折百产量
-
-        // 汇总结果
-        public float AllAverage_1 { get; set; }
-        public float AllAverage_2 { get; set; }
-        public float AllAverage_3 { get; set; }
-        public float AllAverage_4 { get; set; }
-        public float AllAverage_5 { get; set; }
-        public float AllProduction { get; set; }//总产量
-        public float AllYield { get; set; }//总折百产量
-    }
-
-    //**********************计算**********************
-    public static class ProductionDataCollectionExtensions
-    {
-        //整个表计算
-        public static void CalculateSheet(this ProductionDataCollection collection)
-        {
-            collection.CalculateSingleCells();
-            collection.CalculateTotalCells();
-        }
-        //**********************行内计算**********************
-        private static void CalculateSingleCells(this ProductionDataCollection collection)
-        {
-            // 1. 白班
-            //一次
-            MulColumn(collection.DayShiftData, x => x.Cell21, x => x.Cell26, setValue3: (d, result) => d.Cell27 = result);
-            //二次
-            MulColumn(collection.DayShiftData, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell37 = result);
-            //合计
-            WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell21, x => x.Cell26, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell41 = result);
-            WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell22, x => x.Cell26, x => x.Cell32, x => x.Cell36, setValue3: (d, result) => d.Cell42 = result);
-            WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell23, x => x.Cell26, x => x.Cell33, x => x.Cell36, setValue3: (d, result) => d.Cell43 = result);
-            WeightedAverageFourColumn(collection.DayShiftData, x => x.Cell24, x => x.Cell26, x => x.Cell34, x => x.Cell36, setValue3: (d, result) => d.Cell44 = result);
-            SumColumn(collection.DayShiftData, x => x.Cell26, x => x.Cell36, setValue3: (d, result) => d.Cell46 = result);
-            SumColumn(collection.DayShiftData, x => x.Cell27, x => x.Cell37, setValue3: (d, result) => d.Cell47 = result);
-
-            // 2. 夜班
-            //一次
-            MulColumn(collection.NightShiftData, x => x.Cell21, x => x.Cell26, setValue3: (d, result) => d.Cell27 = result);
-            //二次
-            MulColumn(collection.NightShiftData, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell37 = result);
-            //合计
-            WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell21, x => x.Cell26, x => x.Cell31, x => x.Cell36, setValue3: (d, result) => d.Cell41 = result);
-            WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell22, x => x.Cell26, x => x.Cell32, x => x.Cell36, setValue3: (d, result) => d.Cell42= result);
-            WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell23, x => x.Cell26, x => x.Cell33, x => x.Cell36, setValue3: (d, result) => d.Cell43 = result);
-            WeightedAverageFourColumn(collection.NightShiftData, x => x.Cell24, x => x.Cell26, x => x.Cell34, x => x.Cell36, setValue3: (d, result) => d.Cell44 = result);
-            SumColumn(collection.NightShiftData, x => x.Cell26, x => x.Cell36, setValue3: (d, result) => d.Cell46 = result);
-            SumColumn(collection.NightShiftData, x => x.Cell27, x => x.Cell37, setValue3: (d, result) => d.Cell47 = result);
-        }
-        //**********************汇总计算**********************
-        private static void CalculateTotalCells(this ProductionDataCollection collection)
-        {
-            //白班
-            //2026年5月12日增加一次和二次结晶计算
-            collection.DayResult.FirstAverage_1 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell21, x => x.Cell26);
-            collection.DayResult.FirstAverage_3 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell23, x => x.Cell26);
-            collection.DayResult.FirstAverage_5 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell25, x => x.Cell26);
-            collection.DayResult.FirstProduction = SumRow(collection.DayShiftData, x => x.Cell26);
-            collection.DayResult.FirstYield = SumRow(collection.DayShiftData, x => x.Cell27);
-
-            collection.DayResult.SecondAverage_1 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell31, x => x.Cell36);
-            collection.DayResult.SecondAverage_3 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell33, x => x.Cell36);
-            collection.DayResult.SecondAverage_5 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell35, x => x.Cell36);
-            collection.DayResult.SecondProduction = SumRow(collection.DayShiftData, x => x.Cell36);
-            collection.DayResult.SecondYield = SumRow(collection.DayShiftData, x => x.Cell37);
-
-            collection.DayResult.AllProduction = SumRow(collection.DayShiftData, x => x.Cell46);
-            collection.DayResult.AllYield = SumRow(collection.DayShiftData, x => x.Cell47);
-            collection.DayResult.AllAverage_1 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell41, x => x.Cell46);
-            collection.DayResult.AllAverage_2 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell42, x => x.Cell46);
-            collection.DayResult.AllAverage_3 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell43, x => x.Cell46);
-            collection.DayResult.AllAverage_4 = WeightedAverageTowColumn(collection.DayShiftData, x => x.Cell44, x => x.Cell46);
-
-            //夜班
-            //2026年5月12日增加一次和二次结晶计算
-            collection.NightResult.FirstAverage_1 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell21, x => x.Cell26);
-            collection.NightResult.FirstAverage_3 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell23, x => x.Cell26);
-            collection.NightResult.FirstAverage_5 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell25, x => x.Cell26);
-            collection.NightResult.FirstProduction = SumRow(collection.NightShiftData, x => x.Cell26);
-            collection.NightResult.FirstYield = SumRow(collection.NightShiftData, x => x.Cell27);
-
-            collection.NightResult.SecondAverage_1 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell31, x => x.Cell36);
-            collection.NightResult.SecondAverage_3 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell33, x => x.Cell36);
-            collection.NightResult.SecondAverage_5 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell35, x => x.Cell36);
-            collection.NightResult.SecondProduction = SumRow(collection.NightShiftData, x => x.Cell36);
-            collection.NightResult.SecondYield = SumRow(collection.NightShiftData, x => x.Cell37);
-
-            collection.NightResult.AllProduction = SumRow(collection.NightShiftData, x => x.Cell46);
-            collection.NightResult.AllYield = SumRow(collection.NightShiftData, x => x.Cell47);
-            collection.NightResult.AllAverage_1 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell41, x => x.Cell46);
-            collection.NightResult.AllAverage_2 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell42, x => x.Cell46);
-            collection.NightResult.AllAverage_3 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell43, x => x.Cell46);
-            collection.NightResult.AllAverage_4 = WeightedAverageTowColumn(collection.NightShiftData, x => x.Cell44, x => x.Cell46);
-
-            //当日
-            var value1 = collection.DayResult.AllAverage_1 * collection.DayResult.AllProduction + collection.NightResult.AllAverage_1 * collection.NightResult.AllProduction;
-            var value2 = collection.DayResult.AllAverage_4 * collection.DayResult.AllProduction + collection.NightResult.AllAverage_4 * collection.NightResult.AllProduction;
-            var value3 = collection.DayResult.AllProduction +  collection.NightResult.AllProduction;
-            var value4 = collection.DayResult.AllYield + collection.NightResult.AllYield;
-            var value5= collection.DayResult.AllAverage_2 * collection.DayResult.AllProduction + collection.NightResult.AllAverage_2* collection.NightResult.AllProduction;
-            var value6 = collection.DayResult.AllAverage_3 * collection.DayResult.AllProduction + collection.NightResult.AllAverage_3 * collection.NightResult.AllProduction;
-
-            collection.TotalResult.AllAverage_1 = value1 / value3;
-            collection.TotalResult.AllAverage_2 = value5/ value3;
-            collection.TotalResult.AllAverage_3 = value6 / value3;
-            collection.TotalResult.AllAverage_4 = value2 / value3;
-            collection.TotalResult.AllProduction = value3;
-            collection.TotalResult.AllYield = value4;
-        }
-        //**********************通用方法**********************
-        // 列内求和
-        private static float SumRow(
-                                    List<ProductionData> dataList,
-                                    Func<ProductionData, float?> getValue)
-        {
-            float Result = 0; 
-            foreach (var d in dataList)
-            {
-                float a = getValue(d) ?? 0f;
-                Result += a;
-            }
-            return Result;
-        }
-        // 行内求和
-        private static void SumColumn(
-                                    List<ProductionData> dataList,
-                                    Func<ProductionData, float?> getValue1,
-                                    Func<ProductionData, float?> getValue2,
-                                    Action<ProductionData, float?> setValue3)
-        {
-            if (dataList == null || dataList.Count == 0) return;
-            // 逐行计算 a+b，收集有效结果
-            List<float> rowResults = [];
-            foreach (var d in dataList)
-            {
-                float a = getValue1(d) ?? 0f;
-                float b = getValue2(d) ?? 0f;
-
-                var Result = (a + b);
-                rowResults.Add(Result);
-                setValue3(d, Result);
-            }
-        }
-        // 行内求折百
-        private static void MulColumn(
-                                List<ProductionData> dataList,
-                                Func<ProductionData, float?> getValue1,
-                                Func<ProductionData, float?> getValue2,
-                                Action<ProductionData, float?> setValue3)
-        {
-            if (dataList == null || dataList.Count == 0) return ;
-
-            // 逐行计算 a*b/100，收集有效结果
-            List<float> rowResults = [];
-            foreach (var d in dataList)
-            {
-                float a = getValue1(d) ?? 0f;
-                float b = getValue2(d) ?? 0f;
-
-                var Result = (a * b) / 100;
-                rowResults.Add(Result);
-                setValue3(d, Result);
-            }
-        }
-
-
-
-        // 所有列求两列加权平均
-        private static float WeightedAverageTowColumn(
-                                                    List<ProductionData> dataList, 
-                                                    Func<ProductionData, float?> getValue, 
-                                                    Func<ProductionData, float?> getWeight)
-        {
-            if (dataList == null || dataList.Count == 0) return 0;
-
-            float weightedSum = 0;
-            float totalWeight = 0;
-            foreach (var d in dataList)
-            {
-                var value = getValue(d) ?? 0f;
-                var weight = getWeight(d) ?? 0f;
-                weightedSum += value * weight;
-                totalWeight += weight;
-            }
-            return totalWeight == 0 ? 0 : weightedSum / totalWeight;
-        }
-        // 行内求四列加权平均
-        private static void WeightedAverageFourColumn(
-                                                    List<ProductionData> dataList,
-                                                    Func<ProductionData, float?> getValue1,
-                                                    Func<ProductionData, float?> getWeight1,
-                                                    Func<ProductionData, float?> getValue2,
-                                                    Func<ProductionData, float?> getWeight2,
-                                                    Action<ProductionData, float?> setValue3)
-        {
-            if (dataList == null || dataList.Count == 0) return;
-
-            foreach (var d in dataList)
-            {
-                var value1 = getValue1(d) ?? 0f;
-                var weight1 = getWeight1(d) ?? 0f;
-                var value2 = getValue2(d) ?? 0f;
-                var weight2 = getWeight2(d) ?? 0f;
-                float weightedSum = (value1 * weight1) + (value2 * weight2);
-                float totalWeight = (weight1 + weight2);
-                setValue3(d, weightedSum / totalWeight);
-            }
-        }
-        // 所有列四列加权平均
-        private static float WeightedAverageFourColumn(
-                                                    List<ProductionData> dataList,
-                                                    Func<ProductionData, float?> getValue1,
-                                                    Func<ProductionData, float?> getWeight1,
-                                                    Func<ProductionData, float?> getValue2,
-                                                    Func<ProductionData, float?> getWeight2)
-        {
-            if (dataList == null || dataList.Count == 0) return 0;
-
-            float weightedSum = 0;
-            float totalWeight = 0;
-            foreach (var d in dataList)
-            {
-                var value1 = getValue1(d) ?? 0f;
-                var weight1 = getWeight1(d) ?? 0f;
-                var value2 = getValue2(d) ?? 0f;
-                var weight2 = getWeight2(d) ?? 0f;
-                weightedSum += (value1 * weight1)+ (value2 * weight2);
-                totalWeight += (weight1 + weight2);
-            }
-            return totalWeight == 0 ? 0 : weightedSum / totalWeight;
-        }
-    }
 }
 

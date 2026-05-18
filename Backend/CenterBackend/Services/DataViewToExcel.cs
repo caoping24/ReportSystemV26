@@ -2,6 +2,7 @@
 using CenterBackend.Models;
 using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository.Models;
+using Masuit.Tools.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using NPOI.OpenXmlFormats.Spreadsheet;
 using NPOI.SS.Formula.Functions;
@@ -9,6 +10,7 @@ using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
 using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Asn1.X509;
 using System.Globalization;
 
 namespace CenterBackend.Services
@@ -47,7 +49,7 @@ namespace CenterBackend.Services
                 return false;
             }
         }
-        // 写Xlsx数据
+        // 写报表数据
         private static bool DayWriteExcel(XSSFWorkbook srcWorkbook, DayWorkBook dayWorkBookData)
         {
             ISheet srcSheet;
@@ -103,51 +105,62 @@ namespace CenterBackend.Services
             }
 
             //考评表
-            var shiftsList = dayWorkBookData.ShiftsAnalysis;
-            if (shiftsList.Count == 0)
-                return false;
+            //var shiftsList = dayWorkBookData.ShiftsAnalysis;
+            //if (shiftsList.Count == 0)
+            //    return false;
+            //srcSheet = srcWorkbook.GetSheetAt(4);
+            //srcSheet.ForceFormulaRecalculation = true; 
+            //SetXlsxCellString(srcSheet,5, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+            //SetXlsxCellString(srcSheet,26, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+            //for (int i = 0; i < 2; i++)
+            //{
+            //    if (i >= shiftsList.Count) break;
+            //    var data = shiftsList[i];
+            //    if (data == null) continue; // 如果 data 为空则跳过
+            //    int targeRow = 21 * i;
+            //    WriteDataRowsToExcel(data, srcSheet, 6 + targeRow, 2, 1, 33);
+            //    WriteDataRowsToExcel(data, srcSheet, 11 + targeRow, 2, 34, 66);
+            //    WriteDataRowsToExcel(data, srcSheet, 16 + targeRow, 2, 67, 99);
+            //    WriteDataRowsToExcel(data, srcSheet, 21 + targeRow, 2, 100, 113);
+            //}
+   
             srcSheet = srcWorkbook.GetSheetAt(4);
-            srcSheet.ForceFormulaRecalculation = true; 
-            SetXlsxCellString(srcSheet,5, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
-            SetXlsxCellString(srcSheet,26, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
-            for (int i = 0; i < 2; i++)
+            //srcSheet.ForceFormulaRecalculation = true;
+            var target = dayWorkBookData.ShiftsAnalysis; if (target == null) return false;
+            SetXlsxCellString(srcSheet, 2, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+            SetXlsxCellString(srcSheet, 5,  1, target.TimePoint.ToString("yyyy-MM-dd"));//写日期
+            if (target.Data != null && target.Data.ShiftBatches.Count > 0)
             {
-                if (i >= shiftsList.Count) break;
-                var data = shiftsList[i];
-                if (data == null) continue; // 如果 data 为空则跳过
-                int targeRow = 21 * i;
-                WriteDataRowsToExcel(data, srcSheet, 6 + targeRow, 2, 1, 33);
-                WriteDataRowsToExcel(data, srcSheet, 11 + targeRow, 2, 34, 66);
-                WriteDataRowsToExcel(data, srcSheet, 16 + targeRow, 2, 67, 99);
-                WriteDataRowsToExcel(data, srcSheet, 21 + targeRow, 2, 100, 113);
+                WriteDataRowsToExcel(target.Data, srcSheet, 5, 16, 2, 3);
+                for (var j = 0; j < target.Data.MaxBatches; j++)
+                {
+                    var item = target.Data.ShiftBatches[j];
+                    WriteDataRowsToExcel(item, srcSheet, j * 3 + 5, 9, 4, 5);
+                    for (var i = 0; i < item.MaxBatches; i++)
+                    {
+                        if (i < item.Batches.Count)
+                        {
+                            if (item.Batches[i].IsEmpty == false)
+                            {
+                                WriteDataRowsToExcel(item.Batches[i], srcSheet, j * 3 + i + 5, 2, 1, 3);
+                            }
+                        }
+                    }
+                }
             }
-            srcSheet.GetRow(20).GetCell(2).SetCellValue("test");
             //日报表
-            var dayList = dayWorkBookData.DayAnalysis;
-            if (dayList == null)
-                return false;
-            srcSheet = srcWorkbook.GetSheetAt(5);                                       //实际要写的表
-            SetXlsxCellString(srcSheet, 3, 3, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));  //记录日期
-            SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
-            SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
-            SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
-
-            SetXlsxCellValue(srcSheet, 9, 7, dayList.Cell4 ?? 0f);
-            SetXlsxCellValue(srcSheet, 10, 7, dayList.Cell5 ?? 0f);
-
-            SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
-
-            SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell8 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell9 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell10 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 9, dayList.Cell11 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 11, dayList.Cell12 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 13, dayList.Cell13 ?? 0f);
-
+            srcSheet = srcWorkbook.GetSheetAt(5); //实际要写的表
+            srcSheet.ForceFormulaRecalculation = true;
+            //SetXlsxCellString(srcSheet, 2, 6, dayList.ReportDate);
+            //SetXlsxCellString(srcSheet, 2, 7, dayList.WeekNumberInYear);
+            var dayResult = dayWorkBookData.DayAnalysis; 
+            int k = 0;
+            if (dayResult != null )
+            {
+                WriteDataColumnsToExcel(dayResult, srcSheet, 3 + k, 6, 1, 28);
+            }
             return true;
         }
-
         private static bool MonthWriteExcel(XSSFWorkbook srcWorkbook, MonthWorkBook monthWorkBookData)
         {
             ISheet srcSheet;
@@ -202,8 +215,6 @@ namespace CenterBackend.Services
         }
         private static bool WeekWriteExcel(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
-
-
             WeekWriteExcelSheet1(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet2(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet3(srcWorkbook, weekWorkBookData);
@@ -211,83 +222,13 @@ namespace CenterBackend.Services
             WeekWriteExcelSheet5(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet6(srcWorkbook, weekWorkBookData);
             WeekWriteExcelSheet7(srcWorkbook, weekWorkBookData);
+            WeekWriteExcelSheet8(srcWorkbook, weekWorkBookData);
 
-            //WeekWriteExcelSheet13(srcWorkbook, weekWorkBookData);2026年5月14日 弃用
+            WeekWriteExcelSheet9(srcWorkbook, weekWorkBookData);//图表数据
+
             return true;
         }
-
-        private static void BatchWriteDataToExcel(SingleShift dataList, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
-        {
-            if (dataList == null) return;
-            int offset = 0;
-            for (int i = cellStart; i <= cellEnd; i++)
-            {
-                offset++;
-                var cellProperty = dataList.GetType().GetProperty($"Cell{i}");
-                if (cellProperty == null) continue;
-
-                var value = cellProperty.GetValue(dataList);
-                if (value == null) continue;// 如果 data 为空则跳过
-                if (value is float floatValue) // 检查 value 是否可以转换为 float
-                {
-                    SetXlsxCellValue(sheet, rowIdx, colIdx + offset, floatValue);
-                }
-            }
-        }
-        private static void SetXlsxCellValue(ISheet sheet, int rowIdx, int colIdx, float value)
-        {
-            IRow row = sheet.GetRow(rowIdx) ?? sheet.CreateRow(rowIdx);// 获取或创建行
-            ICell Cell = row.GetCell(colIdx) ?? row.CreateCell(colIdx);// 获取或创建单元格
-            Cell.SetCellValue(value);// 赋值
-
-        }
-        private static void SetXlsxCellString(ISheet sheet, int rowIdx, int colIdx, string? value)
-        {
-            if (string.IsNullOrEmpty(value))// 如果值为空或null，则不写入单元格
-                return;
-            IRow row = sheet.GetRow(rowIdx) ?? sheet.CreateRow(rowIdx);// 获取或创建行
-            ICell Cell = row.GetCell(colIdx) ?? row.CreateCell(colIdx);// 获取或创建单元格
-            Cell.SetCellValue(value);// 赋值
-        }
-
-        private static void WriteDataRowsToExcel<T>(T dataItem, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
-        {
-            if (dataItem == null) return;
-            int offset = 0;
-            for (int i = cellStart; i <= cellEnd; i++)
-            {
-                offset++;
-                var cellProperty = dataItem.GetType().GetProperty($"Cell{i}");
-                if (cellProperty == null) continue;
-
-                var value = cellProperty.GetValue(dataItem);
-                if (value == null) continue;// 如果 data 为空则跳过
-                if (value is float floatValue) // 检查 value 是否可以转换为 float
-                {
-                    SetXlsxCellValue(sheet, rowIdx, colIdx + offset, floatValue);
-                }
-            }
-        }
-        private static void WriteDataColumnsToExcel<T>(T dataItem, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
-        {
-            if (dataItem == null) return;
-            int offset = 0;
-            for (int i = cellStart; i <= cellEnd; i++)
-            {
-                offset++;
-                var cellProperty = dataItem.GetType().GetProperty($"Cell{i}");
-                if (cellProperty == null) continue;
-
-                var value = cellProperty.GetValue(dataItem);
-                if (value == null) continue;// 如果 data 为空则跳过
-                if (value is float floatValue) // 检查 value 是否可以转换为 float
-                {
-                    SetXlsxCellValue(sheet, rowIdx + offset, colIdx, floatValue);
-                }
-            }
-        }
-
-
+        //写单个sheet
         private static void WeekWriteExcelSheet1(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
             ISheet srcSheet;
@@ -295,16 +236,16 @@ namespace CenterBackend.Services
             srcSheet.ForceFormulaRecalculation = true;
             SetXlsxCellString(srcSheet, 2, 6, weekWorkBookData.ReportDate);
             SetXlsxCellString(srcSheet, 2, 7, weekWorkBookData.WeekNumberInYear);
-
             var dataList = weekWorkBookData.WorkSheet1;
-            int i= 0;
+            int i = 0;
             if (dataList != null && dataList.Count > i && dataList[i] != null)
             {
                 var dataItem = dataList[i];
-                WriteDataColumnsToExcel (dataItem, srcSheet, 3 + i, 6, 1, 28);
+                WriteDataColumnsToExcel(dataItem, srcSheet, 3 + i, 6, 1, 28);
+                //写chart 测试
             }
+            var charttemp = GetChartByObjectName(srcWorkbook.GetSheetAt(8), "Chart1");
         }
-
         private static void WeekWriteExcelSheet2(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
             ISheet srcSheet;
@@ -345,17 +286,37 @@ namespace CenterBackend.Services
         {
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(3);
-            //srcSheet.ForceFormulaRecalculation = false;
+            srcSheet.ForceFormulaRecalculation = true;
             SetXlsxCellString(srcSheet, 2, 1, weekWorkBookData.WeekNumberInYear);
             var dataList = weekWorkBookData.WorkSheet4;
             for (int i = 0; i < 7; i++)
             {
-                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                if (dataList != null && i < dataList.Count && dataList[i] != null)
                 {
                     var dataItem = dataList[i];
-                    var dateString = dataList[i].TimePoint.ToString("yyyy-MM-dd");
-                    SetXlsxCellString(srcSheet, 5 + i, 1, dateString);
-                    WriteDataRowsToExcel(dataItem, srcSheet, 5 + i, 2, 1, 5);
+                    var dateString = dataList[i].TimePoint.ToString("yyyy-MM-dd");//写日期
+                    SetXlsxCellString(srcSheet, 5 + i * 6, 1, dateString);
+                    WriteDataRowsToExcel(dataItem.Data, srcSheet, i * 6 + 5, 16, 2, 3);
+                    if (dataItem.Data != null && dataItem.Data.ShiftBatches.Count > 0)
+                    {
+
+                        for (var j = 0; j < dataItem.Data.MaxBatches; j++)
+                        {
+                            var item = dataItem.Data.ShiftBatches[j];
+                            for (var k = 0; k < item.MaxBatches; k++)
+                            {
+                                if (k < item.Batches.Count)
+                                {
+                                    if (item.Batches[k].IsEmpty == false)
+                                    {
+                                        WriteDataRowsToExcel(item.Batches[k], srcSheet, i * 6 + j * 3 + k + 5, 2, 1, 3);
+                                    }
+                                }
+                                if (k == 0)
+                                    WriteDataRowsToExcel(item, srcSheet, i * 6 + j * 3 + k + 5, 9, 4, 5);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -377,7 +338,6 @@ namespace CenterBackend.Services
                 }
             }
         }
-
         private static void WeekWriteExcelSheet6(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
             ISheet srcSheet;
@@ -387,13 +347,12 @@ namespace CenterBackend.Services
             var dataList = weekWorkBookData.WorkSheet6;
             for (int i = 0; i < 7; i++)
             {
-                
                 if (dataList != null && dataList.Count > i && dataList[i] != null)
                 {
                     var dataItem = dataList[i];
                     var dateString = dataList[i].TimePoint.ToString("yyyy-MM-dd");
                     SetXlsxCellString(srcSheet, 6 + i, 1, dateString);
-                    WriteDataRowsToExcel(dataItem, srcSheet, 6 + i, 2, 1, 14);
+                    WriteDataRowsToExcel(dataItem, srcSheet, 6 + i, 2, 1, 13);
                 }
             }
         }
@@ -416,28 +375,198 @@ namespace CenterBackend.Services
                 }
             }
         }
-       
-
-
-        private static DateTime GetWeekFirstDay(DateTime dt)
+        private static void WeekWriteExcelSheet8(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
-            int diff = (int)dt.DayOfWeek - (int)DayOfWeek.Monday;
-            if (diff < 0) diff += 7;
-            return dt.AddDays(-diff).Date;
-        }
-        private static float? CalculateAverage<T>(IEnumerable<T> data, Func<T, float?> selector)
-        {
-            if (data == null || !data.Any())// 空数据校验
-                return null;
-            var validValues = data.Select(selector).OfType<float>();
-            float sum = 0f;
-            int count = 0;
-            foreach (var value in validValues)
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(7);
+            //srcSheet.ForceFormulaRecalculation = false;
+            SetXlsxCellString(srcSheet, 2, 1, weekWorkBookData.WeekNumberInYear);
+            var dataList = weekWorkBookData.WorkSheet8;
+            for (int i = 0; i < 7; i++)
             {
-                sum += value;
-                count++;
+
+                if (dataList != null && dataList.Count > i && dataList[i] != null)
+                {
+                    var dataItem = dataList[i];
+                    var dateString = dataList[i].TimePoint.ToString("yyyy-MM-dd");
+                    SetXlsxCellString(srcSheet, 6 + i, 1, dateString);
+                    WriteDataRowsToExcel(dataItem, srcSheet, 6 + i, 2, 1, 7);
+                }
             }
-            return count > 0 ? sum / count : (float?)null;
+        }
+        private static void WeekWriteExcelSheet9(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
+        {
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(8);
+
+            int[] IndexInMaterialDatas = new[] { 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 15 };
+            String[] ChartNames = new[] { "羟基乙腈1", "羟基乙腈1","羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1" };
+            int[,,] address = new int[,,]
+                                    {
+                                        { {3}  , {3} ,},
+                                        { {53} , {3} ,},
+                                        { {103}, {3} ,},
+                                        { {153}, {3} ,},
+                                        { {203}, {3} ,},
+                                        { {253}, {3} ,},
+                                        { {303}, {3} ,},
+                                        { {353}, {3} ,},
+                                        { {403}, {3} ,},
+                                        { {453}, {3} ,},
+                                        { {503}, {3} ,},
+                                    };
+            for (int i = 0; i < 11; i++)
+            {
+                int index = IndexInMaterialDatas[i];
+                int row = address[i, 0, 0];
+                int col = address[i, 1, 0];
+
+                WeekWriteExcelChart(srcSheet, weekWorkBookData, index, row, col);
+            }
+
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="srcSheet">表引用</param>
+        /// <param name="weekWorkBookData">数据引用</param>
+        /// <param name="dataIndex">数据在MaterialDatas中的index</param>
+        /// <param name="rowStart"></param>
+        /// <param name="cloumnStart"></param>
+        private static void WeekWriteExcelChart(ISheet srcSheet, WeekWorkBook weekWorkBookData, int dataIndex, int rowStart, int cloumnStart)
+        {
+            var dataList = weekWorkBookData.WorkSheet9;
+            List<float> dataItem;
+            if (dataList != null)
+            {
+                dataItem = dataList.DailyCollections
+                                .Select(daily => daily.MaterialDatas.FirstOrDefault(m => m.Index == dataIndex)? //第一个
+                                .Specific ?? 0)
+                                .ToList();
+                for (int i = 0; i < 7; i++)
+                {
+                    var temp = dataItem[i];
+                    SetXlsxCellValue(srcSheet,  i + rowStart, cloumnStart, temp);
+                }
+
+            }
+        }
+
+        //写excel方法
+        private static void BatchWriteDataToExcel(SingleShift dataList, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
+        {
+            if (dataList == null) return;
+            int offset = 0;
+            for (int i = cellStart; i <= cellEnd; i++)
+            {
+                offset++;
+                var cellProperty = dataList.GetType().GetProperty($"Cell{i}");
+                if (cellProperty == null) continue;
+
+                var value = cellProperty.GetValue(dataList);
+                if (value == null) continue;// 如果 data 为空则跳过
+                if (value is float floatValue) // 检查 value 是否可以转换为 float
+                {
+                    SetXlsxCellValue(sheet, rowIdx, colIdx + offset, floatValue);
+                }
+            }
+        }
+        private static void SetXlsxCellValue(ISheet sheet, int rowIdx, int colIdx, float value)
+        {
+            IRow row = sheet.GetRow(rowIdx) ?? sheet.CreateRow(rowIdx);// 获取或创建行
+            ICell Cell = row.GetCell(colIdx) ?? row.CreateCell(colIdx);// 获取或创建单元格
+            Cell.SetCellValue(value);// 赋值
+
+        }
+        private static void SetXlsxCellString(ISheet sheet, int rowIdx, int colIdx, string? value)
+        {
+            if (string.IsNullOrEmpty(value))// 如果值为空或null，则不写入单元格
+                return;
+            IRow row = sheet.GetRow(rowIdx) ?? sheet.CreateRow(rowIdx);// 获取或创建行
+            ICell Cell = row.GetCell(colIdx) ?? row.CreateCell(colIdx);// 获取或创建单元格
+            Cell.SetCellValue(value);// 赋值
+        }
+        private static void WriteDataRowsToExcel<T>(T dataItem, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
+        {
+            if (dataItem == null) return;
+            int offset = 0;
+            for (int i = cellStart; i <= cellEnd; i++)
+            {
+                offset++;
+                var cellProperty = dataItem.GetType().GetProperty($"Cell{i}");
+                if (cellProperty == null) continue;
+
+                var value = cellProperty.GetValue(dataItem);
+                if (value == null) continue;// 如果 data 为空则跳过
+                if (value is float floatValue) // 检查 value 是否可以转换为 float
+                {
+                    SetXlsxCellValue(sheet, rowIdx, colIdx + offset, floatValue);
+                }
+            }
+        }
+        private static void WriteDataColumnsToExcel<T>(T dataItem, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
+        {
+            if (dataItem == null) return;
+            int offset = 0;
+            for (int i = cellStart; i <= cellEnd; i++)
+            {
+                offset++;
+                var cellProperty = dataItem.GetType().GetProperty($"Cell{i}");
+                if (cellProperty == null) continue;
+
+                var value = cellProperty.GetValue(dataItem);
+                if (value == null) continue;// 如果 data 为空则跳过
+                if (value is float floatValue) // 检查 value 是否可以转换为 float
+                {
+                    SetXlsxCellValue(sheet, rowIdx + offset, colIdx, floatValue);
+                }
+            }
+        }
+        //图表的操作
+        private static XSSFChart? GetChartByObjectName(ISheet sheet, string chartObjectName)//根据对象名称查找指定图表
+        {
+            if (string.IsNullOrWhiteSpace(chartObjectName))
+                return null;
+            if (sheet is not XSSFSheet xssfSheet)
+                throw new NotSupportedException("仅支持 .xlsx 格式文件");
+
+            XSSFDrawing? drawing = xssfSheet.GetDrawingPatriarch() as XSSFDrawing;
+            if (drawing == null || drawing.Count() == 0)
+                return null;
+
+            foreach (XSSFShape shape in drawing.Cast<XSSFShape>())
+            {
+                if (shape is XSSFGraphicFrame graphicFrame &&
+                    string.Equals(graphicFrame.Name, chartObjectName, StringComparison.OrdinalIgnoreCase))
+                {
+                    XSSFChart? chart = GetChartFromGraphicFrame(drawing, graphicFrame);
+                    if (chart != null)
+                        return chart;
+                }
+            }
+            return null;
+        }
+        private static XSSFChart? GetChartFromGraphicFrame(XSSFDrawing drawing, XSSFGraphicFrame targetFrame)
+        {
+            foreach (var relationPart in drawing.RelationParts)
+            {
+                if (relationPart.DocumentPart is XSSFChart chart)
+                {
+                    try
+                    {
+                        XSSFGraphicFrame? graphicFrame = chart.GetGraphicFrame();
+                        if (graphicFrame != null && graphicFrame == targetFrame)
+                        {
+                            return chart;
+                        }
+                    }
+                    catch (NotImplementedException)
+                    {
+                        return null;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

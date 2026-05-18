@@ -10,6 +10,7 @@ using Microsoft.Identity.Client;
 using NPOI.POIFS.Crypt.Dsig;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
+using Org.BouncyCastle.Asn1.X509;
 using System.Collections;
 using System.Security.Cryptography.Xml;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -25,72 +26,39 @@ namespace CenterBackend.Services
         public async Task<bool> DayGetMapDataAsync(DayWorkBook dayWorkBook)
         {
             DateTime startTime = dayWorkBook.ReportedTime.Date.AddHours(8);
-            DateTime endTime = startTime.AddDays(1);
-
+            DateTime endTime = startTime.AddHours(25);
             var sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
-            if (sourceData == null || sourceData.Count == 0)
-                return false;//未查到数据
+            if (sourceData == null || sourceData.Count == 0) return false;//未查到数据
             var operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
             MoveDataShifts(dayWorkBook, sourceData, operatorInputData);
             MoveDataShiftsAnalysis(dayWorkBook, sourceData, operatorInputData);
-            DateTime startTimeLast = startTime.AddDays(-1);
-            DateTime endTimeLast = endTime.AddDays(-1);
-            var operatorInputdataLast = await _operatorInputData.GetByDateTimeRangeAsync(startTimeLast, endTimeLast);//昨日数据
-            MoveDataDayAnalysis(dayWorkBook, sourceData, operatorInputData, operatorInputdataLast);
+            MoveDataDayAnalysis(dayWorkBook, sourceData, operatorInputData);
             return true;
         }
         public async Task<bool> MonthGetMapDataAsync(MonthWorkBook monthWorkBook)
         {
-            DateTime startTime = new DateTime(monthWorkBook.ReportedTime.Year, monthWorkBook.ReportedTime.Month, 1).AddHours(8);
-            DateTime endTime = startTime.AddMonths(1).AddDays(-1);
 
-            var sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
-            if (sourceData == null || sourceData.Count == 0)
-                return false;//未查到数据
-            var operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
-            DateTime startTimeLast = startTime.AddMonths(-1);
-            DateTime endTimeLast = endTime.AddMonths(1);
-            var operatorInputdataLast = await _operatorInputData.GetByDateTimeRangeAsync(startTimeLast, endTimeLast);
-            MoveDataMonthAnalysis(monthWorkBook, sourceData, operatorInputData, operatorInputdataLast);
             return true;
         }
         public async Task<bool> YearGetMapDataAsync(YearWorkBook yearWorkBook)
         {
-            DateTime startTime = new DateTime(yearWorkBook.ReportedTime.Year, 1, 1).AddHours(8);
-            DateTime endTime = startTime.AddYears(1).AddDays(-1);
 
-            var sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
-            if (sourceData == null || sourceData.Count == 0)
-                return false;//未查到数据
-            var operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
-            DateTime startTimeLast = startTime.AddYears(-1);
-            DateTime endTimeLast = endTime.AddYears(1);
-            var operatorInputdataLast = await _operatorInputData.GetByDateTimeRangeAsync(startTimeLast, endTimeLast);
-            MoveDataYearAnalysis(yearWorkBook, sourceData, operatorInputData, operatorInputdataLast);
             return true;
         }
         public async Task<bool> WeekGetMapDataAsync(WeekWorkBook WeekWorkBook)
         {
-            DateTime startDay = WeekWorkBook.ReportedTime.Date.AddDays(-14);
-            DateTime endDay = WeekWorkBook.ReportedTime.Date.AddDays(7);
+            DateTime startDay = WeekWorkBook.ReportedTime.Date.AddHours(8);  //开始日期的 8:00 
+            DateTime endDay = WeekWorkBook.ReportedTime.Date.AddDays(7).AddHours(1); //一周后的 9:00
             List<SourceData> sourceData = await _sourceData.GetByDateTimeRangeAsync(startDay, endDay);
             List<OperatorInputData> operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startDay, endDay);
-
-            //DateTime currentYearFirstDay = new(WeekWorkBook.ReportedTime.Year, 1, 1);
-            //currentYearFirstDay= currentYearFirstDay.AddHours(8);
-            //DateTime currentYearLastDay = currentYearFirstDay.AddYears(1).AddDays(-1);
-            //List<SourceData> sourceData = await _sourceData.GetByDateTimeRangeAsync(currentYearFirstDay, currentYearLastDay);
-            //List< OperatorInputData > operatorInputData= await _operatorInputData.GetByDateTimeRangeAsync(currentYearFirstDay, currentYearLastDay);
-
+            WeekMoveDataSheet1Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet2Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet3Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet4Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet5Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet6Async(WeekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet7Async(WeekWorkBook, sourceData, operatorInputData);
-
-            //WeekMoveDataSheet13Async(WeekWorkBook, sourceData, operatorInputData);2026年5月14日 弃用
-            WeekMoveDataSheet1Async(WeekWorkBook, sourceData, operatorInputData);//必须放在最后 因为需要用到前面12张表的数据
+            WeekMoveDataSheet8Async(WeekWorkBook, sourceData, operatorInputData);
             return true;
         }
         /***********************数据处理***********************/
@@ -431,446 +399,103 @@ namespace CenterBackend.Services
         }
         private static void MoveDataShiftsAnalysis(DayWorkBook dayWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
+            var target = dayWorkBook.ShiftsAnalysis;
             DateTime startTime = dayWorkBook.ReportedTime.Date.AddHours(8);
-            DateTime shiftTime;
-            ProductionDataCollection productionDataCollection = new();
-            MaterialDataCollection materialDataCollection = new();
-
-            dayWorkBook.ShiftsAnalysis = Enumerable.Range(0, 2).Select(_ => new ShiftsAnalysis()).ToList();//白班+晚班
-            List<ShiftsAnalysis> target = dayWorkBook.ShiftsAnalysis;
-
-            List<SourceData> sourcedataPart;
-            List<OperatorInputData> operatorInputdataPart;
-            if (sourceDatas == null || sourceDatas.Count == 0)
-                return;
-            if (operatorInputDatas == null || operatorInputDatas.Count == 0)
-                return;
-            //需要计算的数据
-            {
-                productionDataCollection = CalculateForSheet3(startTime, operatorInputDatas);
-                float rangeYield = productionDataCollection.TotalResult.AllYield;//获取每日折百产量
-                for (var y = 0; y < 10; y++)
-                {
-                    materialDataCollection.MaterialDatas[y].TotalResult.Yield = rangeYield;
-                }
-                materialDataCollection.CalculateSum();//计算原料单耗
-            }
-            //填充考评表数据
-            for (var i = 0; i < 2; i++)
-            {
-                if (i != 0)
-                {
-                    startTime = startTime.AddHours(12);
-                }
-                shiftTime = startTime.AddHours(12);
-                sourcedataPart = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < shiftTime).ToList();//区分白夜班
-                operatorInputdataPart = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < shiftTime).ToList();//区分白夜班
-
-                var shiftsProductionSum = productionDataCollection.DayResult.AllProduction + productionDataCollection.NightResult.AllProduction;
-                var shiftsProductionAverage = shiftsProductionSum / 2;
-
-
-                var shiftResult = i == 0
-                    ? productionDataCollection.DayResult
-                    : productionDataCollection.NightResult;
-
-                //第一列
-                target[i].Cell1 = shiftResult.AllProduction;
-                target[i].Cell2 = shiftResult.AllYield;
-                //target[i].Cell3 = (shiftResult.AllProduction >= shiftsProductionAverage) ? 5 : 6;//Wingdings 3 字体 5:上箭头 6 :下箭头   公式可以做在excel中
-                target[i].Cell4 = shiftResult.AllProduction - shiftsProductionAverage;
-                target[i].Cell5 = shiftResult.AllAverage_3;
-                target[i].Cell6 = shiftResult.AllAverage_5;
-
-                target[i].Cell7 = shiftResult.FirstProduction;
-                target[i].Cell8 = shiftResult.FirstYield;    
-                target[i].Cell9 = shiftResult.FirstAverage_1;
-                //target[i].Cell10 = ;
-                //target[i].Cell11 = ;
-                target[i].Cell12 = shiftResult.FirstAverage_3;
-                //target[i].Cell13 = ;
-                //target[i].Cell14 = ;
-                target[i].Cell15 = shiftResult.FirstAverage_5;
-                //target[i].Cell16 = ;
-                //target[i].Cell17 = ;
-
-                target[i].Cell18 = shiftResult.SecondProduction;
-                target[i].Cell19 = shiftResult.SecondYield;
-                target[i].Cell20 = shiftResult.SecondAverage_1;
-                target[i].Cell21 = shiftResult.SecondAverage_3;
-                target[i].Cell22 = shiftResult.SecondAverage_5;
-                target[i].Cell23 = (shiftsProductionSum != 0) ? shiftResult.SecondProduction / shiftsProductionSum : 0; //占比
-
-                if (materialDataCollection != null)
-                {
-                    target[i].Cell24 = (materialDataCollection.MaterialDatas[0] != null) ? materialDataCollection.MaterialDatas[0].TotalResult.Specific : 0f;
-                    target[i].Cell25 = (materialDataCollection.MaterialDatas[1] != null) ? materialDataCollection.MaterialDatas[1].TotalResult.Specific : 0f;
-                    target[i].Cell26 = (materialDataCollection.MaterialDatas[2] != null) ? materialDataCollection.MaterialDatas[2].TotalResult.Specific : 0f;
-                    target[i].Cell27 = (materialDataCollection.MaterialDatas[3] != null) ? materialDataCollection.MaterialDatas[3].TotalResult.Specific : 0f;
-                    target[i].Cell28 = (materialDataCollection.MaterialDatas[4] != null) ? materialDataCollection.MaterialDatas[4].TotalResult.Specific : 0f;
-                    target[i].Cell29 = (materialDataCollection.MaterialDatas[5] != null) ? materialDataCollection.MaterialDatas[5].TotalResult.Specific : 0f;
-                    target[i].Cell30 = (materialDataCollection.MaterialDatas[6] != null) ? materialDataCollection.MaterialDatas[6].TotalResult.Specific : 0f;
-                    target[i].Cell31 = (materialDataCollection.MaterialDatas[7] != null) ? materialDataCollection.MaterialDatas[7].TotalResult.Specific : 0f;
-                    target[i].Cell32 = (materialDataCollection.MaterialDatas[8] != null) ? materialDataCollection.MaterialDatas[8].TotalResult.Specific : 0f;
-                    target[i].Cell33 = (materialDataCollection.MaterialDatas[9] != null) ? materialDataCollection.MaterialDatas[9].TotalResult.Specific : 0f;
-  
-                }
-                //第二列
-                //target[i].Cell34 = //手填基准值
-                target[i].Cell35 = CalculateAverage(sourcedataPart, x => x.Cell23);//累计摩尔比
-                //target[i].Cell36 = //公式做在模板中 累计摩尔比与手填基准值的差值  上下箭头表示
-
-                target[i].Cell37 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell20) / 12 / 1000 ;//累计除以当班时间 还要换算成m³/h
-                target[i].Cell38 = CalculateAverage(sourcedataPart, x => x.Cell6);
-                target[i].Cell39 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell14) / 12;
-                target[i].Cell40 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell16) / 12;
-                target[i].Cell41 = CalculateAverage(sourcedataPart, x => x.Cell25);
-                target[i].Cell42 = CalculateAverage(sourcedataPart, x => x.Cell24);
-                target[i].Cell43 = CalculateAverage(sourcedataPart, x => x.Cell26);
-                target[i].Cell44 = CalculateAverage(sourcedataPart, x => x.Cell28);
-                target[i].Cell45 = CalculateAverage(sourcedataPart, x => x.Cell27);
-
-                //target[i].Cell46 = //固定值
-                //target[i].Cell47 = //固定值
-                target[i].Cell48 = CalculateAverage(operatorInputdataPart, x => x.Cell11);
-                //target[i].Cell49 = 0;//excel中计算
-                //target[i].Cell50 = 0;//excel中计算
-                target[i].Cell51 = CalculateAverage(operatorInputdataPart, x => x.Cell18);
-                //target[i].Cell52 = 0;//固定值
-                //target[i].Cell53 = 0;//固定值
-                target[i].Cell54 = CalculateAverage(operatorInputdataPart, x => x.Cell13);
-                //target[i].Cell55 = 0;//excel中计算
-                //target[i].Cell56 = 0;//excel中计算
-                //target[i].Cell57 = 0;//固定值
-                target[i].Cell58 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell37) / 12;
-                //target[i].Cell59 = 0;//excel中计算
-                //target[i].Cell60 = 0;//excel中计算
-                target[i].Cell61 = CalculateAverage(sourcedataPart, x => x.Cell40);
-                target[i].Cell62 = CalculateAverage(sourcedataPart, x => x.Cell39);
-                //target[i].Cell63 = CalculateAverage(sourcedataPart, x => x.Cell53);//闪发器液位没有统计  只有冷凝液罐的液位
-                target[i].Cell64 = CalculateAverage(operatorInputdataPart, x => x.Cell1);
-                target[i].Cell65 = CalculateAverage(operatorInputdataPart, x => x.Cell2);
-                target[i].Cell66 = CalculateAverage(operatorInputdataPart, x => x.Cell3);
-                //第三列
-                target[i].Cell67 = CalculateAverage(operatorInputdataPart, x => x.Cell4);
-                target[i].Cell68 = CalculateAverage(operatorInputdataPart, x => x.Cell5);
-                
-                target[i].Cell69 = CalculateAverage(sourcedataPart, x => x.Cell70);
-                target[i].Cell70 = CalculateAverage(sourcedataPart, x => x.Cell66);
-                target[i].Cell71 = (target[i].Cell70 ?? 0f) - (target[i].Cell69 ?? 0f);//差值
-                target[i].Cell72 = CalculateAverage(sourcedataPart, x => x.Cell67);
-                target[i].Cell73 = CalculateAverage(sourcedataPart, x => x.Cell65);
-                target[i].Cell74 = shiftResult.FirstYield;
-                target[i].Cell75 = shiftResult.FirstAverage_2;
-                target[i].Cell76 = shiftResult.FirstAverage_5;
-
-                target[i].Cell77 = CalculateAverage(sourcedataPart, x => x.Cell125);
-                target[i].Cell78 = CalculateAverage(sourcedataPart, x => x.Cell122);
-                target[i].Cell79 = (target[i].Cell78 ?? 0f) - (target[i].Cell77 ?? 0f);//差值
-                target[i].Cell80 = CalculateAverage(sourcedataPart, x => x.Cell121);
-                //target[i].Cell81 = //二次结晶没有PH
-                target[i].Cell82 = shiftResult.SecondYield;
-                target[i].Cell83 = shiftResult.SecondAverage_2;
-                target[i].Cell84 = shiftResult.SecondAverage_5;
-
-                target[i].Cell85 = CalculateAverage(sourcedataPart, x => x.Cell110);
-                target[i].Cell86 = CalculateAverage(sourcedataPart, x => x.Cell108);
-                target[i].Cell87 = CalculateAverage(sourcedataPart, x => x.Cell92);
-                //target[i].Cell88 =//低蒸液位没有统计
-                target[i].Cell89 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell106);
-                target[i].Cell90 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell107) / 12;
-                target[i].Cell91 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell115);
-                target[i].Cell92 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell116) / 12;
-                target[i].Cell93 = CalculateAverage(sourcedataPart, x => x.Cell114);
-                //target[i].Cell94 = 0;//浓缩比 excel中计算
-                target[i].Cell95 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell112) ;
-                target[i].Cell96 = CalculateAverage(sourcedataPart, x => x.Cell112);
-                //float temp1, temp2, temp3;
-                //temp1 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell107) ?? 0f;
-                //temp2 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell116) ?? 0f;
-                //temp3 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell112) ?? 0f;
-                //target[i].Cell97 =  (temp1 - temp2) == 0 ? 0f : (temp3 / (temp1 - temp2));//低蒸蒸汽单耗 excel中计算
-                //target[i].Cell98 = 0;//固定值
-                //target[i].Cell99 = 0;//excel中计算
-
-
-                target[i].Cell100 = CalculateAverage(operatorInputdataPart, x => x.Cell51);
-                target[i].Cell101 = CalculateAverage(operatorInputdataPart, x => x.Cell57);
-                //target[i].Cell102 = //excel中计算
-                target[i].Cell103 = CalculateAverage(operatorInputdataPart, x => x.Cell53);
-                target[i].Cell104 = CalculateAverage(operatorInputdataPart, x => x.Cell59);
-                //target[i].Cell105 = //excel中计算
-                target[i].Cell106 = CalculateAverage(operatorInputdataPart, x => x.Cell55);
-                target[i].Cell107 = CalculateAverage(operatorInputdataPart, x => x.Cell61);
-                //target[i].Cell108 = //excel中计算
-                float? sum1, sum2;
-                sum1 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell107) ?? 0f;
-                sum2 = CalculateFirstLastDifference(sourcedataPart, x => x.Cell102) ?? 0f;
-                target[i].Cell109 = (sum1 ?? 0f) - (sum2 ?? 0f);
-                target[i].Cell110 = CalculateAverage(operatorInputdataPart, x => x.Cell64);
-                //target[i].Cell111 = //excel中计算
-                target[i].Cell112 = CalculateAverage(operatorInputdataPart, x => x.Cell62);
-                //target[i].Cell113 = //固定值
-            }
-
+            DateTime endTime = startTime.AddHours(25);
+            var dayData = new DailyProductionReport(startTime, sourceDatas, operatorInputDatas);
+            target.Data = dayData;
+            target.TimePoint = startTime;
         }
-        private static void MoveDataDayAnalysis(DayWorkBook dayWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas, List<OperatorInputData> operatorInputDatasYesterDay)
+        private static void MoveDataDayAnalysis(DayWorkBook dayWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
-            DateTime startTime = dayWorkBook.ReportedTime.Date.AddHours(8);
-            ProductionDataCollection productionDataCollection = new();
             DayAnalysis target = dayWorkBook.DayAnalysis;
 
-            if (sourceDatas == null || sourceDatas.Count == 0)
-                return;
-            if (operatorInputDatas == null || operatorInputDatas.Count == 0)
-                return;
-            //需要计算的数据
-            productionDataCollection = CalculateForSheet3(startTime, operatorInputDatas);
-            float rangeYield = productionDataCollection.TotalResult.AllYield;//获取每日折百产量
+            DateTime startTime = dayWorkBook.ReportedTime.Date.AddHours(8);
+            DateTime endTime = startTime.AddHours(25);
 
-            const float qualifiedCell1 = 415;//羟基乙腈浓度
-            const float diffCell1 = 5;
-            const float qualifiedCell2 = 168;//氨化反应热点温度
-            const float diffCell2 = 2;
-            const float qualifiedCell3 = 20;//一次结晶温度
-            const float diffCell3 = 5;
-            //const float qualifiedCell4 = 0.515f;//羟基浓度
-            //const float diffCell4 = 0.0103f;
-            const float qualifiedCell5 = 0.530f;//氨/腈摩尔比
-            const float diffCell5 = 0.005f;
+            var dayData = new DailyProductionReport(startTime, sourceDatas, operatorInputDatas);
+            var dayYield = dayData?.Cell2 ?? 0;
+            var Materialcollection = new MaterialDailyCollection(startTime, dayYield, sourceDatas, operatorInputDatas);
 
-            float minRange = 0;
-            float maxRange = 0;
-            (int, int) rerult = (0, 0);
-            //填充考评表数据
-            maxRange = qualifiedCell1 + diffCell1;
-            minRange = qualifiedCell1 - diffCell1;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell3, minRange, maxRange);
-            target.Cell1 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
+            target.Cell1 = dayData?.Cell1??0; //计算本日收率
+            
+            target.Cell3 = Materialcollection.MaterialDatas[1].Specific;     //氨单耗
+            target.Cell4 = Materialcollection.MaterialDatas[2].Specific;     //稀硫酸单耗
+            target.Cell5 = Materialcollection.MaterialDatas[3].Specific;     //羟基浓度 
 
-            maxRange = qualifiedCell2 + diffCell2;
-            minRange = qualifiedCell2 - diffCell2;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell26, minRange, maxRange);
-            target.Cell2 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
+            target.Cell2 = Materialcollection.MaterialDatas[0].Specific * target.Cell5 ;   //羟基单耗 配后累计(l)*配后浓度(g/l)
 
-            maxRange = qualifiedCell3 + diffCell3;
-            minRange = qualifiedCell3 - diffCell3;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell66, minRange, maxRange);
-            target.Cell3 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
+            target.Cell6 = Materialcollection.MaterialDatas[4].Specific;     //氨腈摩尔比
+            target.Cell7 = MathTools.ResidenceTimeSeconds(15, 22, 300);  // 反应时间 固定值
+            target.Cell8 = Materialcollection.MaterialDatas[6].Specific;     // 反应压力
+            target.Cell9 = Materialcollection.MaterialDatas[7].Specific;     //羟基加热温度
+            target.Cell10 = Materialcollection.MaterialDatas[8].Specific;     //氨汽混合温度
+            target.Cell11 = Materialcollection.MaterialDatas[9].Specific;        //管反热点温度
+            target.Cell12 = Materialcollection.MaterialDatas[10].Specific;        //预冷器结晶温度
+            target.Cell13 = Materialcollection.MaterialDatas[11].Specific;       //一次结晶温度
+            target.Cell14 = Materialcollection.MaterialDatas[12].Specific;       //降膜蒸发温度
+            target.Cell15 = Materialcollection.MaterialDatas[13].Specific;       //二次结晶温度
+                                                                            //Materialcollection.WeeklyCollections[14]        //脱盐水
+            target.Cell21 = Materialcollection.MaterialDatas[15].Specific;       //废液排放
 
+            if (operatorInputDatas != null)
+            {
+                var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+                target.Cell16 = CalculateAverage(operatorInputData, x => x.Cell11);  //	二乙腈含量
+                target.Cell17 = CalculateAverage(operatorInputData, x => x.Cell13);  //	羟基乙腈残余
+                target.Cell18 = CalculateAverage(operatorInputData, x => x.Cell17);  //	pH值
+                target.Cell19 = CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
+                target.Cell20 = CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
 
-            target.Cell4 = target.Cell1;//这两个现在是同一个数据
-
-            maxRange = qualifiedCell5 + diffCell5;
-            minRange = qualifiedCell5 - diffCell5;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell23, minRange, maxRange);
-            target.Cell5 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-
-            target.Cell6 = productionDataCollection.TotalResult.AllAverage_1 * 0.01f;//当日收率
-
-            target.Cell7 = productionDataCollection.TotalResult.AllProduction;
-            target.Cell8 = productionDataCollection.TotalResult.AllYield;
-
-            var productionDataCollectionYesterDay = CalculateForSheet3(startTime.AddDays(-1), operatorInputDatasYesterDay);//计算昨日的产量
-            var temp1  = productionDataCollection.TotalResult.AllYield;
-            var temp2 = productionDataCollectionYesterDay.TotalResult.AllYield;
-            target.Cell9 = (temp1 - temp2) > 0 ? (temp1 - temp2) : 0;
-            target.Cell10 = (temp1 - temp2) <= 0 ? (temp1 - temp2) : 0;
-            target.Cell11 = productionDataCollection.TotalResult.AllAverage_3;
-            target.Cell12 = productionDataCollection.TotalResult.AllAverage_4;
-            target.Cell13 = productionDataCollection.TotalResult.AllAverage_5;
+                target.Cell22 = CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
+                target.Cell23 = CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
+                target.Cell24 = CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
+                target.Cell25 = CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
+                target.Cell26 = CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
+                target.Cell27 = CalculateAverage(operatorInputData, x => x.Cell79); //	其它
+                target.Cell28 = CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
+            }
         }
         private static void MoveDataMonthAnalysis(MonthWorkBook monthWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas, List<OperatorInputData> operatorInputDatasLastMonth)
         {
-            DateTime startTime = monthWorkBook.ReportedTime.Date.AddHours(8);
-            DateTime endTime = startTime.AddMonths(1);
-            List<ProductionDataCollection> productionDataCollection = [];
-            List<ProductionDataCollection> productionDataCollectionLast = [];
-            var target = monthWorkBook.MonthAnalysis;
 
-            if (sourceDatas == null || sourceDatas.Count == 0)
-                return;
-            if (operatorInputDatas == null || operatorInputDatas.Count == 0)
-                return;
-            //需要计算的数据
-            productionDataCollection = CalculateForSheet3TimeRange (startTime, endTime, operatorInputDatas);
-            var rangeYield = CalculateSum(productionDataCollection, x => x.TotalResult.AllYield);//当月累计折百产量
-
-            DateTime startTimeLast = startTime.AddMonths(-1);//上个月
-            DateTime endTimeLast = startTime.AddMonths(1);
-            productionDataCollectionLast = CalculateForSheet3TimeRange(startTimeLast, endTimeLast, operatorInputDatasLastMonth);
-            var rangeYieldLast = CalculateSum(productionDataCollection, x => x.TotalResult.AllYield);//上月累计折百产量
-
-            const float qualifiedCell1 = 0.515f;//羟基乙腈浓度
-            const float diffCell1 = 0.0103f;
-            const float qualifiedCell2 = 0.515f;//氨化反应热点温度
-            const float diffCell2 = 0.0103f;
-            const float qualifiedCell3 = 0.515f;//一次结晶温度
-            const float diffCell3 = 0.0103f;
-            const float qualifiedCell4 = 0.515f;//羟基浓度
-            const float diffCell4 = 0.0103f;
-            const float qualifiedCell5 = 0.515f;//氨/腈摩尔比
-            const float diffCell5 = 0.0103f;
-
-            float minRange = 0;
-            float maxRange = 0;
-            (int, int) rerult = (0, 0);
-            //填充考评表数据
-            minRange = qualifiedCell1 + diffCell1;
-            maxRange = qualifiedCell1 - diffCell1;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell3, minRange, maxRange);
-            target.Cell1 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            minRange = qualifiedCell2 + diffCell2;
-            maxRange = qualifiedCell2 - diffCell2;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell26, minRange, maxRange);
-            target.Cell2 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            minRange = qualifiedCell3 + diffCell3;
-            maxRange = qualifiedCell3 - diffCell3;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell66, minRange, maxRange);
-            target.Cell3 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            minRange = qualifiedCell4 + diffCell4;
-            maxRange = qualifiedCell4 - diffCell4;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell6, minRange, maxRange);
-            target.Cell4 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            minRange = qualifiedCell5 + diffCell5;
-            maxRange = qualifiedCell5 - diffCell5;
-            rerult = CountRatioInRange(sourceDatas, x => x.Cell20, x => x.Cell14, minRange, maxRange);
-            target.Cell5 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            var okCollection = productionDataCollection.Where(x => x.DayShiftData.Any(x => x.Cell41 >= 0.9)|| x.NightShiftData.Any(x => x.Cell41 >= 0.9));//合格的批次
-            float sumProduction = CalculateSum(productionDataCollection, x => x.TotalResult.AllProduction) ?? 0;
-            float okProduction = CalculateSum(okCollection, x => x.TotalResult.AllProduction) ?? 0;
-            const float Epsilon = 0.0001f;//处理浮点数精度
-            target.Cell6 = Math.Abs(sumProduction) > Epsilon ? okProduction / sumProduction : 0;
-            target.Cell7 = sumProduction;
-            target.Cell8 = CalculateSum(productionDataCollection, x => x.TotalResult.AllYield) ?? 0;
-
-            var temp1 = CalculateSum(productionDataCollection, x => x.TotalResult.AllYield) ?? 0;
-            var temp2 = CalculateSum(productionDataCollectionLast, x => x.TotalResult.AllYield) ?? 0;
-            target.Cell9 = (temp1 - temp2) > 0 ? (temp1 - temp2) : 0;
-            target.Cell10 = (temp1 - temp2) <= 0 ? (temp1 - temp2) : 0;
-            target.Cell11 = CalculateSum(productionDataCollection, x => x.TotalResult.AllAverage_3) ?? 0;
-            target.Cell12 = CalculateSum(productionDataCollection, x => x.TotalResult.AllAverage_4) ?? 0;
-            target.Cell13 = CalculateSum(productionDataCollection, x => x.TotalResult.AllAverage_5) ?? 0;
         }
         private static void MoveDataYearAnalysis(YearWorkBook yearWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas, List<OperatorInputData> operatorInputDatasLastYear)
         {
-            DateTime startTime = yearWorkBook.ReportedTime.Date.AddHours(8);
-            DateTime endTime = startTime.AddMonths(1);
-            List<ProductionDataCollection> productionDataCollection = [];
-            List<ProductionDataCollection> productionDataCollectionLast = [];
-            var target = yearWorkBook.YearAnalysis;
 
-            if (sourceDatas == null || sourceDatas.Count == 0)
-                return;
-            if (operatorInputDatas == null || operatorInputDatas.Count == 0)
-                return;
-            //需要计算的数据
-            productionDataCollection = CalculateForSheet3TimeRange(startTime, endTime, operatorInputDatas);
-            var rangeYield = CalculateSum(productionDataCollection, x => x.TotalResult.AllYield);//当月累计折百产量
-
-            DateTime startTimeLast = startTime.AddMonths(-1);//上个月
-            DateTime endTimeLast = startTime.AddMonths(1);
-            productionDataCollectionLast = CalculateForSheet3TimeRange(startTimeLast, endTimeLast, operatorInputDatasLastYear);
-            var rangeYieldLast = CalculateSum(productionDataCollection, x => x.TotalResult.AllYield);//上月累计折百产量
-
-            const float qualifiedCell1 = 0.515f;//羟基乙腈浓度
-            const float diffCell1 = 0.0103f;
-            const float qualifiedCell2 = 0.515f;//氨化反应热点温度
-            const float diffCell2 = 0.0103f;
-            const float qualifiedCell3 = 0.515f;//一次结晶温度
-            const float diffCell3 = 0.0103f;
-            const float qualifiedCell4 = 0.515f;//羟基浓度
-            const float diffCell4 = 0.0103f;
-            const float qualifiedCell5 = 0.515f;//氨/腈摩尔比
-            const float diffCell5 = 0.0103f;
-
-            float minRange = 0;
-            float maxRange = 0;
-            (int, int) rerult = (0, 0);
-            //填充考评表数据
-            minRange = qualifiedCell1 + diffCell1;
-            maxRange = qualifiedCell1 - diffCell1;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell3, minRange, maxRange);
-            target.Cell1 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            minRange = qualifiedCell2 + diffCell2;
-            maxRange = qualifiedCell2 - diffCell2;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell26, minRange, maxRange);
-            target.Cell2 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            minRange = qualifiedCell3 + diffCell3;
-            maxRange = qualifiedCell3 - diffCell3;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell66, minRange, maxRange);
-            target.Cell3 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            minRange = qualifiedCell4 + diffCell4;
-            maxRange = qualifiedCell4 - diffCell4;
-            rerult = CountValueInRange(sourceDatas, x => x.Cell6, minRange, maxRange);
-            target.Cell4 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            minRange = qualifiedCell5 + diffCell5;
-            maxRange = qualifiedCell5 - diffCell5;
-            rerult = CountRatioInRange(sourceDatas, x => x.Cell20, x => x.Cell14, minRange, maxRange);
-            target.Cell5 = rerult.Item1 != 0 ? rerult.Item2 / rerult.Item1 : 0;
-
-            var okCollection = productionDataCollection.Where(x => x.DayShiftData.Any(x => x.Cell41 >= 0.9) || x.NightShiftData.Any(x => x.Cell41 >= 0.9));//合格的批次
-            float sumProduction = CalculateSum(productionDataCollection, x => x.TotalResult.AllProduction) ?? 0;
-            float okProduction = CalculateSum(okCollection, x => x.TotalResult.AllProduction) ?? 0;
-            const float Epsilon = 0.0001f;//处理浮点数精度
-            target.Cell6 = Math.Abs(sumProduction) > Epsilon ? okProduction / sumProduction : 0;
-            target.Cell7 = sumProduction;
-            target.Cell8 = CalculateSum(productionDataCollection, x => x.TotalResult.AllYield) ?? 0;
-
-            var temp1 = CalculateSum(productionDataCollection, x => x.TotalResult.AllYield) ?? 0;
-            var temp2 = CalculateSum(productionDataCollectionLast, x => x.TotalResult.AllYield) ?? 0;
-            target.Cell9 = (temp1 - temp2) > 0 ? (temp1 - temp2) : 0;
-            target.Cell10 = (temp1 - temp2) <= 0 ? (temp1 - temp2) : 0;
-            target.Cell11 = CalculateSum(productionDataCollection, x => x.TotalResult.AllAverage_3) ?? 0;
-            target.Cell12 = CalculateSum(productionDataCollection, x => x.TotalResult.AllAverage_4) ?? 0;
-            target.Cell13 = CalculateSum(productionDataCollection, x => x.TotalResult.AllAverage_5) ?? 0;
         }
         private static bool WeekMoveDataSheet1Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
             WeekWorkBook.WorkSheet1 = Enumerable.Range(1, 1).Select(_ => new WorkSheet1()).ToList();
-
             DateTime startTime;
             DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-
             startTime = currentWeekFirstDay;
-            endTime = startTime.AddDays(7);
+            endTime = startTime.AddDays(7).AddHours(1);
+            var data = new MaterialDailyCollection(startTime, 2104.62f, sourceDatas, operatorInputDatas);
+            var WeekRangeData = CalculateDailyProductionReportRange(startTime, endTime, sourceDatas, operatorInputDatas);
+            List<float?> WeekRangeYield = WeekRangeData == null
+                            ? new List<float?>() // 集合为null时返回空列表，避免空引用异常
+                            : WeekRangeData.Select(report => report?.Cell2).ToList();
+            var Materialcollection = new MaterialDataWeeklyCollection(startTime, WeekRangeYield, sourceDatas, operatorInputDatas);
             int i = 0;
-            WeekWorkBook.WorkSheet1[i].Cell1 = WeekWorkBook.WorkSheet7[2].Cell1; //读取计算的收率
-
-            //WeekWorkBook.WorkSheet1[i].Cell2 = WeekWorkBook.WorkSheet12[2].Cell1; //读取羟基单耗
-            //WeekWorkBook.WorkSheet1[i].Cell3 = WeekWorkBook.WorkSheet12[2].Cell2; //读取氨单耗
-            //WeekWorkBook.WorkSheet1[i].Cell4 = WeekWorkBook.WorkSheet12[2].Cell3; //读取硫酸单耗
-
-            //WeekWorkBook.WorkSheet1[i].Cell21 = WeekWorkBook.WorkSheet12[2].Cell8;//	废液单位产品排放量
-            if (sourceDatas != null)
-            {
-                var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                WeekWorkBook.WorkSheet1[i].Cell5 = CalculateAverage(sourceData, x => x.Cell6);   //	羟基浓度 (配料后)
-                WeekWorkBook.WorkSheet1[i].Cell6 = CalculateAverage(sourceData, x => x.Cell23);   //	氨腈摩尔比
-
-                var averageFlow = CalculateAverage(sourceData, x => x.Cell19) ?? 0;//羟基平均流量
-                WeekWorkBook.WorkSheet1[i].Cell7 = ResidenceTimeSeconds(15, 22, averageFlow * 1000);   //	反应时间 15mm内径 22m长的管道 体积流量L换算成m³
-
-                WeekWorkBook.WorkSheet1[i].Cell8 = CalculateAverage(sourceData, x => x.Cell24);   //	反应压力 PT-05311
-                WeekWorkBook.WorkSheet1[i].Cell9 = CalculateAverage(sourceData, x => x.Cell21);   //	羟基加热温度
-                WeekWorkBook.WorkSheet1[i].Cell10 = CalculateAverage(sourceData, x => x.Cell17);  //	氨汽混合温度TT05143
-                WeekWorkBook.WorkSheet1[i].Cell11 = CalculateAverage(sourceData, x => x.Cell26);  //	管反热点温度
-                WeekWorkBook.WorkSheet1[i].Cell12 = CalculateAverage(sourceData, x => x.Cell62); //	预冷器结晶温度
-                WeekWorkBook.WorkSheet1[i].Cell13 = CalculateAverage(sourceData, x => x.Cell66);  //	一次结晶温度
-                WeekWorkBook.WorkSheet1[i].Cell14 = CalculateAverage(sourceData, x => x.Cell144);  //	降膜蒸发温度 新增的
-                WeekWorkBook.WorkSheet1[i].Cell15 = CalculateAverage(sourceData, x => x.Cell122);	//	二次结晶温度
-            }
+            WeekWorkBook.WorkSheet1[i].Cell1 = CalculateWeighted(WeekRangeData, x => x.Cell1, x => x.Cell3); //计算本周收率
+            WeekWorkBook.WorkSheet1[i].Cell2 = Materialcollection.WeeklyCollections[0];     //羟基单耗
+            WeekWorkBook.WorkSheet1[i].Cell3 = Materialcollection.WeeklyCollections[1];     //氨单耗
+            WeekWorkBook.WorkSheet1[i].Cell4 = Materialcollection.WeeklyCollections[2];     //稀硫酸单耗
+            WeekWorkBook.WorkSheet1[i].Cell5 = Materialcollection.WeeklyCollections[3];     //羟基浓度 
+            WeekWorkBook.WorkSheet1[i].Cell6 = Materialcollection.WeeklyCollections[4];     //氨腈摩尔比
+            WeekWorkBook.WorkSheet1[i].Cell7 = MathTools.ResidenceTimeSeconds(15, 22, 300);  // 反应时间 固定值
+            WeekWorkBook.WorkSheet1[i].Cell8 = Materialcollection.WeeklyCollections[6];     // 反应压力
+            WeekWorkBook.WorkSheet1[i].Cell9 = Materialcollection.WeeklyCollections[7];     //羟基加热温度
+            WeekWorkBook.WorkSheet1[i].Cell10 = Materialcollection.WeeklyCollections[8];     //氨汽混合温度
+            WeekWorkBook.WorkSheet1[i].Cell11 = Materialcollection.WeeklyCollections[9];        //管反热点温度
+            WeekWorkBook.WorkSheet1[i].Cell12 = Materialcollection.WeeklyCollections[10];        //预冷器结晶温度
+            WeekWorkBook.WorkSheet1[i].Cell13 = Materialcollection.WeeklyCollections[11];       //一次结晶温度
+            WeekWorkBook.WorkSheet1[i].Cell14 = Materialcollection.WeeklyCollections[12];       //降膜蒸发温度
+            WeekWorkBook.WorkSheet1[i].Cell15 = Materialcollection.WeeklyCollections[13];       //二次结晶温度
+                                              //Materialcollection.WeeklyCollections[14]        //脱盐水
+            WeekWorkBook.WorkSheet1[i].Cell21 = Materialcollection.WeeklyCollections[15];       //废液排放
             if (operatorInputDatas != null)
             {
                 var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
@@ -888,7 +513,7 @@ namespace CenterBackend.Services
                 WeekWorkBook.WorkSheet1[i].Cell27 = CalculateAverage(operatorInputData, x => x.Cell79); //	其它
                 WeekWorkBook.WorkSheet1[i].Cell28 = CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
             }
-
+            WeekWorkBook.WorkSheet9 = Materialcollection;
             return true;
         }
         private static bool WeekMoveDataSheet2Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
@@ -939,7 +564,6 @@ namespace CenterBackend.Services
                     var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
                     if (operatorInputData.Count == 0)
                         continue;
-                    
                     dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell11);
                     dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell12);
                     dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell13);
@@ -947,56 +571,29 @@ namespace CenterBackend.Services
                     dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell15);
                     dataItem.Cell6 = CalculateAverage(operatorInputData, x => x.Cell16);
                     dataItem.Cell7 = CalculateAverage(operatorInputData, x => x.Cell17);
-                    dataItem.Cell7 = CalculateAverage(operatorInputData, x => x.Cell18);
+                    dataItem.Cell8 = CalculateAverage(operatorInputData, x => x.Cell18);
                 }
             }
             return true;
         }
         private static bool WeekMoveDataSheet4Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
-            //WeekWorkBook.WorkSheet4 = Enumerable.Range(1, 3).Select(_ => new WorkSheet4()).ToList();
+            WeekWorkBook.WorkSheet4 = Enumerable.Range(1, 7).Select(_ => new WorkSheet4()).ToList();
 
-            //DateTime startTime;
-            //DateTime endTime;
-            //DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-
-            //for (var i = 0; i < 3; i++)
-            //{
-            //    if (i == 0)
-            //    {
-            //        startTime = currentWeekFirstDay.AddDays(-14);
-            //        endTime = startTime.AddDays(7);
-            //    }
-            //    else if (i == 1)
-            //    {
-            //        startTime = currentWeekFirstDay.AddDays(-7);
-            //        endTime = startTime.AddDays(7);
-            //    }
-            //    else
-            //    {
-            //        startTime = currentWeekFirstDay;
-            //        endTime = startTime.AddDays(7);
-            //    }
-
-            //    if (sourceDatas != null)
-            //    { 
-            //        var sourceData = sourceDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-
-            //        WeekWorkBook.WorkSheet4[i].Cell6 = CalculateAverage(sourceData, x => x.Cell92);
-            //        WeekWorkBook.WorkSheet4[i].Cell7 = CalculateAverage(sourceData, x => x.Cell106);
-            //    }
-
-            //    if (operatorInputDatas != null)
-            //    { 
-            //        var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-
-            //        WeekWorkBook.WorkSheet4[i].Cell1 = CalculateAverage(operatorInputData, x => x.Cell1);
-            //        WeekWorkBook.WorkSheet4[i].Cell2 = CalculateAverage(operatorInputData, x => x.Cell2);
-            //        WeekWorkBook.WorkSheet4[i].Cell3 = CalculateAverage(operatorInputData, x => x.Cell3);
-            //        WeekWorkBook.WorkSheet4[i].Cell4 = CalculateAverage(operatorInputData, x => x.Cell4);
-            //        WeekWorkBook.WorkSheet4[i].Cell5 = CalculateAverage(operatorInputData, x => x.Cell5);
-            //    }
-            //}
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            DateTime startTime = currentWeekFirstDay;
+            for (var i = 0; i < 7; i++)
+            {
+                
+                var dataItem = WeekWorkBook.WorkSheet4[i];
+                if (sourceDatas != null && operatorInputDatas != null)
+                {
+                    var dayData = new DailyProductionReport(startTime, sourceDatas, operatorInputDatas);
+                    dataItem.Data= dayData;
+                    dataItem.TimePoint = startTime;
+                }
+                startTime = startTime.AddDays(1);
+            }
             return true;
         }
         private static bool WeekMoveDataSheet5Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
@@ -1006,7 +603,6 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-
             for (var i = 0; i < 7; i++)
             {
                 startTime = currentWeekFirstDay.AddDays(i);
@@ -1035,7 +631,6 @@ namespace CenterBackend.Services
             DateTime startTime;
             DateTime endTime;
             DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
-
             for (var i = 0; i < 7; i++)
             {
                 startTime = currentWeekFirstDay.AddDays(i);
@@ -1061,7 +656,6 @@ namespace CenterBackend.Services
                     dataItem.Cell11 = CalculateAverage(operatorInputData, x => x.Cell61);
                     dataItem.Cell12 = CalculateAverage(operatorInputData, x => x.Cell62);
                     dataItem.Cell13 = CalculateAverage(operatorInputData, x => x.Cell63);
-                    dataItem.Cell14 = CalculateAverage(operatorInputData, x => x.Cell64);
                 }
             }
             return true;
@@ -1090,6 +684,36 @@ namespace CenterBackend.Services
                     dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell71);
                     dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell72);
                     dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell73);
+                }
+            }
+            return true;
+        }
+        private static bool WeekMoveDataSheet8Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
+        {
+            WeekWorkBook.WorkSheet8 = Enumerable.Range(1, 7).Select(_ => new WorkSheet8()).ToList();
+            var datalist = WeekWorkBook.WorkSheet8;
+            DateTime startTime;
+            DateTime endTime;
+            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+
+            for (var i = 0; i < 7; i++)
+            {
+                startTime = currentWeekFirstDay.AddDays(i);
+                endTime = startTime.AddDays(1);
+                var dataItem = datalist[i];
+                dataItem.TimePoint = startTime;
+                if (operatorInputDatas != null)
+                {
+                    var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
+                    if (operatorInputData.Count == 0)
+                        continue;
+                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell74);
+                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell75);
+                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell76);
+                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell77);
+                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell78);
+                    dataItem.Cell6 = CalculateAverage(operatorInputData, x => x.Cell79);
+                    dataItem.Cell7 = CalculateAverage(operatorInputData, x => x.Cell80);
                 }
             }
             return true;
@@ -1242,90 +866,59 @@ namespace CenterBackend.Services
                 .ToList();
             return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;//计算总和
         }
-        /***********************Excel需要计算的表***********************/
         /// <summary>
-        /// 计算手写表一天的数据
+        /// 所有列求两列加权平均
         /// </summary>
-        /// <param name="startTime">对应当天日期</param>
-        /// <returns>返回计算完成的sheet3的数据集合</returns>
-        public static ProductionDataCollection CalculateForSheet3(DateTime startTime, List<OperatorInputData> operatorInputData)
+        /// <param name="dataList"></param>
+        /// <param name="getValue">含量</param>
+        /// <param name="getWeight">总量</param>
+        /// <returns></returns>
+        public static float CalculateWeighted(
+                                                List<DailyProductionReport> dataList,
+                                                Func<DailyProductionReport, float?> getValue,
+                                                Func<DailyProductionReport, float?> getWeight)
         {
-            //查询当日数据
-            startTime = startTime.Date.AddHours(8);
-            var endTime = startTime.AddDays(1);
+            if (dataList == null || dataList.Count == 0) return 0;
 
-            operatorInputData = operatorInputData.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-            if (operatorInputData == null || operatorInputData.Count == 0)// 空数据校验
-                return new ProductionDataCollection();
-
-            //填充当日数据
-            ProductionDataCollection dataCellection = new();
-            IEnumerable<OperatorInputData> filteredList;
-            var ShiftStart = startTime;//早班开始
-            var ShiftTime = ShiftStart.AddHours(12);//换班时间
-            var ShiftEnd = ShiftTime.AddHours(12);//换班时间
-
-            filteredList = operatorInputData.Where(x => x.ReportedTime >= ShiftStart && x.ReportedTime <= ShiftTime && x.Cell21 != null).Take(5);
-            var DayShiftData = (filteredList != null) ? filteredList.ToList() : [];//早班数据
-            dataCellection.DayShiftData = DayShiftData.Select(ProductionData.FromOperatorInput).ToList();
-
-            filteredList = operatorInputData.Where(x => x.ReportedTime >= ShiftTime && x.ReportedTime <= ShiftEnd && x.Cell21 != null).Take(5);
-            var NightShiftData = (filteredList != null) ? filteredList.ToList() : [];//晚班数据
-            dataCellection.NightShiftData = NightShiftData.Select(ProductionData.FromOperatorInput).ToList();
-            
-            if (dataCellection.DayShiftData == null || dataCellection.DayShiftData.Count == 0) return dataCellection;
-            if (dataCellection.NightShiftData == null || dataCellection.NightShiftData.Count == 0) return dataCellection;
-            //表内计算,得出当日所有统计数据
-            dataCellection.CalculateSheet();
-            return dataCellection;
+            float weightedSum = 0;
+            float totalWeight = 0;
+            foreach (var d in dataList)
+            {
+                var value = getValue(d) ?? 0f;
+                var weight = getWeight(d) ?? 0f;
+                weightedSum += value * weight;
+                totalWeight += weight;
+            }
+            return totalWeight == 0 ? 0 : weightedSum / totalWeight;
         }
+        /***********************Excel需要计算的表***********************/
         /// <summary>
         /// 计算手写表一段时间的数据
         /// </summary>
         /// <param name="startTime">开始时间</param>
         /// <param name="endTime">结束时间</param>
         /// <returns>ProductionDataCollection</returns>
-        public static List<ProductionDataCollection> CalculateForSheet3TimeRange(DateTime startDate, DateTime endtDate, List<OperatorInputData> operatorInputData)
+        public static List<DailyProductionReport> CalculateDailyProductionReportRange(DateTime startDate, DateTime endtDate, List<SourceData> sourceData, List<OperatorInputData> operatorInputData)
         {
             if (startDate > endtDate)
             {
                 (startDate, endtDate) = (endtDate, startDate);
             }
-            List<ProductionDataCollection> productionDataCollection = [];
+            List<DailyProductionReport> DailyProductionReportCollection = [];
             var currentDay = startDate.Date.AddHours(8);
             var lastDay = endtDate.Date.AddHours(8);
             while (currentDay < lastDay)
             {
-                var data = CalculateForSheet3(currentDay, operatorInputData);
+                var data = new DailyProductionReport(currentDay, sourceData, operatorInputData);
                 if (data != null)
                 {
-                    if (data.DayShiftData.Count != 0) productionDataCollection.AddRange(data);
+                    DailyProductionReportCollection.AddRange(data);
                 }
                 currentDay = currentDay.AddDays(1);
             }
 
-            return productionDataCollection;
+            return DailyProductionReportCollection;
         }
-        /// <summary>
-        /// 反应时间计算公式 2026年5月13日增加
-        /// </summary>
-        /// <param name="d_mm">管内径</param>
-        /// <param name="L_m">管长度</param>
-        /// <param name="Q_L_per_h">流速L/H</param>
-        /// <returns></returns>
-        public static float ResidenceTimeSeconds(float d_mm, float L_m, float Q_L_per_h)
-        {
-            if (Q_L_per_h <= 0f) return 0f;
 
-            double d_m = (double)d_mm * 1e-3;
-            double r_m = d_m / 2.0;
-            double area_m2 = Math.PI * r_m * r_m;
-            double V_m3 = area_m2 * (double)L_m;
-            double V_L = V_m3 * 1000.0;
-            double t_h = V_L / (double)Q_L_per_h;
-            double t_s = t_h * 3600.0;
-
-            return (float)Math.Round(t_s, 3, MidpointRounding.AwayFromZero);//保留两位小数
-        }
     }
 }

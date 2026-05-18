@@ -190,15 +190,15 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell21", "Cell22", "Cell23", "Cell24", "Cell25", "Cell26" },
-                Label = "一次结晶物/一次产品成分检测",
+                Label = "结晶物/产品成分检测",
                 Unit = ""
             },
-            new GroupHeader
-            {
-                Props = new List<string> { "Cell31", "Cell32", "Cell33", "Cell34", "Cell35", "Cell36" },
-                Label = "二次结晶物/二次产品成分检测",
-                Unit = ""
-            }
+            //new GroupHeader
+            //{
+            //    Props = new List<string> { "Cell31", "Cell32", "Cell33", "Cell34", "Cell35", "Cell36" },
+            //    Label = "二次结晶物/二次产品成分检测",
+            //    Unit = ""
+            //}
         },
         tableHeaders = new List<TableHeaderDto>
         {
@@ -264,7 +264,7 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                
-                Props = new List<string> {  "Cell64" },// Props = new List<string> { "Cell63", "Cell64" },
+                Props = new List<string> {  "Cell63" },
                 Label = "耗材消耗",
                 Unit = ""
             }
@@ -284,8 +284,7 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell60", Label = "羟基乙腈残余 (g/L)" },
             new TableHeaderDto { Prop = "Cell61", Label = "硫铵 (g/L)" },
             new TableHeaderDto { Prop = "Cell62", Label = "透光率 (%)" },
-            //new TableHeaderDto { Prop = "Cell63", Label = "废液中二乙睛含量 %" },//弃用，废液成分 有单独的一页
-            new TableHeaderDto { Prop = "Cell64", Label = "活性炭使用量 (kg)" },
+            new TableHeaderDto { Prop = "Cell63", Label = "活性炭使用量 (kg)" },
         }
     },
    

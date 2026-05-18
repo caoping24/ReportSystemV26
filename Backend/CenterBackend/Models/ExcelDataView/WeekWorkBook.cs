@@ -1,4 +1,6 @@
-﻿namespace CenterBackend.Models.ExcelDataView
+﻿using CenterBackend.Models.CalculateData;
+
+namespace CenterBackend.Models.ExcelDataView
 {
 
     public class WeekWorkBook : BaseSheet
@@ -10,6 +12,8 @@
         public List<WorkSheet5> WorkSheet5 { get; set; } = [];
         public List<WorkSheet6> WorkSheet6 { get; set; } = [];
         public List<WorkSheet7> WorkSheet7 { get; set; } = [];
+        public List<WorkSheet8> WorkSheet8 { get; set; } = [];
+        public MaterialDataWeeklyCollection? WorkSheet9 { get; set; }  
     }
 
     public class WorkSheet1
@@ -72,11 +76,8 @@
     public class WorkSheet4
     {
         public DateTime TimePoint { get; set; }
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
+        public DailyProductionReport? Data { get; set; }
+
     }
 
     public class WorkSheet5
@@ -105,7 +106,6 @@
         public float? Cell11 { get; set; }
         public float? Cell12 { get; set; }
         public float? Cell13 { get; set; }
-        public float? Cell14 { get; set; }
 
     }
 
@@ -116,5 +116,15 @@
         public float? Cell2 { get; set; }
         public float? Cell3 { get; set; }
     }
-
+    public class WorkSheet8
+    {
+        public DateTime TimePoint { get; set; }
+        public float? Cell1 { get; set; }
+        public float? Cell2 { get; set; }
+        public float? Cell3 { get; set; }
+        public float? Cell4 { get; set; }
+        public float? Cell5 { get; set; }
+        public float? Cell6 { get; set; }
+        public float? Cell7 { get; set; }
+    }
 }

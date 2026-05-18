@@ -92,21 +92,21 @@ namespace CenterBackend.Services
             if (operatorInputDatas == null || operatorInputDatas.Count == 0)
                 return null;
             //需要计算的数据
-            List<ProductionDataCollection> productionDataCollections = DataToViewService.CalculateForSheet3TimeRange(startTime, endTime, operatorInputDatas);//计算产品数据
+            //List<ProductionDataCollection> productionDataCollections = DataToViewService.CalculateForSheet3TimeRange(startTime, endTime, operatorInputDatas);//计算产品数据
             
-            var allProduction  = DataToViewService.CalculateSum(productionDataCollections, x => x.TotalResult.AllProduction); //产量累计
-            comToSiemens.Cell1 = allProduction;
-            comToSiemens.Cell2 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllYield);//折百平均
-            comToSiemens.Cell3 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_1);//收率平均
+            //var allProduction  = DataToViewService.CalculateSum(productionDataCollections, x => x.TotalResult.AllProduction); //产量累计
+            //comToSiemens.Cell1 = allProduction;
+            //comToSiemens.Cell2 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllYield);//折百平均
+            //comToSiemens.Cell3 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_1);//收率平均
 
-            comToSiemens.Cell4 = DataToViewService.CalculateFirstLastDifference(sourceDatas, x => x.Cell14);//气氨消耗
-            comToSiemens.Cell5 = DataToViewService.CalculateFirstLastDifference(sourceDatas, x => x.Cell20);//羟基乙睛消耗
-            comToSiemens.Cell6 = DataToViewService.CalculateFirstLastDifference(sourceDatas, x => x.Cell37);//稀硫酸消耗
-            comToSiemens.Cell7 = DataToViewService.CalculateAverage(sourceDatas, x => x.Cell24);//摩尔比 做平均
+            //comToSiemens.Cell4 = DataToViewService.CalculateFirstLastDifference(sourceDatas, x => x.Cell14);//气氨消耗
+            //comToSiemens.Cell5 = DataToViewService.CalculateFirstLastDifference(sourceDatas, x => x.Cell20);//羟基乙睛消耗
+            //comToSiemens.Cell6 = DataToViewService.CalculateFirstLastDifference(sourceDatas, x => x.Cell37);//稀硫酸消耗
+            //comToSiemens.Cell7 = DataToViewService.CalculateAverage(sourceDatas, x => x.Cell24);//摩尔比 做平均
 
-            comToSiemens.Cell8   = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_1); //二乙睛含量平均
-            comToSiemens.Cell9 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_3); //水分含量平均
-            comToSiemens.Cell10 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_5); //未知物含量平均
+            //comToSiemens.Cell8   = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_1); //二乙睛含量平均
+            //comToSiemens.Cell9 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_3); //水分含量平均
+            //comToSiemens.Cell10 = DataToViewService.CalculateAverage(productionDataCollections, x => x.TotalResult.AllAverage_5); //未知物含量平均
 
             var usageWater = DataToViewService.CalculateFirstLastDifference(sourceDatas, x => x.Cell143);//水消耗 修改为sourcedata中143 读取 
             var usageElectric = DataToViewService.CalculateFirstLastDifference(operatorInputDatas, x => x.Cell73);//电消耗
@@ -130,10 +130,10 @@ namespace CenterBackend.Services
             float standUsagesteam = usagesteam * 0.0857f;
 
             float standUsageTotal = standUsageWater + standUsageElectric + standUsagesteam;
-            var standUsagePerProduct = allProduction != null && allProduction != 0 ? standUsageTotal / allProduction : 0f;
+            //var standUsagePerProduct = allProduction != null && allProduction != 0 ? standUsageTotal / allProduction : 0f;
 
             //单位产品耗能
-            comToSiemens.Cell44 = standUsagePerProduct;
+            //comToSiemens.Cell44 = standUsagePerProduct;
 
             return comToSiemens;
         }
