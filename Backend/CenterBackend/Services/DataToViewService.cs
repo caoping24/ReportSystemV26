@@ -48,7 +48,7 @@ namespace CenterBackend.Services
         public async Task<bool> WeekGetMapDataAsync(WeekWorkBook WeekWorkBook)
         {
             DateTime startDay = WeekWorkBook.ReportedTime.Date.AddHours(8);  //开始日期的 8:00 
-            DateTime endDay = WeekWorkBook.ReportedTime.Date.AddDays(7).AddHours(1); //一周后的 9:00
+            DateTime endDay = startDay.AddDays(7).AddHours(1); //一周后的 9:00
             List<SourceData> sourceData = await _sourceData.GetByDateTimeRangeAsync(startDay, endDay);
             List<OperatorInputData> operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startDay, endDay);
             WeekMoveDataSheet1Async(WeekWorkBook, sourceData, operatorInputData);
@@ -418,7 +418,7 @@ namespace CenterBackend.Services
             var Materialcollection = new MaterialDailyCollection(startTime, dayYield, sourceDatas, operatorInputDatas);
 
             target.Cell1 = dayData?.Cell1??0; //计算本日收率
-            
+            target.Cell2 = Materialcollection.MaterialDatas[0].Specific;     //氨单耗
             target.Cell3 = Materialcollection.MaterialDatas[1].Specific;     //氨单耗
             target.Cell4 = Materialcollection.MaterialDatas[2].Specific;     //稀硫酸单耗
             target.Cell5 = Materialcollection.MaterialDatas[3].Specific;     //羟基浓度 
@@ -426,7 +426,7 @@ namespace CenterBackend.Services
             target.Cell2 = Materialcollection.MaterialDatas[0].Specific * target.Cell5 ;   //羟基单耗 配后累计(l)*配后浓度(g/l)
 
             target.Cell6 = Materialcollection.MaterialDatas[4].Specific;     //氨腈摩尔比
-            target.Cell7 = MathTools.ResidenceTimeSeconds(15, 22, 300);  // 反应时间 固定值
+            target.Cell7 = MathTools.ResidenceTimeSeconds(15, 22, 300m);  // 反应时间 固定值
             target.Cell8 = Materialcollection.MaterialDatas[6].Specific;     // 反应压力
             target.Cell9 = Materialcollection.MaterialDatas[7].Specific;     //羟基加热温度
             target.Cell10 = Materialcollection.MaterialDatas[8].Specific;     //氨汽混合温度
@@ -441,19 +441,19 @@ namespace CenterBackend.Services
             if (operatorInputDatas != null)
             {
                 var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                target.Cell16 = CalculateAverage(operatorInputData, x => x.Cell11);  //	二乙腈含量
-                target.Cell17 = CalculateAverage(operatorInputData, x => x.Cell13);  //	羟基乙腈残余
-                target.Cell18 = CalculateAverage(operatorInputData, x => x.Cell17);  //	pH值
-                target.Cell19 = CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
-                target.Cell20 = CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
+                target.Cell16 = MathTools.CalculateAverage(operatorInputData, x => x.Cell11);  //	二乙腈含量
+                target.Cell17 = MathTools.CalculateAverage(operatorInputData, x => x.Cell13);  //	羟基乙腈残余
+                target.Cell18 = MathTools.CalculateAverage(operatorInputData, x => x.Cell17);  //	pH值
+                target.Cell19 = MathTools.CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
+                target.Cell20 = MathTools.CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
 
-                target.Cell22 = CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
-                target.Cell23 = CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
-                target.Cell24 = CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
-                target.Cell25 = CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
-                target.Cell26 = CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
-                target.Cell27 = CalculateAverage(operatorInputData, x => x.Cell79); //	其它
-                target.Cell28 = CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
+                target.Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
+                target.Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
+                target.Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
+                target.Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
+                target.Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
+                target.Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
+                target.Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
             }
         }
         private static void MoveDataMonthAnalysis(MonthWorkBook monthWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas, List<OperatorInputData> operatorInputDatasLastMonth)
@@ -469,23 +469,30 @@ namespace CenterBackend.Services
             WeekWorkBook.WorkSheet1 = Enumerable.Range(1, 1).Select(_ => new WorkSheet1()).ToList();
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            DateTime currentWeekFirstDay =MathTools.GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             startTime = currentWeekFirstDay;
             endTime = startTime.AddDays(7).AddHours(1);
-            var data = new MaterialDailyCollection(startTime, 2104.62f, sourceDatas, operatorInputDatas);
+            
             var WeekRangeData = CalculateDailyProductionReportRange(startTime, endTime, sourceDatas, operatorInputDatas);
-            List<float?> WeekRangeYield = WeekRangeData == null
-                            ? new List<float?>() // 集合为null时返回空列表，避免空引用异常
+            List<decimal?> WeekRangeYield = WeekRangeData == null
+                            ? new List<decimal?>() // 集合为null时返回空列表，避免空引用异常
                             : WeekRangeData.Select(report => report?.Cell2).ToList();
             var Materialcollection = new MaterialDataWeeklyCollection(startTime, WeekRangeYield, sourceDatas, operatorInputDatas);
             int i = 0;
-            WeekWorkBook.WorkSheet1[i].Cell1 = CalculateWeighted(WeekRangeData, x => x.Cell1, x => x.Cell3); //计算本周收率
+            //计算本周收率
+            decimal totalYield = MathTools.CalculateSum(WeekRangeData, x => x.Cell2) ?? 0m;
+            decimal totalUseage = MathTools.CalculateSum(Materialcollection.DailyCollections, x => x.Useage)/1000 ?? 0m;//转立方
+            decimal totalRate = MathTools.CalculateAverage(Materialcollection.DailyCollections, x => x.Rate) ?? 0m;
+            decimal weekYield = ((totalUseage != 0 && totalUseage != 0) ? (totalYield / totalUseage / totalRate) * 1.2m * 100 : 0);
+            //weekYield = CalculateMaterialcollectionRangeYield(MaterialDataWeeklyCollection MaterialData);
+
+            WeekWorkBook.WorkSheet1[i].Cell1 = weekYield;
             WeekWorkBook.WorkSheet1[i].Cell2 = Materialcollection.WeeklyCollections[0];     //羟基单耗
             WeekWorkBook.WorkSheet1[i].Cell3 = Materialcollection.WeeklyCollections[1];     //氨单耗
             WeekWorkBook.WorkSheet1[i].Cell4 = Materialcollection.WeeklyCollections[2];     //稀硫酸单耗
             WeekWorkBook.WorkSheet1[i].Cell5 = Materialcollection.WeeklyCollections[3];     //羟基浓度 
             WeekWorkBook.WorkSheet1[i].Cell6 = Materialcollection.WeeklyCollections[4];     //氨腈摩尔比
-            WeekWorkBook.WorkSheet1[i].Cell7 = MathTools.ResidenceTimeSeconds(15, 22, 300);  // 反应时间 固定值
+            WeekWorkBook.WorkSheet1[i].Cell7 = MathTools.ResidenceTimeSeconds(15, 22, 300m);  // 反应时间 固定值
             WeekWorkBook.WorkSheet1[i].Cell8 = Materialcollection.WeeklyCollections[6];     // 反应压力
             WeekWorkBook.WorkSheet1[i].Cell9 = Materialcollection.WeeklyCollections[7];     //羟基加热温度
             WeekWorkBook.WorkSheet1[i].Cell10 = Materialcollection.WeeklyCollections[8];     //氨汽混合温度
@@ -499,19 +506,19 @@ namespace CenterBackend.Services
             if (operatorInputDatas != null)
             {
                 var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
-                WeekWorkBook.WorkSheet1[i].Cell16 = CalculateAverage(operatorInputData, x => x.Cell11);  //	二乙腈含量
-                WeekWorkBook.WorkSheet1[i].Cell17 = CalculateAverage(operatorInputData, x => x.Cell13);  //	羟基乙腈残余
-                WeekWorkBook.WorkSheet1[i].Cell18 = CalculateAverage(operatorInputData, x => x.Cell17);  //	pH值
-                WeekWorkBook.WorkSheet1[i].Cell19 = CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
-                WeekWorkBook.WorkSheet1[i].Cell20 = CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
+                WeekWorkBook.WorkSheet1[i].Cell16 = MathTools.CalculateAverage(operatorInputData, x => x.Cell11);  //	二乙腈含量
+                WeekWorkBook.WorkSheet1[i].Cell17 = MathTools.CalculateAverage(operatorInputData, x => x.Cell13);  //	羟基乙腈残余
+                WeekWorkBook.WorkSheet1[i].Cell18 = MathTools.CalculateAverage(operatorInputData, x => x.Cell17);  //	pH值
+                WeekWorkBook.WorkSheet1[i].Cell19 = MathTools.CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
+                WeekWorkBook.WorkSheet1[i].Cell20 = MathTools.CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
 
-                WeekWorkBook.WorkSheet1[i].Cell22 = CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
-                WeekWorkBook.WorkSheet1[i].Cell23 = CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
-                WeekWorkBook.WorkSheet1[i].Cell24 = CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
-                WeekWorkBook.WorkSheet1[i].Cell25 = CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
-                WeekWorkBook.WorkSheet1[i].Cell26 = CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
-                WeekWorkBook.WorkSheet1[i].Cell27 = CalculateAverage(operatorInputData, x => x.Cell79); //	其它
-                WeekWorkBook.WorkSheet1[i].Cell28 = CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
+                WeekWorkBook.WorkSheet1[i].Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
+                WeekWorkBook.WorkSheet1[i].Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
+                WeekWorkBook.WorkSheet1[i].Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
+                WeekWorkBook.WorkSheet1[i].Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
+                WeekWorkBook.WorkSheet1[i].Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
+                WeekWorkBook.WorkSheet1[i].Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
+                WeekWorkBook.WorkSheet1[i].Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
             }
             WeekWorkBook.WorkSheet9 = Materialcollection;
             return true;
@@ -522,7 +529,7 @@ namespace CenterBackend.Services
             var datalist = WeekWorkBook.WorkSheet2;
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            DateTime currentWeekFirstDay = MathTools.GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
 
             for (var i = 0; i < 7; i++)
             {
@@ -536,11 +543,11 @@ namespace CenterBackend.Services
                     if (operatorInputData.Count == 0)
                         continue;
                     
-                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell1);
-                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell2);
-                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell3);
-                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell4);
-                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell5);
+                    dataItem.Cell1 = MathTools.CalculateAverage(operatorInputData, x => x.Cell1);
+                    dataItem.Cell2 = MathTools.CalculateAverage(operatorInputData, x => x.Cell2);
+                    dataItem.Cell3 = MathTools.CalculateAverage(operatorInputData, x => x.Cell3);
+                    dataItem.Cell4 = MathTools.CalculateAverage(operatorInputData, x => x.Cell4);
+                    dataItem.Cell5 = MathTools.CalculateAverage(operatorInputData, x => x.Cell5);
                 }
             }
             return true;
@@ -551,7 +558,7 @@ namespace CenterBackend.Services
             var datalist = WeekWorkBook.WorkSheet3;
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            DateTime currentWeekFirstDay = MathTools.GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
 
             for (var i = 0; i < 7; i++)
             {
@@ -564,14 +571,14 @@ namespace CenterBackend.Services
                     var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
                     if (operatorInputData.Count == 0)
                         continue;
-                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell11);
-                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell12);
-                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell13);
-                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell14);
-                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell15);
-                    dataItem.Cell6 = CalculateAverage(operatorInputData, x => x.Cell16);
-                    dataItem.Cell7 = CalculateAverage(operatorInputData, x => x.Cell17);
-                    dataItem.Cell8 = CalculateAverage(operatorInputData, x => x.Cell18);
+                    dataItem.Cell1 = MathTools.CalculateAverage(operatorInputData, x => x.Cell11);
+                    dataItem.Cell2 = MathTools.CalculateAverage(operatorInputData, x => x.Cell12);
+                    dataItem.Cell3 = MathTools.CalculateAverage(operatorInputData, x => x.Cell13);
+                    dataItem.Cell4 = MathTools.CalculateAverage(operatorInputData, x => x.Cell14);
+                    dataItem.Cell5 = MathTools.CalculateAverage(operatorInputData, x => x.Cell15);
+                    dataItem.Cell6 = MathTools.CalculateAverage(operatorInputData, x => x.Cell16);
+                    dataItem.Cell7 = MathTools.CalculateAverage(operatorInputData, x => x.Cell17);
+                    dataItem.Cell8 = MathTools.CalculateAverage(operatorInputData, x => x.Cell18);
                 }
             }
             return true;
@@ -580,7 +587,7 @@ namespace CenterBackend.Services
         {
             WeekWorkBook.WorkSheet4 = Enumerable.Range(1, 7).Select(_ => new WorkSheet4()).ToList();
 
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            DateTime currentWeekFirstDay = MathTools.GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             DateTime startTime = currentWeekFirstDay;
             for (var i = 0; i < 7; i++)
             {
@@ -602,7 +609,7 @@ namespace CenterBackend.Services
             var datalist = WeekWorkBook.WorkSheet5;
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            DateTime currentWeekFirstDay = MathTools.GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             for (var i = 0; i < 7; i++)
             {
                 startTime = currentWeekFirstDay.AddDays(i);
@@ -615,11 +622,11 @@ namespace CenterBackend.Services
                     if (operatorInputData.Count == 0)
                         continue;
                     
-                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell41);
-                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell42);
-                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell43);
-                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell44);
-                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell45);
+                    dataItem.Cell1 = MathTools.CalculateAverage(operatorInputData, x => x.Cell41);
+                    dataItem.Cell2 = MathTools.CalculateAverage(operatorInputData, x => x.Cell42);
+                    dataItem.Cell3 = MathTools.CalculateAverage(operatorInputData, x => x.Cell43);
+                    dataItem.Cell4 = MathTools.CalculateAverage(operatorInputData, x => x.Cell44);
+                    dataItem.Cell5 = MathTools.CalculateAverage(operatorInputData, x => x.Cell45);
                 }
             }
             return true;
@@ -630,7 +637,7 @@ namespace CenterBackend.Services
             var datalist = WeekWorkBook.WorkSheet6;
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            DateTime currentWeekFirstDay = MathTools.GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
             for (var i = 0; i < 7; i++)
             {
                 startTime = currentWeekFirstDay.AddDays(i);
@@ -643,19 +650,19 @@ namespace CenterBackend.Services
                     if (operatorInputData.Count == 0)
                         continue;
                     
-                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell51);
-                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell52);
-                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell53);
-                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell54);
-                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell55);
-                    dataItem.Cell6 = CalculateAverage(operatorInputData, x => x.Cell56);
-                    dataItem.Cell7 = CalculateAverage(operatorInputData, x => x.Cell57);
-                    dataItem.Cell8 = CalculateAverage(operatorInputData, x => x.Cell58);
-                    dataItem.Cell9 = CalculateAverage(operatorInputData, x => x.Cell59);
-                    dataItem.Cell10 = CalculateAverage(operatorInputData, x => x.Cell60);
-                    dataItem.Cell11 = CalculateAverage(operatorInputData, x => x.Cell61);
-                    dataItem.Cell12 = CalculateAverage(operatorInputData, x => x.Cell62);
-                    dataItem.Cell13 = CalculateAverage(operatorInputData, x => x.Cell63);
+                    dataItem.Cell1 = MathTools.CalculateAverage(operatorInputData, x => x.Cell51);
+                    dataItem.Cell2 = MathTools.CalculateAverage(operatorInputData, x => x.Cell52);
+                    dataItem.Cell3 = MathTools.CalculateAverage(operatorInputData, x => x.Cell53);
+                    dataItem.Cell4 = MathTools.CalculateAverage(operatorInputData, x => x.Cell54);
+                    dataItem.Cell5 = MathTools.CalculateAverage(operatorInputData, x => x.Cell55);
+                    dataItem.Cell6 = MathTools.CalculateAverage(operatorInputData, x => x.Cell56);
+                    dataItem.Cell7 = MathTools.CalculateAverage(operatorInputData, x => x.Cell57);
+                    dataItem.Cell8 = MathTools.CalculateAverage(operatorInputData, x => x.Cell58);
+                    dataItem.Cell9 = MathTools.CalculateAverage(operatorInputData, x => x.Cell59);
+                    dataItem.Cell10 = MathTools.CalculateAverage(operatorInputData, x => x.Cell60);
+                    dataItem.Cell11 = MathTools.CalculateAverage(operatorInputData, x => x.Cell61);
+                    dataItem.Cell12 = MathTools.CalculateAverage(operatorInputData, x => x.Cell62);
+                    dataItem.Cell13 = MathTools.CalculateAverage(operatorInputData, x => x.Cell63);
                 }
             }
             return true;
@@ -667,7 +674,7 @@ namespace CenterBackend.Services
             var datalist = WeekWorkBook.WorkSheet7;
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            DateTime currentWeekFirstDay = MathTools.GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
 
             for (var i = 0; i < 7; i++)
             {
@@ -681,9 +688,9 @@ namespace CenterBackend.Services
                     if (operatorInputData.Count == 0)
                         continue;
                     
-                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell71);
-                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell72);
-                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell73);
+                    dataItem.Cell1 = MathTools.CalculateAverage(operatorInputData, x => x.Cell71);
+                    dataItem.Cell2 = MathTools.CalculateAverage(operatorInputData, x => x.Cell72);
+                    dataItem.Cell3 = MathTools.CalculateAverage(operatorInputData, x => x.Cell73);
                 }
             }
             return true;
@@ -694,7 +701,7 @@ namespace CenterBackend.Services
             var datalist = WeekWorkBook.WorkSheet8;
             DateTime startTime;
             DateTime endTime;
-            DateTime currentWeekFirstDay = GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
+            DateTime currentWeekFirstDay = MathTools.GetWeekFirstDay(WeekWorkBook.ReportedTime.Date).AddHours(8);
 
             for (var i = 0; i < 7; i++)
             {
@@ -707,13 +714,13 @@ namespace CenterBackend.Services
                     var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
                     if (operatorInputData.Count == 0)
                         continue;
-                    dataItem.Cell1 = CalculateAverage(operatorInputData, x => x.Cell74);
-                    dataItem.Cell2 = CalculateAverage(operatorInputData, x => x.Cell75);
-                    dataItem.Cell3 = CalculateAverage(operatorInputData, x => x.Cell76);
-                    dataItem.Cell4 = CalculateAverage(operatorInputData, x => x.Cell77);
-                    dataItem.Cell5 = CalculateAverage(operatorInputData, x => x.Cell78);
-                    dataItem.Cell6 = CalculateAverage(operatorInputData, x => x.Cell79);
-                    dataItem.Cell7 = CalculateAverage(operatorInputData, x => x.Cell80);
+                    dataItem.Cell1 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74);
+                    dataItem.Cell2 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75);
+                    dataItem.Cell3 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76);
+                    dataItem.Cell4 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77);
+                    dataItem.Cell5 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78);
+                    dataItem.Cell6 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79);
+                    dataItem.Cell7 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);
                 }
             }
             return true;
@@ -795,102 +802,7 @@ namespace CenterBackend.Services
             }
             return sortedList;
         }
-        public static DateTime GetWeekFirstDay(DateTime dt)
-        {
-            int diff = (int)dt.DayOfWeek - (int)DayOfWeek.Monday;
-            if (diff < 0) diff += 7;
-            return dt.AddDays(-diff).Date;
-        }
-        public static float? CalculateAverage<T>(IEnumerable<T> data, Func<T, float?> selector)
-        {
-            if (data == null || !data.Any())// 空数据校验
-                return null;
-            var validValues = data.Select(selector).OfType<float>();
-            float sum = 0f;
-            int count = 0;
-            foreach (var value in validValues)
-            {
-                sum += value;
-                count++;
-            }
-            return count > 0 ? sum / count : (float?)null;
-        }
-        public static float? CalculateFirstLastDifference<T>(IEnumerable<T> data, Func<T, float?> selector)
-        {
-            if (data == null || !data.Any())
-                return null;
 
-            var nonNullValues = data
-                .Select(selector)
-                .Where(x => x.HasValue)
-                .Select(x => x.GetValueOrDefault())
-                .ToList();
-            if (nonNullValues.Count < 2)
-                return null;
-            float firstValue = nonNullValues.First();//计算差值
-            float lastValue = nonNullValues.Last();
-            float difference = lastValue - firstValue;
-            return difference;
-        }
-        /// <param name="mode">mode：模式开关(true = 区间校验 [min,max]，false = 上限校验 [≤max])</param>
-        public static float? CalculateQualifiedRate<T>(IEnumerable<T> data, Func<T, float?> selector, bool mode, float qualifiedValue, float qualifiedValuediff)
-        {
-            var maxQualifiedValue = qualifiedValue + qualifiedValuediff;
-            var minQualifiedValue = qualifiedValue - qualifiedValuediff;
-            if (data == null || !data.Any())// 空数据校验
-                return null;
-            var nonNullValues = data// 筛选非null的float值并计算平均值
-                .Select(selector)
-                .Where(x => x.HasValue)
-                .Select(x => x.GetValueOrDefault())
-                .ToList();
-            if (nonNullValues.Count == 0)
-                return null;
-
-            int qualifiedCount = mode
-                // mode=true：值在 [min, max] 区间内为合格
-                ? nonNullValues.Count(value => value >= minQualifiedValue && value <= maxQualifiedValue)
-                // mode=false：值 ≤ max 为合格
-                : nonNullValues.Count(value => value <= maxQualifiedValue);
-            float qualifiedRate = (qualifiedCount / (float)nonNullValues.Count) * 100f;// 计算合格利率(合格数/总有效数 * 100%)，保留3位小数
-            return (float)Math.Round(qualifiedRate, 3);
-        }
-        public static float? CalculateSum<T>(IEnumerable<T> data, Func<T, float?> selector)//非null值的总和
-        {
-            if (data == null || !data.Any())//空数据校验
-                return null;
-            var nonNullValues = data        //筛选非null的float值
-                .Select(selector)           // 提取float?字段
-                .Where(x => x.HasValue)     // 过滤掉null值
-                .Select(x => x.GetValueOrDefault())      // 转换为float(非可空)
-                .ToList();
-            return nonNullValues.Count != 0 ? nonNullValues.Sum() : (float?)null;//计算总和
-        }
-        /// <summary>
-        /// 所有列求两列加权平均
-        /// </summary>
-        /// <param name="dataList"></param>
-        /// <param name="getValue">含量</param>
-        /// <param name="getWeight">总量</param>
-        /// <returns></returns>
-        public static float CalculateWeighted(
-                                                List<DailyProductionReport> dataList,
-                                                Func<DailyProductionReport, float?> getValue,
-                                                Func<DailyProductionReport, float?> getWeight)
-        {
-            if (dataList == null || dataList.Count == 0) return 0;
-
-            float weightedSum = 0;
-            float totalWeight = 0;
-            foreach (var d in dataList)
-            {
-                var value = getValue(d) ?? 0f;
-                var weight = getWeight(d) ?? 0f;
-                weightedSum += value * weight;
-                totalWeight += weight;
-            }
-            return totalWeight == 0 ? 0 : weightedSum / totalWeight;
-        }
         /***********************Excel需要计算的表***********************/
         /// <summary>
         /// 计算手写表一段时间的数据
@@ -898,25 +810,23 @@ namespace CenterBackend.Services
         /// <param name="startTime">开始时间</param>
         /// <param name="endTime">结束时间</param>
         /// <returns>ProductionDataCollection</returns>
-        public static List<DailyProductionReport> CalculateDailyProductionReportRange(DateTime startDate, DateTime endtDate, List<SourceData> sourceData, List<OperatorInputData> operatorInputData)
+        public static List<DailyProductionReport> CalculateDailyProductionReportRange(DateTime startDate, DateTime endDate, List<SourceData> sourceData, List<OperatorInputData> operatorInputData)
         {
-            if (startDate > endtDate)
+            if (startDate > endDate)
             {
-                (startDate, endtDate) = (endtDate, startDate);
+                (startDate, endDate) = (endDate, startDate);
             }
             List<DailyProductionReport> DailyProductionReportCollection = [];
-            var currentDay = startDate.Date.AddHours(8);
-            var lastDay = endtDate.Date.AddHours(8);
-            while (currentDay < lastDay)
+
+            while (startDate < endDate)
             {
-                var data = new DailyProductionReport(currentDay, sourceData, operatorInputData);
+                var data = new DailyProductionReport(startDate, sourceData, operatorInputData);
                 if (data != null)
                 {
                     DailyProductionReportCollection.AddRange(data);
                 }
-                currentDay = currentDay.AddDays(1);
+                startDate = startDate.AddDays(1);
             }
-
             return DailyProductionReportCollection;
         }
 

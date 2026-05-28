@@ -19,58 +19,58 @@ namespace CenterBackend.Models.ExcelDataView
     public class WorkSheet1
     {
         public DateTime TimePoint { get; set; }
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
-        public float? Cell8 { get; set; }
-        public float? Cell9 { get; set; }
-        public float? Cell10 { get; set; }
-        public float? Cell11 { get; set; }
-        public float? Cell12 { get; set; }
-        public float? Cell13 { get; set; }
-        public float? Cell14 { get; set; }
-        public float? Cell15 { get; set; }
-        public float? Cell16 { get; set; }
-        public float? Cell17 { get; set; }
-        public float? Cell18 { get; set; }
-        public float? Cell19 { get; set; }
-        public float? Cell20 { get; set; }
-        public float? Cell21 { get; set; }
-        public float? Cell22 { get; set; }
-        public float? Cell23 { get; set; }
-        public float? Cell24 { get; set; }
-        public float? Cell25 { get; set; }
-        public float? Cell26 { get; set; }
-        public float? Cell27 { get; set; }
-        public float? Cell28 { get; set; }
+        public decimal? Cell1 { get; set; }
+        public decimal? Cell2 { get; set; }
+        public decimal? Cell3 { get; set; }
+        public decimal? Cell4 { get; set; }
+        public decimal? Cell5 { get; set; }
+        public decimal? Cell6 { get; set; }
+        public decimal? Cell7 { get; set; }
+        public decimal? Cell8 { get; set; }
+        public decimal? Cell9 { get; set; }
+        public decimal? Cell10 { get; set; }
+        public decimal? Cell11 { get; set; }
+        public decimal? Cell12 { get; set; }
+        public decimal? Cell13 { get; set; }
+        public decimal? Cell14 { get; set; }
+        public decimal? Cell15 { get; set; }
+        public decimal? Cell16 { get; set; }
+        public decimal? Cell17 { get; set; }
+        public decimal? Cell18 { get; set; }
+        public decimal? Cell19 { get; set; }
+        public decimal? Cell20 { get; set; }
+        public decimal? Cell21 { get; set; }
+        public decimal? Cell22 { get; set; }
+        public decimal? Cell23 { get; set; }
+        public decimal? Cell24 { get; set; }
+        public decimal? Cell25 { get; set; }
+        public decimal? Cell26 { get; set; }
+        public decimal? Cell27 { get; set; }
+        public decimal? Cell28 { get; set; }
 
     }
 
     public class WorkSheet2
     {
         public DateTime TimePoint { get; set; }
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
+        public decimal? Cell1 { get; set; }
+        public decimal? Cell2 { get; set; }
+        public decimal? Cell3 { get; set; }
+        public decimal? Cell4 { get; set; }
+        public decimal? Cell5 { get; set; }
     }
 
     public class WorkSheet3
     {
         public DateTime TimePoint { get; set; }
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
-        public float? Cell8 { get; set; }
+        public decimal? Cell1 { get; set; }
+        public decimal? Cell2 { get; set; }
+        public decimal? Cell3 { get; set; }
+        public decimal? Cell4 { get; set; }
+        public decimal? Cell5 { get; set; }
+        public decimal? Cell6 { get; set; }
+        public decimal? Cell7 { get; set; }
+        public decimal? Cell8 { get; set; }
     }
 
     public class WorkSheet4
@@ -83,48 +83,48 @@ namespace CenterBackend.Models.ExcelDataView
     public class WorkSheet5
     {
         public DateTime TimePoint { get; set; }
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
+        public decimal? Cell1 { get; set; }
+        public decimal? Cell2 { get; set; }
+        public decimal? Cell3 { get; set; }
+        public decimal? Cell4 { get; set; }
+        public decimal? Cell5 { get; set; }
     }
 
     public class WorkSheet6
     {
         public DateTime TimePoint { get; set; }
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
-        public float? Cell8 { get; set; }
-        public float? Cell9 { get; set; }
-        public float? Cell10 { get; set; }
-        public float? Cell11 { get; set; }
-        public float? Cell12 { get; set; }
-        public float? Cell13 { get; set; }
+        public decimal? Cell1 { get; set; }
+        public decimal? Cell2 { get; set; }
+        public decimal? Cell3 { get; set; }
+        public decimal? Cell4 { get; set; }
+        public decimal? Cell5 { get; set; }
+        public decimal? Cell6 { get; set; }
+        public decimal? Cell7 { get; set; }
+        public decimal? Cell8 { get; set; }
+        public decimal? Cell9 { get; set; }
+        public decimal? Cell10 { get; set; }
+        public decimal? Cell11 { get; set; }
+        public decimal? Cell12 { get; set; }
+        public decimal? Cell13 { get; set; }
 
     }
 
     public class WorkSheet7
     {
         public DateTime TimePoint { get; set; }
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
+        public decimal? Cell1 { get; set; }
+        public decimal? Cell2 { get; set; }
+        public decimal? Cell3 { get; set; }
     }
     public class WorkSheet8
     {
         public DateTime TimePoint { get; set; }
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 { get; set; }
-        public float? Cell5 { get; set; }
-        public float? Cell6 { get; set; }
-        public float? Cell7 { get; set; }
+        public decimal? Cell1 { get; set; }
+        public decimal? Cell2 { get; set; }
+        public decimal? Cell3 { get; set; }
+        public decimal? Cell4 { get; set; }
+        public decimal? Cell5 { get; set; }
+        public decimal? Cell6 { get; set; }
+        public decimal? Cell7 { get; set; }
     }
 }

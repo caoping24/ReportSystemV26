@@ -12,8 +12,10 @@ namespace CenterBackend.Models.CalculateData
         public List<MaterialData> MaterialDatas { get; private set; } = Enumerable.Range(0, DataCount).Select(_ => new MaterialData()).ToList();
 
 
-        public float? Yield { get; private set; }//每天的折百产量
-        public MaterialDailyCollection(DateTime startTime, float? yield, List<SourceData> sourceData, List<OperatorInputData> operatorInputData) 
+        public decimal? Yield { get; private set; }//每天的折百产量
+        public decimal? Useage { get; private set; }//每天的羟基消耗
+        public decimal? Rate { get; private set; }//每天的羟基含量平均值
+        public MaterialDailyCollection(DateTime startTime, decimal? yield, List<SourceData> sourceData, List<OperatorInputData> operatorInputData) 
         {
             sourceData ??= new List<SourceData>();
             operatorInputData ??= new List<OperatorInputData>();
@@ -26,7 +28,7 @@ namespace CenterBackend.Models.CalculateData
             var DataListFromoperator = operatorInputData.Where(x => x.ReportedTime >= start && x.ReportedTime < end).ToList();//左闭右开
             foreach (var config in MaterialConfigs.AllItems)
             {
-                float? value = null;
+                decimal? value = null;
 
                 // 根据配置的数据源 + 计算方式 自动计算
                 if (config.DataSourceType == DataSourceType.DCS)
@@ -46,18 +48,29 @@ namespace CenterBackend.Models.CalculateData
                 var eachItem = MaterialDatas[config.Index];
                 eachItem.Index = config.Index;
                 eachItem.CalculationType = config.CalculationType;
-                eachItem.UsageOrAverage = value * config.Mul ?? 0; // 使用乘数修正
+                eachItem.UsageOrAverage = value * config.Mul ?? 0; // 使用乘数修正单位
                 eachItem.Specific = RecalculateSpecific(eachItem);
+
+
+                if (config.Index == 0) Useage = eachItem.UsageOrAverage;//获取羟基用量
+                if (config.Index == 3)
+                {
+                    Rate = eachItem.UsageOrAverage;//获取羟基含量
+                    MaterialDatas[0].Specific *= Rate;//还要计算一下羟基的单耗,需要将Rate乘上
+                } 
             }
         }
 
-        private float RecalculateSpecific(MaterialData item)
+        private decimal RecalculateSpecific(MaterialData item)//计算每个属性的单耗或者平均值
         {
-            float temp;
+            decimal temp;
             if (item.CalculationType == CalculationType.FirstLastDifference)
             {
                 if (item.UsageOrAverage.HasValue && Yield.HasValue && Yield.Value != 0)
+                {
                     temp = item.UsageOrAverage.Value / Yield.Value;
+                }
+                    
                 else
                     temp = 0;
             }
@@ -73,8 +86,8 @@ namespace CenterBackend.Models.CalculateData
     {
         public int Index { get; set; }
         public CalculationType CalculationType  { get; set; }
-        public float? UsageOrAverage { get; set; } = 0;
-        public float? Specific { get; set; }
+        public decimal? UsageOrAverage { get; set; } = 0;
+        public decimal? Specific { get; set; }
 
     }
     // 枚举定义（统一复用）
@@ -90,7 +103,7 @@ namespace CenterBackend.Models.CalculateData
         public DataSourceType DataSourceType { get; set; }   // 数据源类型
         public Func<SourceData, float?>? DcsSelector { get; set; } // DCS字段选择器
         public Func<OperatorInputData, float?>? OperatorSelector { get; set; } // 人工录入字段选择器
-        public float Mul { get; set; } = 1;  // 单位修正乘数
+        public decimal Mul { get; set; } = 1;  // 单位修正乘数
     }
     public static class MaterialConfigs
     {
@@ -100,7 +113,7 @@ namespace CenterBackend.Models.CalculateData
             {
                 Index = 0,
                 Name = "羟基乙腈",
-                AggregationType = AggregationType.Sum,
+                AggregationType = AggregationType.Average,
                 DataSourceType = DataSourceType.DCS,
                 CalculationType = CalculationType.FirstLastDifference,
                 DcsSelector = x => x.Cell20, //用配后流量 可以方便和配后浓度一起计算单耗

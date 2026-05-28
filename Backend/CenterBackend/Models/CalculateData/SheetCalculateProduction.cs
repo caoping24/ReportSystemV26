@@ -18,9 +18,9 @@ namespace CenterBackend.Models.CalculateData
         private readonly List<ShiftProductionData> _shiftBatches;
         public IReadOnlyList<ShiftProductionData> ShiftBatches => _shiftBatches;
         public DateTime TimePoint;
-        public float? Cell1 { get; } // 当日总收率
-        public float? Cell2 { get; } // 当日折百产量
-        public float? Cell3 { get; } // 当日产量
+        public decimal? Cell1 { get; } // 当日总收率
+        public decimal? Cell2 { get; } // 当日折百产量
+        public decimal? Cell3 { get; } // 当日产量
         public DailyProductionReport(DateTime timeBase, List<SourceData> dataList1, List<OperatorInputData> dataList2)
         {
             _shiftBatches = new List<ShiftProductionData>();
@@ -34,7 +34,7 @@ namespace CenterBackend.Models.CalculateData
             _shiftBatches.Add(new ShiftProductionData(dayData1, dayData2));
 
             // 夜班 20:00 ~ 次日 8:00
-            var nightStart = dayEnd;
+            var nightStart = dayStart.AddHours(12);//当天20点
             var nightEnd = nightStart.AddHours(13);
             var nightData1 = dataList1.Where(x => x.ReportedTime >= nightStart && x.ReportedTime < nightEnd).ToList();
             var nightData2 = dataList2.Where(x => x.ReportedTime >= nightStart && x.ReportedTime < nightEnd).ToList();
@@ -47,29 +47,29 @@ namespace CenterBackend.Models.CalculateData
             TimePoint = timeBase;
         }
 
-        public float CalculateYield()
+        public decimal CalculateYield()
         {
             if (_shiftBatches.Count == 0) return 0;
 
             var batch1 = _shiftBatches[0];
             var batch2 = _shiftBatches[1];
 
-            float a = batch1.Cell2;
-            float b = batch1.Cell4;
-            float c = batch2.Cell2;
-            float d = batch2.Cell4;
-            float e = batch1.Cell5;
+            decimal a = batch1.Cell2;
+            decimal b = batch1.Cell4;
+            decimal c = batch2.Cell2;
+            decimal d = batch2.Cell4;
+            decimal e = batch1.Cell5;
 
-            float denominator = b + d;
+            decimal denominator = b + d;
             if (denominator == 0 || e == 0) return 0;
 
-            return (a + c) / denominator / e * 1.2f * 100;
+            return (a + c) / denominator / e * 1.2m * 100m;
         }
-        public float CalculateYieldWeight()
+        public decimal CalculateYieldWeight()
         {
             return _shiftBatches.Sum(b => b.Cell2);
         }
-        public float CalculateTotalWeight()
+        public decimal CalculateTotalWeight()
         {
             return _shiftBatches.Sum(b => b.Cell1);
         }
@@ -79,19 +79,19 @@ namespace CenterBackend.Models.CalculateData
         public int MaxBatches => 3;
         private readonly List<ProductionData> _batches = new();
         public IReadOnlyList<ProductionData> Batches => _batches;
-        public float Cell1 => _batches.Sum(b => b.Cell3 ?? 0); // 产量累计
-        public float Cell2 => _batches.Sum(b => b.Cell4 ?? 0); // 折百产量累计
-        public float Cell3 => Cell2;
-        public float Cell4 { get; } // 羟基用量
-        public float Cell5 { get; } // 羟基浓度
-        public float Cell6 => (Cell4 * Cell5 / 1000f); // 羟基折百
-        public float Cell7 => Cell6;
-        public float Cell8
+        public decimal Cell1 => _batches.Sum(b => b.Cell3 ?? 0); // 产量累计
+        public decimal Cell2 => _batches.Sum(b => b.Cell4 ?? 0); // 折百产量累计
+        public decimal Cell3 => Cell2;
+        public decimal Cell4 { get; } // 羟基用量
+        public decimal Cell5 { get; } // 羟基浓度
+        public decimal Cell6 => (Cell4 * Cell5 / 1000m); // 羟基折百
+        public decimal Cell7 => Cell6;
+        public decimal Cell8
         {
             get
             {
                 if (Cell6 == 0) return 0;
-                return Cell2 / Cell6 * 1.2f / 10f;
+                return Cell2 / Cell6 * 1.2m / 10m;
             }
         }
 
@@ -115,19 +115,19 @@ namespace CenterBackend.Models.CalculateData
     }
     public class ProductionData
     {
-        public float? Cell1 { get; set; }
-        public float? Cell2 { get; set; }
-        public float? Cell3 { get; set; }
-        public float? Cell4 => (Cell1.HasValue && Cell3.HasValue)
+        public decimal? Cell1 { get; set; }
+        public decimal? Cell2 { get; set; }
+        public decimal? Cell3 { get; set; }
+        public decimal? Cell4 => (Cell1.HasValue && Cell3.HasValue)
             ? Cell1.Value * Cell3.Value / 100
             : null;
         public ProductionData(OperatorInputData src)
         {
             if (src == null) return;
 
-            Cell1 = src.Cell21;
-            Cell2 = src.Cell23;
-            Cell3 = src.Cell26;
+            Cell1 = (decimal?)src.Cell21;
+            Cell2 = (decimal?)src.Cell23;
+            Cell3 = (decimal?)src.Cell26;
         }
         public bool IsEmpty => Cell1 == null && Cell2 == null && Cell3 == null;
     }

@@ -1,5 +1,6 @@
 ﻿using CenterBackend.IServices;
 using CenterBackend.Models;
+using CenterBackend.Models.CalculateData;
 using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository.Models;
 using Masuit.Tools.Reflection;
@@ -163,54 +164,54 @@ namespace CenterBackend.Services
         }
         private static bool MonthWriteExcel(XSSFWorkbook srcWorkbook, MonthWorkBook monthWorkBookData)
         {
-            ISheet srcSheet;
-            var dayList = monthWorkBookData.MonthAnalysis;
-            if (dayList == null)
-                return false;
-            srcSheet = srcWorkbook.GetSheetAt(0);                                       //实际要写的表
-            SetXlsxCellString(srcSheet, 3, 3, monthWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
-            SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
-            SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
-            SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
+            //ISheet srcSheet;
+            //var dayList = monthWorkBookData.MonthAnalysis;
+            //if (dayList == null)
+            //    return false;
+            //srcSheet = srcWorkbook.GetSheetAt(0);                                       //实际要写的表
+            //SetXlsxCellString(srcSheet, 3, 3, monthWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
+            //SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
 
-            SetXlsxCellValue(srcSheet, 9, 7, dayList.Cell4 ?? 0f);
-            SetXlsxCellValue(srcSheet, 10, 7, dayList.Cell5 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 9, 7, dayList.Cell4 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 10, 7, dayList.Cell5 ?? 0f);
 
-            SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
 
-            SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 2, dayList.Cell8 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell9 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 4, dayList.Cell10 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell11 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 6, dayList.Cell12 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 2, dayList.Cell8 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell9 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 4, dayList.Cell10 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell11 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 6, dayList.Cell12 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
             return true;
         }
         private static bool YearWriteExcel(XSSFWorkbook srcWorkbook, YearWorkBook yearWorkBookData)
         {
-            ISheet srcSheet;
-            var dayList = yearWorkBookData.YearAnalysis;
-            if (dayList == null)
-                return false;
-            srcSheet = srcWorkbook.GetSheetAt(0);                                       //实际要写的表
-            SetXlsxCellString(srcSheet, 3, 3, yearWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
-            SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
-            SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
-            SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
+            //ISheet srcSheet;
+            //var dayList = yearWorkBookData.YearAnalysis;
+            //if (dayList == null)
+            //    return false;
+            //srcSheet = srcWorkbook.GetSheetAt(0);                                       //实际要写的表
+            //SetXlsxCellString(srcSheet, 3, 3, yearWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
+            //SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
 
-            SetXlsxCellValue(srcSheet, 9, 7, dayList.Cell4 ?? 0f);
-            SetXlsxCellValue(srcSheet, 10, 7, dayList.Cell5 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 9, 7, dayList.Cell4 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 10, 7, dayList.Cell5 ?? 0f);
 
-            SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
 
-            SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 2, dayList.Cell8 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell9 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 4, dayList.Cell10 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell11 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 6, dayList.Cell12 ?? 0f);
-            SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 2, dayList.Cell8 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell9 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 4, dayList.Cell10 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell11 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 6, dayList.Cell12 ?? 0f);
+            //SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
             return true;
         }
         private static bool WeekWriteExcel(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
@@ -399,8 +400,19 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             srcSheet = srcWorkbook.GetSheetAt(8);
 
-            int[] IndexInMaterialDatas = new[] { 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 15 };
-            String[] ChartNames = new[] { "羟基乙腈1", "羟基乙腈1","羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1", "羟基乙腈1" };
+            int[] indexInMaterialDatas = new[] { 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 15 };
+            string[] chartNames = [
+                                    "羟基浓度(g/l)",
+                                    "氨腈摩尔比",
+                                    "反应压力(MPa)",
+                                    "羟基加热温度(°C)",
+                                    "氨汽混合温度(°C)",
+                                    "管反热点温度(°C)",
+                                    "预冷器结晶温度(°C)",
+                                    "一次结晶温度(°C)",
+                                    "降膜蒸发温度(°C)",
+                                    "二次结晶温度(°C)" ,
+                                    "废液排放(m³/t)"];
             int[,,] address = new int[,,]
                                     {
                                         { {3}  , {3} ,},
@@ -417,11 +429,11 @@ namespace CenterBackend.Services
                                     };
             for (int i = 0; i < 11; i++)
             {
-                int index = IndexInMaterialDatas[i];
+                int index = indexInMaterialDatas[i];
                 int row = address[i, 0, 0];
                 int col = address[i, 1, 0];
-
-                WeekWriteExcelChart(srcSheet, weekWorkBookData, index, row, col);
+                string chartName = chartNames[i];
+                WeekWriteExcelChart(srcSheet, weekWorkBookData, index, row, col, chartName);
             }
 
         }
@@ -433,16 +445,23 @@ namespace CenterBackend.Services
         /// <param name="dataIndex">数据在MaterialDatas中的index</param>
         /// <param name="rowStart"></param>
         /// <param name="cloumnStart"></param>
-        private static void WeekWriteExcelChart(ISheet srcSheet, WeekWorkBook weekWorkBookData, int dataIndex, int rowStart, int cloumnStart)
+        private static void WeekWriteExcelChart(ISheet srcSheet, 
+                                                WeekWorkBook weekWorkBookData,
+                                                int dataIndex,
+                                                int rowStart,
+                                                int cloumnStart,
+                                                string chartName)
         {
             var dataList = weekWorkBookData.WorkSheet9;
-            List<float> dataItem;
+            List<decimal> dataItem;
             if (dataList != null)
             {
                 dataItem = dataList.DailyCollections
                                 .Select(daily => daily.MaterialDatas.FirstOrDefault(m => m.Index == dataIndex)? //第一个
                                 .Specific ?? 0)
                                 .ToList();
+
+                SetXlsxCellString(srcSheet, rowStart - 2, cloumnStart - 1, chartName ?? "曲线");
                 for (int i = 0; i < 7; i++)
                 {
                     var temp = dataItem[i];
@@ -463,19 +482,17 @@ namespace CenterBackend.Services
                 var cellProperty = dataList.GetType().GetProperty($"Cell{i}");
                 if (cellProperty == null) continue;
 
-                var value = cellProperty.GetValue(dataList);
+                decimal? value = (decimal?)cellProperty.GetValue(dataList);
                 if (value == null) continue;// 如果 data 为空则跳过
-                if (value is float floatValue) // 检查 value 是否可以转换为 float
-                {
-                    SetXlsxCellValue(sheet, rowIdx, colIdx + offset, floatValue);
-                }
+                SetXlsxCellValue(sheet, rowIdx, colIdx + offset, value.Value);
             }
         }
-        private static void SetXlsxCellValue(ISheet sheet, int rowIdx, int colIdx, float value)
+        private static void SetXlsxCellValue(ISheet sheet, int rowIdx, int colIdx, decimal value)
         {
+
             IRow row = sheet.GetRow(rowIdx) ?? sheet.CreateRow(rowIdx);// 获取或创建行
             ICell Cell = row.GetCell(colIdx) ?? row.CreateCell(colIdx);// 获取或创建单元格
-            Cell.SetCellValue(value);// 赋值
+            Cell.SetCellValue((double)value);// 赋值
 
         }
         private static void SetXlsxCellString(ISheet sheet, int rowIdx, int colIdx, string? value)
@@ -496,12 +513,9 @@ namespace CenterBackend.Services
                 var cellProperty = dataItem.GetType().GetProperty($"Cell{i}");
                 if (cellProperty == null) continue;
 
-                var value = cellProperty.GetValue(dataItem);
+                decimal? value = (decimal?) cellProperty.GetValue(dataItem);
                 if (value == null) continue;// 如果 data 为空则跳过
-                if (value is float floatValue) // 检查 value 是否可以转换为 float
-                {
-                    SetXlsxCellValue(sheet, rowIdx, colIdx + offset, floatValue);
-                }
+                SetXlsxCellValue(sheet, rowIdx, colIdx + offset, value.Value);
             }
         }
         private static void WriteDataColumnsToExcel<T>(T dataItem, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
@@ -514,12 +528,9 @@ namespace CenterBackend.Services
                 var cellProperty = dataItem.GetType().GetProperty($"Cell{i}");
                 if (cellProperty == null) continue;
 
-                var value = cellProperty.GetValue(dataItem);
+                decimal? value =(decimal?) cellProperty.GetValue(dataItem); 
                 if (value == null) continue;// 如果 data 为空则跳过
-                if (value is float floatValue) // 检查 value 是否可以转换为 float
-                {
-                    SetXlsxCellValue(sheet, rowIdx + offset, colIdx, floatValue);
-                }
+                SetXlsxCellValue(sheet, rowIdx + offset, colIdx, value.Value);
             }
         }
         //图表的操作

@@ -9,16 +9,16 @@ namespace CenterBackend.Models.CalculateData
     {
         const int MaterialDataCount = 19;
         public IReadOnlyList<MaterialDailyCollection> DailyCollections { get; }
-        public List<float> WeeklyCollections { get; private set; }
-                     = Enumerable.Range(0, MaterialDataCount).Select(_ => default(float)).ToList();//每个条目一周的汇总
+        public List<decimal> WeeklyCollections { get; private set; }
+                     = Enumerable.Range(0, MaterialDataCount).Select(_ => default(decimal)).ToList();//每个条目一周的汇总
         public MaterialDataWeeklyCollection(DateTime monday,
-                                            List<float?> yields,
+                                            List<decimal?> yields,
                                             List<SourceData> sourceData,
                                             List<OperatorInputData> operatorInputData)
         {
             sourceData ??= new List<SourceData>();
             operatorInputData ??= new List<OperatorInputData>();
-            yields ??= new List<float?>();
+            yields ??= new List<decimal?>();
 
             // 1. 生成周一~周日共 7 个日对象
             var dailies = new List<MaterialDailyCollection>();
@@ -46,7 +46,7 @@ namespace CenterBackend.Models.CalculateData
                         WeeklyCollections[config.Index] = dayValues.Sum() ?? 0;
                         break;
                     case AggregationType.Average:
-                        WeeklyCollections[config.Index] = dayValues.Count != 0 ? (dayValues.Average() ?? 0) : 0;
+                        WeeklyCollections[config.Index] = dayValues.Count != 0 ? (dayValues.Where(x=>x!=0).Average() ?? 0) : 0; 
                         break;
                 }
             }
