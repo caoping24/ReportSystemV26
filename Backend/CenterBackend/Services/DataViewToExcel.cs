@@ -3,6 +3,7 @@ using CenterBackend.Models;
 using CenterBackend.Models.CalculateData;
 using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository.Models;
+using Masuit.Tools;
 using Masuit.Tools.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using NPOI.OpenXmlFormats.Spreadsheet;
@@ -13,6 +14,7 @@ using NPOI.XSSF.UserModel;
 using Org.BouncyCastle.Asn1.Ocsp;
 using Org.BouncyCastle.Asn1.X509;
 using System.Globalization;
+using System.Reflection;
 
 namespace CenterBackend.Services
 {
@@ -105,26 +107,6 @@ namespace CenterBackend.Services
                 BatchWriteDataToExcel(data, srcSheet, targeRow, colOffSet, 101, 150);
             }
 
-            //考评表
-            //var shiftsList = dayWorkBookData.ShiftsAnalysis;
-            //if (shiftsList.Count == 0)
-            //    return false;
-            //srcSheet = srcWorkbook.GetSheetAt(4);
-            //srcSheet.ForceFormulaRecalculation = true; 
-            //SetXlsxCellString(srcSheet,5, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
-            //SetXlsxCellString(srcSheet,26, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    if (i >= shiftsList.Count) break;
-            //    var data = shiftsList[i];
-            //    if (data == null) continue; // 如果 data 为空则跳过
-            //    int targeRow = 21 * i;
-            //    WriteDataRowsToExcel(data, srcSheet, 6 + targeRow, 2, 1, 33);
-            //    WriteDataRowsToExcel(data, srcSheet, 11 + targeRow, 2, 34, 66);
-            //    WriteDataRowsToExcel(data, srcSheet, 16 + targeRow, 2, 67, 99);
-            //    WriteDataRowsToExcel(data, srcSheet, 21 + targeRow, 2, 100, 113);
-            //}
-   
             srcSheet = srcWorkbook.GetSheetAt(4);
             //srcSheet.ForceFormulaRecalculation = true;
             var target = dayWorkBookData.ShiftsAnalysis; if (target == null) return false;
@@ -164,28 +146,18 @@ namespace CenterBackend.Services
         }
         private static bool MonthWriteExcel(XSSFWorkbook srcWorkbook, MonthWorkBook monthWorkBookData)
         {
-            //ISheet srcSheet;
-            //var dayList = monthWorkBookData.MonthAnalysis;
-            //if (dayList == null)
-            //    return false;
-            //srcSheet = srcWorkbook.GetSheetAt(0);                                       //实际要写的表
-            //SetXlsxCellString(srcSheet, 3, 3, monthWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));    //记录日期
-            //SetXlsxCellValue(srcSheet, 5, 7, dayList.Cell1 ?? 0f);
-            //SetXlsxCellValue(srcSheet, 6, 7, dayList.Cell2 ?? 0f);
-            //SetXlsxCellValue(srcSheet, 7, 7, dayList.Cell3 ?? 0f);
-
-            //SetXlsxCellValue(srcSheet, 9, 7, dayList.Cell4 ?? 0f);
-            //SetXlsxCellValue(srcSheet, 10, 7, dayList.Cell5 ?? 0f);
-
-            //SetXlsxCellValue(srcSheet, 12, 7, dayList.Cell6 ?? 0f);
-
-            //SetXlsxCellValue(srcSheet, 21, 1, dayList.Cell7 ?? 0f);
-            //SetXlsxCellValue(srcSheet, 21, 2, dayList.Cell8 ?? 0f);
-            //SetXlsxCellValue(srcSheet, 21, 3, dayList.Cell9 ?? 0f);
-            //SetXlsxCellValue(srcSheet, 21, 4, dayList.Cell10 ?? 0f);
-            //SetXlsxCellValue(srcSheet, 21, 5, dayList.Cell11 ?? 0f);
-            //SetXlsxCellValue(srcSheet, 21, 6, dayList.Cell12 ?? 0f);
-            //SetXlsxCellValue(srcSheet, 21, 7, dayList.Cell13 ?? 0f);
+            ISheet srcSheet;
+            srcSheet = srcWorkbook.GetSheetAt(0);
+            srcSheet.ForceFormulaRecalculation = true;
+            SetXlsxCellString(srcSheet, 2, 6, monthWorkBookData.ReportDate);
+            SetXlsxCellString(srcSheet, 2, 7, monthWorkBookData.WeekNumberInYear);
+            var dataList = monthWorkBookData.MonthAnalysis;
+            int i = 0;
+            if (dataList != null && dataList.Count > i && dataList[i] != null)
+            {
+                var dataItem = dataList[i];
+                WriteDataColumnsToExcel(dataItem, srcSheet, 3 + i, 6, 1, 28);
+            }
             return true;
         }
         private static bool YearWriteExcel(XSSFWorkbook srcWorkbook, YearWorkBook yearWorkBookData)
@@ -243,9 +215,8 @@ namespace CenterBackend.Services
             {
                 var dataItem = dataList[i];
                 WriteDataColumnsToExcel(dataItem, srcSheet, 3 + i, 6, 1, 28);
-                //写chart 测试
             }
-            var charttemp = GetChartByObjectName(srcWorkbook.GetSheetAt(8), "Chart1");
+
         }
         private static void WeekWriteExcelSheet2(XSSFWorkbook srcWorkbook, WeekWorkBook weekWorkBookData)
         {
@@ -475,17 +446,37 @@ namespace CenterBackend.Services
         private static void BatchWriteDataToExcel(SingleShift dataList, ISheet sheet, int rowIdx, int colIdx, int cellStart, int cellEnd)
         {
             if (dataList == null) return;
-            int offset = 0;
+            var properties = new PropertyInfo[cellEnd - cellStart + 1];
+            var type = typeof(SingleShift);
             for (int i = cellStart; i <= cellEnd; i++)
             {
-                offset++;
-                var cellProperty = dataList.GetType().GetProperty($"Cell{i}");
-                if (cellProperty == null) continue;
-
-                decimal? value = (decimal?)cellProperty.GetValue(dataList);
-                if (value == null) continue;// 如果 data 为空则跳过
-                SetXlsxCellValue(sheet, rowIdx, colIdx + offset, value.Value);
+                var prop = type.GetProperty($"Cell{i}");
+                if (prop == null) continue;
+                properties[i - cellStart] = prop;
             }
+
+            for (int idx = 0; idx < properties.Length; idx++)
+            {
+                var prop = properties[idx];
+                if (prop == null) continue;
+                var rawValue = prop.GetValue(dataList);
+                if (rawValue == null) continue;
+                decimal value = Convert.ToDecimal(rawValue);
+                SetXlsxCellValue(sheet, rowIdx, colIdx + idx, value);
+            }
+
+            //if (dataList == null) return;
+            //int offset = 0;
+            //for (int i = cellStart; i <= cellEnd; i++)
+            //{
+            //    offset++;
+            //    var cellProperty = dataList.GetType().GetProperty($"Cell{i}");
+            //    if (cellProperty == null) continue;
+
+            //    decimal? value = (decimal?) cellProperty.GetValue(dataList);
+            //    if (value == null) continue;// 如果 data 为空则跳过
+            //    SetXlsxCellValue(sheet, rowIdx, colIdx + offset, value.Value);
+            //}
         }
         private static void SetXlsxCellValue(ISheet sheet, int rowIdx, int colIdx, decimal value)
         {

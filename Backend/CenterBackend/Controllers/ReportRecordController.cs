@@ -177,7 +177,6 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell15", Label = "甘氨腈(g/L)", Unit = "g/L" },
             new TableHeaderDto { Prop = "Cell16", Label = "三乙腈(g/L)", Unit = "g/L" },
             new TableHeaderDto { Prop = "Cell17", Label = "反应液pH", Unit = "" },
-            //new TableHeaderDto { Prop = "Cell18", Label = "反应液比重(kg/m3)", Unit = "" }, 2026年5月11日 移除
         }
     },
 

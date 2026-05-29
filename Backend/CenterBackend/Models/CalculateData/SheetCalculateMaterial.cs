@@ -1,4 +1,5 @@
 ﻿using CenterReport.Repository.Models;
+using NPOI.SS.Formula.Functions;
 using System.Collections;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
@@ -13,7 +14,7 @@ namespace CenterBackend.Models.CalculateData
 
 
         public decimal? Yield { get; private set; }//每天的折百产量
-        public decimal? Useage { get; private set; }//每天的羟基消耗
+        public decimal? Usage { get; private set; }//每天的羟基消耗
         public decimal? Rate { get; private set; }//每天的羟基含量平均值
         public MaterialDailyCollection(DateTime startTime, decimal? yield, List<SourceData> sourceData, List<OperatorInputData> operatorInputData) 
         {
@@ -35,13 +36,14 @@ namespace CenterBackend.Models.CalculateData
                 {
                     value = config.CalculationType == CalculationType.FirstLastDifference
                         ? MathTools.CalculateFirstLastDifference(DataListFromDCS, config.DcsSelector!)
-                        : MathTools.CalculateAverage(DataListFromDCS, config.DcsSelector!);
+                        : MathTools.CalculateAverage(DataListFromDCS.Take(DataListFromDCS.Count - 1), config.DcsSelector!);//计算平均值剔除最后一个数据
+
                 }
                 else if (config.DataSourceType == DataSourceType.Operator)
                 {
                     value = config.CalculationType == CalculationType.FirstLastDifference
                         ? MathTools.CalculateFirstLastDifference(DataListFromoperator, config.OperatorSelector!)
-                        : MathTools.CalculateAverage(DataListFromoperator, config.OperatorSelector!);
+                        : MathTools.CalculateAverage(DataListFromoperator.Take(DataListFromoperator.Count - 1), config.OperatorSelector!);//计算平均值剔除最后一个数据
 
                 }
                 // 自动赋值到对应索引
@@ -52,11 +54,11 @@ namespace CenterBackend.Models.CalculateData
                 eachItem.Specific = RecalculateSpecific(eachItem);
 
 
-                if (config.Index == 0) Useage = eachItem.UsageOrAverage;//获取羟基用量
+                if (config.Index == 0) Usage = eachItem.UsageOrAverage;//获取羟基用量
                 if (config.Index == 3)
                 {
                     Rate = eachItem.UsageOrAverage;//获取羟基含量
-                    MaterialDatas[0].Specific *= Rate;//还要计算一下羟基的单耗,需要将Rate乘上
+                    MaterialDatas[0].Specific *= Rate *1000;//还要计算一下羟基的单耗,需要将Rate乘上
                 } 
             }
         }
@@ -117,7 +119,7 @@ namespace CenterBackend.Models.CalculateData
                 DataSourceType = DataSourceType.DCS,
                 CalculationType = CalculationType.FirstLastDifference,
                 DcsSelector = x => x.Cell20, //用配后流量 可以方便和配后浓度一起计算单耗
-                Mul = 1,
+                Mul = 0.001m,//L转立方
 
             },
             new MaterialItemConfig

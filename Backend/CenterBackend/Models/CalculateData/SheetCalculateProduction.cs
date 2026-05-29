@@ -98,7 +98,8 @@ namespace CenterBackend.Models.CalculateData
         public ShiftProductionData(List<SourceData> dataList1, List<OperatorInputData> dataList2)
         {
             Cell4 = MathTools.CalculateFirstLastDifference(dataList1, x => x.Cell20) /1000 ?? 0; //除以1000 L转立方
-            Cell5 = MathTools.CalculateAverage(dataList1, x => x.Cell6) ?? 0;
+            var listWithoutLast = dataList1.Take(dataList1.Count - 1).ToList();
+            Cell5 = MathTools.CalculateAverage(listWithoutLast, x => x.Cell6) ?? 0;
 
             if (dataList2 == null) return;
 

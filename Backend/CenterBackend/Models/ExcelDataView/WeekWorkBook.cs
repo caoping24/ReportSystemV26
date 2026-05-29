@@ -13,7 +13,7 @@ namespace CenterBackend.Models.ExcelDataView
         public List<WorkSheet6> WorkSheet6 { get; set; } = [];
         public List<WorkSheet7> WorkSheet7 { get; set; } = [];
         public List<WorkSheet8> WorkSheet8 { get; set; } = [];
-        public MaterialDataWeeklyCollection? WorkSheet9 { get; set; }  
+        public MaterialDataRangeCollection? WorkSheet9 { get; set; }  
     }
 
     public class WorkSheet1
