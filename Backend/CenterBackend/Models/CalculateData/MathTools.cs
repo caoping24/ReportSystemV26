@@ -5,9 +5,14 @@
     {
 
         //**********************获取周第一天**********************
+        /// <summary>
+        /// 每周第一天为周四，计算给定日期所在周的周四日期（即每周的第一天），以便按周归类数据
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
         public static DateTime GetWeekFirstDay(DateTime dt)
         {
-            int diff = (int)dt.DayOfWeek - (int)DayOfWeek.Monday;
+            int diff = (int)dt.DayOfWeek - (int)DayOfWeek.Thursday;
             if (diff < 0) diff += 7;
             return dt.AddDays(-diff).Date;
         }

@@ -83,7 +83,7 @@
         public PathAndName GetWeek(DateTime fileDate)
         {
             var date = fileDate.Date;
-            DateTime weekFirstDay = GetWeekFirstDay(date);  //获取该日期的本周一
+            DateTime weekFirstDay = GetWeekFirstDay(date);  //每周4 是第一天
             int weekBelongYear = weekFirstDay.Year;             //本周一 归属的年份
             int weekBelongMonth = weekFirstDay.Month;           //本周一 归属的月份
             int weekNumberInYear = GetWeekNumberInYear(weekFirstDay);//该周在当年的周序号
@@ -98,10 +98,14 @@
             };
             return pathAndName;
         }
-
+        /// <summary>
+        /// 每周四是星期的第一天，计算给定日期所在周的第一天（周四）。如果给定日期是周四，则返回该日期；如果是周五，则返回前一天；如果是周三，则返回后一天；以此类推。这样可以确保每周的第一天始终是周四，方便按照周四来归类和命名周报表。
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
         private static DateTime GetWeekFirstDay(DateTime dt)
         {
-            int diff = (int)dt.DayOfWeek - (int)DayOfWeek.Monday; //计算与周一的差值
+            int diff = (int)dt.DayOfWeek - (int)DayOfWeek.Thursday; // 每周的第一天是星期四
             if (diff < 0) diff += 7;                            //周日处理为-1，补7天
             return dt.AddDays(-diff).Date;
         }
