@@ -1,8 +1,4 @@
-﻿using CenterReport.Repository.Models;
-using CenterReport.Repository.Utils;
-
-
-namespace CenterReport.Repository.IServices
+﻿namespace CenterReport.Repository.IServices
 {
     public interface IOperatorInputDataRepository<T> where T : class
     {

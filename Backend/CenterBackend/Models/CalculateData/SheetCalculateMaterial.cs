@@ -1,7 +1,4 @@
 ﻿using CenterReport.Repository.Models;
-using NPOI.SS.Formula.Functions;
-using System.Collections;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace CenterBackend.Models.CalculateData
 {
@@ -16,7 +13,7 @@ namespace CenterBackend.Models.CalculateData
         public decimal? Yield { get; private set; }//每天的折百产量
         public decimal? Usage { get; private set; }//每天的羟基消耗
         public decimal? Rate { get; private set; }//每天的羟基含量平均值
-        public MaterialDailyCollection(DateTime startTime, decimal? yield, List<SourceData> sourceData, List<OperatorInputData> operatorInputData) 
+        public MaterialDailyCollection(DateTime startTime, decimal? yield, List<SourceData> sourceData, List<OperatorInputData> operatorInputData)
         {
             sourceData ??= new List<SourceData>();
             operatorInputData ??= new List<OperatorInputData>();
@@ -58,8 +55,8 @@ namespace CenterBackend.Models.CalculateData
                 if (config.Index == 3)
                 {
                     Rate = eachItem.UsageOrAverage;//获取羟基含量
-                    MaterialDatas[0].Specific *= Rate *1000;//还要计算一下羟基的单耗,需要将Rate乘上
-                } 
+                    MaterialDatas[0].Specific *= Rate * 1000;//还要计算一下羟基的单耗,需要将Rate乘上
+                }
             }
         }
 
@@ -72,7 +69,7 @@ namespace CenterBackend.Models.CalculateData
                 {
                     temp = item.UsageOrAverage.Value / Yield.Value;
                 }
-                    
+
                 else
                     temp = 0;
             }
@@ -87,7 +84,7 @@ namespace CenterBackend.Models.CalculateData
     public class MaterialData
     {
         public int Index { get; set; }
-        public CalculationType CalculationType  { get; set; }
+        public CalculationType CalculationType { get; set; }
         public decimal? UsageOrAverage { get; set; } = 0;
         public decimal? Specific { get; set; }
 
@@ -95,7 +92,7 @@ namespace CenterBackend.Models.CalculateData
     // 枚举定义（统一复用）
     public enum DataSourceType { DCS, Operator }
     public enum AggregationType { Sum, Average }// 周聚合类型（Sum/Average）
-    public enum CalculationType { FirstLastDifference, Average}//数据收集类型  如果收集类型是  FirstLastDifference 每日统计要做单耗计算 如果是Average 则计算Average
+    public enum CalculationType { FirstLastDifference, Average }//数据收集类型  如果收集类型是  FirstLastDifference 每日统计要做单耗计算 如果是Average 则计算Average
     public class MaterialItemConfig
     {
         public int Index { get; set; }               // 索引

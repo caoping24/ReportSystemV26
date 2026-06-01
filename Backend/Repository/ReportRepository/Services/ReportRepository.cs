@@ -1,6 +1,5 @@
 ﻿using CenterReport.Repository.IServices;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace CenterReport.Repository.Services
 {

@@ -1,14 +1,13 @@
 ﻿using CenterReport.Repository.Models;
-using System.Reflection;
 using ReportServer.Models;
 using ReportServer.Services.IUserService;
-using static ReportServer.Services.UserService.LogServices;//日志服务
+using System.Reflection;
 
 namespace ReportServer.Services.UserService
 {
     public class TagDataConverter : ITagDataConverter
     {
-        public  SourceData? ConvertTagsToSourceData(List<TagMap>? tags)
+        public SourceData? ConvertTagsToSourceData(List<TagMap>? tags)
         {
 
             if (tags == null || tags.Count == 0)
@@ -19,7 +18,7 @@ namespace ReportServer.Services.UserService
             {
                 ReportedTime = DateTime.Now
             };
-            try 
+            try
             {
                 // 反射缓存：一次性获取SourceData的所有属性
                 Type sourceDataType = typeof(SourceData);
@@ -48,7 +47,7 @@ namespace ReportServer.Services.UserService
 
                         if (tag.TagValue is float)
                         {
-                            var floatValue= (float?) tag.TagValue;
+                            var floatValue = (float?)tag.TagValue;
                             targetProperty.SetValue(sourceData, floatValue);
                         }
                     }

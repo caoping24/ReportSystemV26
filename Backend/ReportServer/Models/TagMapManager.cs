@@ -225,7 +225,7 @@ namespace ReportServer.Models
         /// </summary>
         public static List<TagMap> GetAllTagMaps()
         {
-            return [.. _allTagMaps]; 
+            return [.. _allTagMaps];
         }
         /// <summary>
         /// 根据变量名查询映射

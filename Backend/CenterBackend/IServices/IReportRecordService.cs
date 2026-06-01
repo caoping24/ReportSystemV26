@@ -16,7 +16,7 @@ namespace CenterBackend.IServices
         Task<PaginationResult<ReportRecord>> GetReportsByPageAsync(PaginationRequest request);
         Task<bool> UpdateSourceDataFieldAsync(string dateStr, int hour, string prop, string valueStr);
 
-        Task< List<HourDataDto>> getHourDataTableOne(String date,String type);
+        Task<List<HourDataDto>> getHourDataTableOne(String date, String type);
 
     }
 }

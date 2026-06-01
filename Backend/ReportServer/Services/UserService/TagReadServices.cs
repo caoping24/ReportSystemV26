@@ -1,6 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using ReportServer.Models;
+﻿using ReportServer.Models;
 using ReportServer.Services.IUserService;
+using System.Runtime.InteropServices;
 using static ReportServer.Services.UserService.LogServices;//日志服务
 
 namespace ReportServer.Services.UserService
@@ -45,7 +45,7 @@ namespace ReportServer.Services.UserService
 
                 // 批量读取
                 tagSet.Read();
-                
+
                 if (tagSet.LastError != 0)
                     await AsyncLogHelper.LogWarningAsync($"批量读取完成，但存在错误码: {tagSet.LastError}");
                 //赋值
@@ -85,9 +85,9 @@ namespace ReportServer.Services.UserService
             }
             finally
             {
-                if (tagSet != null) 
+                if (tagSet != null)
                     Marshal.ReleaseComObject(tagSet);
-                if (hmi != null) 
+                if (hmi != null)
                     Marshal.ReleaseComObject(hmi);
 
                 // 强制清理 COM  RCW
@@ -102,7 +102,7 @@ namespace ReportServer.Services.UserService
             return Task.FromResult<TagMap?>(null);
         }
 
-        public  async Task<bool> GetConnectStatus()
+        public async Task<bool> GetConnectStatus()
         {
             CCHMIRUNTIME.HMIRuntime? hmi = null;
             CCHMIRUNTIME.IHMITagSet? tagSet = null;
@@ -179,7 +179,7 @@ namespace ReportServer.Services.UserService
         }
 
     }
-}        
+}
 
 
 

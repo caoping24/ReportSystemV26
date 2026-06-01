@@ -1,6 +1,4 @@
-﻿using Masuit.Tools.Models;
-
-namespace CenterBackend.Dto
+﻿namespace CenterBackend.Dto
 {
     public class LoginDto
     {

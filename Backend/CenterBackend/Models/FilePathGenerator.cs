@@ -1,5 +1,4 @@
-﻿using CenterBackend.Models;
-namespace CenterBackend.Models
+﻿namespace CenterBackend.Models
 {
     public class FilePathGenerator
     {
@@ -144,7 +143,7 @@ namespace CenterBackend.Models
             }
         }
         public string ModFilePath { get; set; } = string.Empty;
-        
+
 
     }
 }

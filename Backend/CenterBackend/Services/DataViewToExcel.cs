@@ -1,19 +1,7 @@
 ﻿using CenterBackend.IServices;
-using CenterBackend.Models;
-using CenterBackend.Models.CalculateData;
 using CenterBackend.Models.ExcelDataView;
-using CenterReport.Repository.Models;
-using Masuit.Tools;
-using Masuit.Tools.Reflection;
-using Microsoft.AspNetCore.Mvc;
-using NPOI.OpenXmlFormats.Spreadsheet;
-using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
-using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
-using Org.BouncyCastle.Asn1.Ocsp;
-using Org.BouncyCastle.Asn1.X509;
-using System.Globalization;
 using System.Reflection;
 
 namespace CenterBackend.Services
@@ -58,9 +46,9 @@ namespace CenterBackend.Services
             ISheet srcSheet;
             //曲线表写入日期
             srcSheet = srcWorkbook.GetSheetAt(1);
-            SetXlsxCellString(srcSheet,59,1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+            SetXlsxCellString(srcSheet, 59, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
             srcSheet = srcWorkbook.GetSheetAt(3);
-            SetXlsxCellString(srcSheet,59,1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
+            SetXlsxCellString(srcSheet, 59, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
             //白班
             var dataList = dayWorkBookData.DaySheet;
             if (dataList.Count == 0)
@@ -111,7 +99,7 @@ namespace CenterBackend.Services
             //srcSheet.ForceFormulaRecalculation = true;
             var target = dayWorkBookData.ShiftsAnalysis; if (target == null) return false;
             SetXlsxCellString(srcSheet, 2, 1, dayWorkBookData.ReportedTime.ToString("yyyy-MM-dd"));
-            SetXlsxCellString(srcSheet, 5,  1, target.TimePoint.ToString("yyyy-MM-dd"));//写日期
+            SetXlsxCellString(srcSheet, 5, 1, target.TimePoint.ToString("yyyy-MM-dd"));//写日期
             if (target.Data != null && target.Data.ShiftBatches.Count > 0)
             {
                 WriteDataRowsToExcel(target.Data, srcSheet, 5, 16, 2, 3);
@@ -136,9 +124,9 @@ namespace CenterBackend.Services
             srcSheet.ForceFormulaRecalculation = true;
             //SetXlsxCellString(srcSheet, 2, 6, dayList.ReportDate);
             //SetXlsxCellString(srcSheet, 2, 7, dayList.WeekNumberInYear);
-            var dayResult = dayWorkBookData.DayAnalysis; 
+            var dayResult = dayWorkBookData.DayAnalysis;
             int k = 0;
-            if (dayResult != null )
+            if (dayResult != null)
             {
                 WriteDataColumnsToExcel(dayResult, srcSheet, 3 + k, 6, 1, 28);
             }
@@ -416,7 +404,7 @@ namespace CenterBackend.Services
         /// <param name="dataIndex">数据在MaterialDatas中的index</param>
         /// <param name="rowStart"></param>
         /// <param name="cloumnStart"></param>
-        private static void WeekWriteExcelChart(ISheet srcSheet, 
+        private static void WeekWriteExcelChart(ISheet srcSheet,
                                                 WeekWorkBook weekWorkBookData,
                                                 int dataIndex,
                                                 int rowStart,
@@ -436,7 +424,7 @@ namespace CenterBackend.Services
                 for (int i = 0; i < 7; i++)
                 {
                     var temp = dataItem[i];
-                    SetXlsxCellValue(srcSheet,  i + rowStart, cloumnStart, temp);
+                    SetXlsxCellValue(srcSheet, i + rowStart, cloumnStart, temp);
                 }
 
             }
@@ -504,7 +492,7 @@ namespace CenterBackend.Services
                 var cellProperty = dataItem.GetType().GetProperty($"Cell{i}");
                 if (cellProperty == null) continue;
 
-                decimal? value = (decimal?) cellProperty.GetValue(dataItem);
+                decimal? value = (decimal?)cellProperty.GetValue(dataItem);
                 if (value == null) continue;// 如果 data 为空则跳过
                 SetXlsxCellValue(sheet, rowIdx, colIdx + offset, value.Value);
             }
@@ -519,7 +507,7 @@ namespace CenterBackend.Services
                 var cellProperty = dataItem.GetType().GetProperty($"Cell{i}");
                 if (cellProperty == null) continue;
 
-                decimal? value =(decimal?) cellProperty.GetValue(dataItem); 
+                decimal? value = (decimal?)cellProperty.GetValue(dataItem);
                 if (value == null) continue;// 如果 data 为空则跳过
                 SetXlsxCellValue(sheet, rowIdx + offset, colIdx, value.Value);
             }

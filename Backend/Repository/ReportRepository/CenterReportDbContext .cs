@@ -20,7 +20,7 @@ namespace CenterReport.Repository
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<OperatorInputData>()
        .ToTable(tb => tb.HasTrigger("TR_OperatorInputData_UpdateLastChange"));
-      
+
         }
     }
 }

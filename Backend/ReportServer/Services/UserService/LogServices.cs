@@ -1,6 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using ReportServer.Models;
+using System.Collections.Concurrent;
 using System.IO;
-using ReportServer.Models;
 
 namespace ReportServer.Services.UserService
 {

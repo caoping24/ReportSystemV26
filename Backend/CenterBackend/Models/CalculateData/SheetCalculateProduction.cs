@@ -1,13 +1,5 @@
-﻿using CenterBackend.Models.ExcelDataView;
-using CenterReport.Repository.Models;
-using MathNet.Numerics.Optimization;
-using NPOI.SS.Formula.Functions;
-using System;
-using System.Collections.Generic;
+﻿using CenterReport.Repository.Models;
 using System.Data;
-using System.Text.RegularExpressions;
-using static FastExpressionCompiler.ExpressionCompiler;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CenterBackend.Models.CalculateData
 {
@@ -97,7 +89,7 @@ namespace CenterBackend.Models.CalculateData
 
         public ShiftProductionData(List<SourceData> dataList1, List<OperatorInputData> dataList2)
         {
-            Cell4 = MathTools.CalculateFirstLastDifference(dataList1, x => x.Cell20) /1000 ?? 0; //除以1000 L转立方
+            Cell4 = MathTools.CalculateFirstLastDifference(dataList1, x => x.Cell20) / 1000 ?? 0; //除以1000 L转立方
             var listWithoutLast = dataList1.Take(dataList1.Count - 1).ToList();
             Cell5 = MathTools.CalculateAverage(listWithoutLast, x => x.Cell6) ?? 0;
 

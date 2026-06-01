@@ -1,21 +1,9 @@
-﻿using CenterBackend.Dto;
-using CenterBackend.IServices;
+﻿using CenterBackend.IServices;
 using CenterBackend.Models;
-using CenterBackend.Models.CalculateData;
 using CenterBackend.Models.ExcelDataView;
-using CenterReport.Repository;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
-using CenterReport.Repository.Services;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NPOI.HPSF;
-using NPOI.SS.UserModel;
-using NPOI.SS.Util;
-using NPOI.XSSF.UserModel;
-using SixLabors.ImageSharp.Drawing;
-using System.Reflection;
-using System.Security.Cryptography;
 
 namespace CenterBackend.Services
 {
@@ -69,7 +57,7 @@ namespace CenterBackend.Services
                     if (await _dataToViewService.DayGetMapDataAsync(dayCollections))
                     {
                         var FilePath = System.IO.Path.Combine(dayCollections.Directory, dayCollections.FileName);
-                        if ( _fileService.CopyFile(dayCollections.ModFilePath, FilePath))
+                        if (_fileService.CopyFile(dayCollections.ModFilePath, FilePath))
                             isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(dayCollections);
                     }
                     break;
@@ -120,7 +108,7 @@ namespace CenterBackend.Services
                         if (_fileService.CopyFile(weekDataCollections.ModFilePath, FilePath))
                             isBuildSuccess = await _dataViewToExcel.WriteXlsxAndSaveAsync(weekDataCollections);
                     }
-                    
+
                     break;
                 default:
                     break;

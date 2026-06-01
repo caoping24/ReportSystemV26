@@ -1,11 +1,8 @@
 using CenterBackend.Dto;
 using CenterBackend.IServices;
-using CenterBackend.Services;
-using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
 using CenterReport.Repository.Utils;
 using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
 
 namespace CenterBackend.Controllers
 {
@@ -54,13 +51,13 @@ namespace CenterBackend.Controllers
         {
             try
             {
-                if (type <= _mockHeaderMains.Count && type >= 0 ) 
+                if (type <= _mockHeaderMains.Count && type >= 0)
                 {
                     return Ok(_mockHeaderMains[type - 1]); // 返回200
                 }
                 else
                 {
-                    return BadRequest(new { message = "传入Type不合法"});
+                    return BadRequest(new { message = "传入Type不合法" });
                 }
             }
             catch (Exception ex)
@@ -214,7 +211,7 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell34", Label = "二乙腈 + 水 (%)", Unit = "%" },
             new TableHeaderDto { Prop = "Cell35", Label = "未知物含量 (%)", Unit = "%" },
             new TableHeaderDto { Prop = "Cell36", Label = "产量 (kg)", Unit = "kg" },
-      
+
         }
     },
   
@@ -262,7 +259,7 @@ namespace CenterBackend.Controllers
             },
             new GroupHeader
             {
-               
+
                 Props = new List<string> {  "Cell63" },
                 Label = "耗材消耗",
                 Unit = ""
@@ -333,7 +330,7 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell80", Label = "水分(%)", Unit = "" },
         }
     }
-    
+
 };
 
     }

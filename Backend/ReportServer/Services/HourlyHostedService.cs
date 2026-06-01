@@ -1,11 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using CenterReport.Repository.IServices;
-using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using ReportServer.Services.IUserService;
+using System.Diagnostics;
 
 namespace ReportServer.Services
 {

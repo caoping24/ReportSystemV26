@@ -6,7 +6,7 @@ namespace ReportServer.Models
     {
         private static IConfiguration? _configuration;
         private const string HomePageUrl = "http://localhost:5260/user/login"; // 主页地址（常量，便于修改）
-        
+
         public static void Initialize()// 初始化配置
         {
             if (_configuration != null)

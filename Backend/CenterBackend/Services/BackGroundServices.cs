@@ -1,16 +1,7 @@
 ﻿using CenterBackend.IServices;
 using CenterBackend.Models.CalculateData;
-using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
-using CenterReport.Repository.Services;
-using CenterUser.Repository;
-using Hangfire.Common;
-using MathNet.Numerics.LinearAlgebra.Factorization;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using NPOI.SS.Formula.Functions;
-using Org.BouncyCastle.Asn1.X509;
-using SixLabors.ImageSharp.Drawing;
 
 
 namespace CenterBackend.Services
@@ -106,7 +97,7 @@ namespace CenterBackend.Services
             comToSiemens.Cell8 = (float?)MathTools.CalculateAverage(operatorInputDatas.Take(operatorInputDatas.Count - 1), x => x.Cell21); //二乙睛含量平均(去掉最后一个值)
             comToSiemens.Cell9 = (float?)MathTools.CalculateAverage(operatorInputDatas.Take(operatorInputDatas.Count - 1), x => x.Cell23); //水分含量平均(去掉最后一个值)
             comToSiemens.Cell10 = (float?)MathTools.CalculateAverage(operatorInputDatas.Take(operatorInputDatas.Count - 1), x => x.Cell25); //未知物含量平均(去掉最后一个值)
-            
+
             var usageWater = (float?)MathTools.CalculateFirstLastDifference(sourceDatas, x => x.Cell143);//水消耗 修改为sourcedata中143 读取 
             var usageElectric = (float?)MathTools.CalculateFirstLastDifference(operatorInputDatas, x => x.Cell73);//电消耗
 

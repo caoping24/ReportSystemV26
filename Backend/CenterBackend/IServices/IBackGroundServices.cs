@@ -1,6 +1,4 @@
-﻿using CenterReport.Repository.Models;
-
-namespace CenterBackend.IServices
+﻿namespace CenterBackend.IServices
 {
     public interface IBackGroundServices
     {

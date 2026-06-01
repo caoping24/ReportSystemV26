@@ -2,7 +2,6 @@
 using CenterReport.Repository.Models;
 using ReportServer.Models;
 using ReportServer.Services.IUserService;
-using static FastExpressionCompiler.ExpressionCompiler;
 using static ReportServer.Services.UserService.LogServices;
 
 namespace ReportServer.Services.UserService
@@ -15,9 +14,9 @@ namespace ReportServer.Services.UserService
         private readonly IReportRepository<ReportRecord> _reportRecord;
         private readonly IReportUnitOfWork _reportUnitOfWork;
         public CollectWinccDatas(ITagReadServices tagReadServices,
-                                ITagDataConverter tagDataConverter, 
+                                ITagDataConverter tagDataConverter,
                                 IReportRepository<SourceData> sourceData,
-                                IReportUnitOfWork reportUnitOfWork, 
+                                IReportUnitOfWork reportUnitOfWork,
                                 IReportRepository<ReportRecord> reportRecord)
         {
             _tagReadServices = tagReadServices;
@@ -46,7 +45,7 @@ namespace ReportServer.Services.UserService
             }
             catch (Exception ex)
             {
-                await AsyncLogHelper.LogErrorAsync($"数据收集失败.:{ ex}");
+                await AsyncLogHelper.LogErrorAsync($"数据收集失败.:{ex}");
                 return false;
             }
         }

@@ -5,10 +5,8 @@ using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
 using CenterReport.Repository.Utils;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Utilities;
 using System.Globalization;
 using System.Reflection;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CenterBackend.Services
 {
@@ -19,7 +17,7 @@ namespace CenterBackend.Services
         private readonly IOperatorInputDataRepository<OperatorInputData> _operatorInputData;
         private readonly CenterReportDbContext _dbContext;
 
-        public ReportRecordService(IReportRecordRepository<ReportRecord> reportRecord, IReportRepository<SourceData> sourceData, 
+        public ReportRecordService(IReportRecordRepository<ReportRecord> reportRecord, IReportRepository<SourceData> sourceData,
                                                     CenterReportDbContext _dbContext, IOperatorInputDataRepository<OperatorInputData> operatorInputData)
 
         {
@@ -218,7 +216,7 @@ namespace CenterBackend.Services
             return GetTableTypeOne(existingData, date);
         }
 
-        public  List<HourDataDto> GetTableTypeOne(List<OperatorInputData> operatorInputDatas, string date)
+        public List<HourDataDto> GetTableTypeOne(List<OperatorInputData> operatorInputDatas, string date)
         {
             // 1. 校验日期格式(和原方法保持一致)
             if (!DateTime.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var queryDate))

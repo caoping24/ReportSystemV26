@@ -171,7 +171,7 @@ namespace ReportServer
             catch (Exception ex)
             {
                 Dispatcher.Invoke(() =>// 异常处理：提示用户手动访问
-                    System.Windows.MessageBox.Show($"打开浏览器失败：{ex.Message}\n请手动访问主页：{HomePageUrl}","访问失败",MessageBoxButton.OK,MessageBoxImage.Warning
+                    System.Windows.MessageBox.Show($"打开浏览器失败：{ex.Message}\n请手动访问主页：{HomePageUrl}", "访问失败", MessageBoxButton.OK, MessageBoxImage.Warning
                     )
                 );
             }
@@ -194,7 +194,7 @@ namespace ReportServer
             }
             catch (Exception ex)// 输出详细异常信息（包含内部异常和调用栈）
             {
-                string errorMsg = $"启动服务失败：{ex.Message}\n" +$"内部异常：{ex.InnerException?.Message}\n";
+                string errorMsg = $"启动服务失败：{ex.Message}\n" + $"内部异常：{ex.InnerException?.Message}\n";
                 System.Windows.MessageBox.Show(errorMsg, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 await ExitApplicationAsync();
 
@@ -284,7 +284,7 @@ namespace ReportServer
                 using var scope = _host.Services.CreateScope(); // 创建作用域（适配Scoped生命周期）
                 var collectWinccDatas = scope.ServiceProvider.GetRequiredService<ICollectWinccDatas>();
                 bool result = await collectWinccDatas.ReadAndSaveDataAsync();// 执行数据写入逻辑
-                System.Windows.MessageBox.Show(result ? "Ok！" : "Error!！","测试结果",MessageBoxButton.OK,
+                System.Windows.MessageBox.Show(result ? "Ok！" : "Error!！", "测试结果", MessageBoxButton.OK,
                     result ? MessageBoxImage.Information : MessageBoxImage.Warning
                 );// 反馈执行结果
             }

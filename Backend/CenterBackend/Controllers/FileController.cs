@@ -110,7 +110,7 @@ namespace CenterBackend.Controllers
                 return new BadRequestObjectResult(new { success = false, msg = "无效的请求参数" });
             }
             string zipName;
-            switch (type) 
+            switch (type)
             {
                 case 1:
                     zipName = $"日报表 {fileDate.Year}年{fileDate.Month}月";

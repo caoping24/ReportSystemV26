@@ -1,5 +1,4 @@
-﻿using CenterBackend.Models.CalculateData;
-using CenterReport.Repository.Models;
+﻿using CenterReport.Repository.Models;
 
 namespace CenterBackend.Models.CalculateData
 {

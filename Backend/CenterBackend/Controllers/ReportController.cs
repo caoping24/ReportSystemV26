@@ -1,14 +1,8 @@
-using CenterBackend.common;
 using CenterBackend.Dto;
-using CenterBackend.Exceptions;
 using CenterBackend.IServices;
 using CenterBackend.Logging;
 using CenterBackend.Models;
-using CenterBackend.Models.CalculateData;
-using CenterReport.Repository.Models;
 using Microsoft.AspNetCore.Mvc;
-using SharpCompress.Common;
-using System.Globalization;
 
 namespace CenterBackend.Controllers
 {

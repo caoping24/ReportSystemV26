@@ -1,19 +1,9 @@
-﻿using AngleSharp.Dom;
-using CenterBackend.IServices;
+﻿using CenterBackend.IServices;
 using CenterBackend.Models.CalculateData;
 using CenterBackend.Models.ExcelDataView;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
 using Masuit.Tools;
-using Masuit.Tools.Models;
-using Microsoft.Identity.Client;
-using NPOI.POIFS.Crypt.Dsig;
-using NPOI.SS.Formula.Functions;
-using NPOI.Util;
-using Org.BouncyCastle.Asn1.X509;
-using System.Collections;
-using System.Security.Cryptography.Xml;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace CenterBackend.Services
@@ -55,7 +45,7 @@ namespace CenterBackend.Services
             List<OperatorInputData> operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startDay, endDay);
             MoveDataYearAnalysis(yearWorkBook, sourceData, operatorInputData);
             return true;
-        }   
+        }
         public async Task<bool> WeekGetMapDataAsync(WeekWorkBook weekWorkBook)
         {
             DateTime startDay = weekWorkBook.ReportedTime.Date.AddHours(8);  //开始日期的 8:00 
@@ -481,7 +471,7 @@ namespace CenterBackend.Services
                             ? new List<decimal?>() // 集合为null时返回空列表，避免空引用异常
                             : RangeData.Select(report => report?.Cell2).ToList();
             var Materialcollection = new MaterialDataRangeCollection(startTime, daysBetween, WeekRangeYield, sourceDatas, operatorInputDatas);//获取daysBetween天的数据
-            
+
             target.Cell1 = CalculateRangeYield(Materialcollection);
             target.Cell2 = Materialcollection.RangeCollections[0];     //羟基单耗
             target.Cell3 = Materialcollection.RangeCollections[1];     //氨单耗
@@ -497,7 +487,7 @@ namespace CenterBackend.Services
             target.Cell13 = Materialcollection.RangeCollections[11];       //一次结晶温度
             target.Cell14 = Materialcollection.RangeCollections[12];       //降膜蒸发温度
             target.Cell15 = Materialcollection.RangeCollections[13];       //二次结晶温度
-                                                                            //Materialcollection.RangeCollections[14]        //脱盐水
+                                                                           //Materialcollection.RangeCollections[14]        //脱盐水
             target.Cell21 = Materialcollection.RangeCollections[15];       //废液排放
             if (operatorInputDatas != null)
             {
@@ -521,7 +511,7 @@ namespace CenterBackend.Services
         private static void MoveDataYearAnalysis(YearWorkBook yearWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
 
-            yearWorkBook.YearAnalysis  = Enumerable.Range(1, 1).Select(_ => new YearAnalysis()).ToList();
+            yearWorkBook.YearAnalysis = Enumerable.Range(1, 1).Select(_ => new YearAnalysis()).ToList();
             var target = yearWorkBook.YearAnalysis[0];
             DateTime reportedDate = yearWorkBook.ReportedTime.Date; // 缓存日期
             DateTime firstDay = reportedDate.AddHours(8);
@@ -585,7 +575,7 @@ namespace CenterBackend.Services
                             : WeekRangeData.Select(report => report?.Cell2).ToList();
             var Materialcollection = new MaterialDataRangeCollection(startTime, daysBetween, WeekRangeYield, sourceDatas, operatorInputDatas);//获取7天的数据
             int i = 0;
-            WeekWorkBook.WorkSheet1[i].Cell1 =CalculateRangeYield(Materialcollection);
+            WeekWorkBook.WorkSheet1[i].Cell1 = CalculateRangeYield(Materialcollection);
             WeekWorkBook.WorkSheet1[i].Cell2 = Materialcollection.RangeCollections[0];     //羟基单耗
             WeekWorkBook.WorkSheet1[i].Cell3 = Materialcollection.RangeCollections[1];     //氨单耗
             WeekWorkBook.WorkSheet1[i].Cell4 = Materialcollection.RangeCollections[2];     //稀硫酸单耗
@@ -600,7 +590,7 @@ namespace CenterBackend.Services
             WeekWorkBook.WorkSheet1[i].Cell13 = Materialcollection.RangeCollections[11];       //一次结晶温度
             WeekWorkBook.WorkSheet1[i].Cell14 = Materialcollection.RangeCollections[12];       //降膜蒸发温度
             WeekWorkBook.WorkSheet1[i].Cell15 = Materialcollection.RangeCollections[13];       //二次结晶温度
-                                                                                                //Materialcollection.RangeCollections[14]        //脱盐水
+                                                                                               //Materialcollection.RangeCollections[14]        //脱盐水
             WeekWorkBook.WorkSheet1[i].Cell21 = Materialcollection.RangeCollections[15];       //废液排放
             if (operatorInputDatas != null)
             {
@@ -619,6 +609,7 @@ namespace CenterBackend.Services
                 WeekWorkBook.WorkSheet1[i].Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
                 WeekWorkBook.WorkSheet1[i].Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
             }
+            WeekWorkBook.WorkSheet9 = Materialcollection;
             return true;
         }
         private static bool WeekMoveDataSheet2Async(WeekWorkBook WeekWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)

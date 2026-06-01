@@ -1,7 +1,4 @@
-﻿using CenterBackend.Dto;
-using CenterBackend.Models;
-using CenterReport.Repository.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using CenterBackend.Models;
 
 namespace CenterBackend.IServices
 {

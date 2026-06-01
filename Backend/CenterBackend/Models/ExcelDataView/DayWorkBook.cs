@@ -1,5 +1,4 @@
 ﻿using CenterBackend.Models.CalculateData;
-using System.Collections.Generic;
 
 namespace CenterBackend.Models.ExcelDataView
 {

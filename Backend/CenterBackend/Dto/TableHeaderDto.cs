@@ -1,6 +1,4 @@
-﻿using CenterBackend.Dto;
-
-namespace CenterBackend.Dto
+﻿namespace CenterBackend.Dto
 {
     /// <summary>
     /// 表格表头DTO

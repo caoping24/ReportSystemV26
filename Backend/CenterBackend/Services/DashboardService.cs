@@ -2,7 +2,6 @@
 using CenterBackend.IServices;
 using CenterReport.Repository.IServices;
 using CenterReport.Repository.Models;
-using static FastExpressionCompiler.ExpressionCompiler;
 
 namespace CenterBackend.Services
 {
@@ -86,7 +85,7 @@ namespace CenterBackend.Services
                         Data = new float?[totalHours + 1]
                     }
                 }
-            }; 
+            };
             float?[] seriesData = lineChartDataDto.Series[0].Data;
 
             foreach (var dataItem in dataList)
@@ -150,7 +149,7 @@ namespace CenterBackend.Services
             (var startTime, var endtime) = GetQueryTimeRange(DateTime.Now);//记录上一个班次的数据
             List<SourceData> dataList = await _sourceData.GetByDateTimeRangeAsync(startTime, endtime);
             CoreChartDto coreChartDto = new();
-            if (dataList == null || dataList.Count == 0) 
+            if (dataList == null || dataList.Count == 0)
                 return coreChartDto;
 
             coreChartDto.Card1 = CalculateAverage(dataList, x => x.Cell19);//羟基流量

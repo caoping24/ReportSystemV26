@@ -1,6 +1,4 @@
 ﻿using CenterReport.Repository.IServices;
-using CenterReport.Repository.Models;
-using CenterReport.Repository.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace CenterReport.Repository.Services
@@ -40,10 +38,10 @@ namespace CenterReport.Repository.Services
                 {
                     updateAction(existingEntity);//存在则执行自定义更新逻辑
                 }
-               
+
             }
             return existingEntity;
         }
-      
+
     }
 }
