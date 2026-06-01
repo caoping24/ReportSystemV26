@@ -251,6 +251,7 @@ const isCellDisabled = (row: TableRow): boolean => {
   if (!row.date || row.hour === undefined || row.hour === null) return true;
   return row.isNextDay === true;
 };
+const highlightedHours = new Set([9, 10, 11, 21, 22, 23]);
 const cellClassName = ({
   row,
   column,
@@ -258,8 +259,14 @@ const cellClassName = ({
   row: TableRow;
   column: any;
 }): string => {
-  if (column.prop === "hour") return "disabled-cell";
-  return isCellDisabled(row) ? "disabled-cell" : "";
+  const classes: string[] = [];
+  if (column.prop === "hour" || isCellDisabled(row)) {
+    classes.push("disabled-cell");
+  }
+  if (highlightedHours.has(Number(row.hour))) {
+    classes.push("highlight-hour-row");
+  }
+  return classes.join(" ");
 };
 
 // 新增：获取当前分组对应的二级表头列
@@ -454,6 +461,20 @@ defineExpose({
   background-color: #f5f5f5;
   color: #999;
   cursor: not-allowed;
+}
+.highlight-hour-row {
+  background-color: #eaf6ff !important;
+}
+:deep(.el-table td.highlight-hour-row),
+:deep(.el-table__fixed td.highlight-hour-row),
+:deep(.el-table__body tr:hover > td.highlight-hour-row) {
+  background-color: #eaf6ff !important;
+}
+:deep(.el-table td.highlight-hour-row .el-input__wrapper) {
+  background-color: #eaf6ff !important;
+}
+:deep(.el-table td.highlight-hour-row .el-input__inner) {
+  background-color: transparent;
 }
 :deep(.el-input__wrapper) {
   padding: 0 5px !important;
