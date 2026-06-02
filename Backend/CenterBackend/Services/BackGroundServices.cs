@@ -36,6 +36,10 @@ namespace CenterBackend.Services
             DateTime today = DateTime.Now.Date; // 缓存当前日期，避免跨零点时出现不一致
             DateTime start = today.AddDays(-7).AddHours(8); // 7天前的08:00:00
             DateTime end = today.AddHours(9); // 今天的09:00:00
+
+            ////测试用
+            //start = new DateTime(2026, 5, 7, 8, 0, 0);
+            //end = start.AddDays(7).AddHours(1);
             List<SourceData> sourceDatas = await _sourceData.GetByDateTimeRangeAsync(start, end);
             List<OperatorInputData> operatorInputDatas = await _operatorInputData.GetByDateTimeRangeAsync(start, end);
             var data = await CalDataAsync(2, start, end, sourceDatas, operatorInputDatas);
@@ -92,7 +96,7 @@ namespace CenterBackend.Services
             comToSiemens.Cell4 = (float?)MathTools.CalculateFirstLastDifference(sourceDatas, x => x.Cell14);//气氨消耗
             comToSiemens.Cell5 = (float?)MathTools.CalculateFirstLastDifference(sourceDatas, x => x.Cell20);//羟基乙睛消耗
             comToSiemens.Cell6 = (float?)MathTools.CalculateFirstLastDifference(sourceDatas, x => x.Cell37);//稀硫酸消耗
-            comToSiemens.Cell7 = (float?)MathTools.CalculateAverage(sourceDatas.Take(sourceDatas.Count - 1), x => x.Cell24);//摩尔比 做平均 (去掉最后一个值)
+            comToSiemens.Cell7 = (float?)MathTools.CalculateAverage(sourceDatas.Take(sourceDatas.Count - 1), x => x.Cell23);//摩尔比 做平均 (去掉最后一个值)
 
             comToSiemens.Cell8 = (float?)MathTools.CalculateAverage(operatorInputDatas.Take(operatorInputDatas.Count - 1), x => x.Cell21); //二乙睛含量平均(去掉最后一个值)
             comToSiemens.Cell9 = (float?)MathTools.CalculateAverage(operatorInputDatas.Take(operatorInputDatas.Count - 1), x => x.Cell23); //水分含量平均(去掉最后一个值)
@@ -103,7 +107,7 @@ namespace CenterBackend.Services
 
             var lowPressData = (float?)MathTools.CalculateFirstLastDifference(operatorInputDatas, x => x.Cell71); //低压蒸汽消耗-手动录入
             var midellPressData = (float?)MathTools.CalculateFirstLastDifference(operatorInputDatas, x => x.Cell72); //中压蒸汽消耗-手动录入
-            var usagesteam = lowPressData ?? 0 + midellPressData ?? 0;//蒸汽总消耗= 低压+中压//气消耗 修改为低压和中压相加
+            var usagesteam = (lowPressData ?? 0) + (midellPressData ?? 0);//蒸汽总消耗= 低压+中压//气消耗 修改为低压和中压相加
 
             comToSiemens.Cell11 = usageWater;
             comToSiemens.Cell12 = usageElectric;

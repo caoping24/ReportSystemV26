@@ -78,32 +78,34 @@
         /// <param name="data">数据集</param>
         /// <param name="selector">字段取值委托</param>
         /// <returns>首尾差值；无数据/有效数据少于2个返回 null</returns>
-        public static decimal? CalculateFirstLastDifference<T>(IEnumerable<T> data, Func<T, float?> selector)
+        public static decimal? CalculateFirstLastDifference<T>(
+                                                                IEnumerable<T> data,
+                                                                Func<T, float?> selector)
         {
-            if (data == null || !data.Any())
+            if (data == null)
                 return null;
 
-            decimal firstValue = 0m;
-            decimal lastValue = 0m;
+            float? firstValue = null;
+            float? lastValue = null;
             int validCount = 0;
 
             foreach (var item in data)
             {
-                decimal? nullable = (decimal?)selector(item);
-                if (nullable.HasValue)
+                float? value = selector(item);
+                if (value.HasValue)
                 {
-                    // 第一个有效值赋值给firstValue
                     if (validCount == 0)
-                        firstValue = nullable.GetValueOrDefault();
-
-                    // 每次都更新lastValue，最终保留最后一个有效值
-                    lastValue = nullable.GetValueOrDefault();
+                        firstValue = value;   // 记录第一个有效值
+                    lastValue = value;        // 不断更新，结束时即为最后一个有效值
                     validCount++;
                 }
             }
 
-            // 有效数据至少2个才返回差值
-            return validCount >= 2 ? lastValue - firstValue : null;
+            // 至少两个有效值才返回差值（转换为 decimal）
+            if (validCount >= 2 && firstValue.HasValue && lastValue.HasValue)
+                return (decimal)(lastValue.Value - firstValue.Value);
+
+            return null;
         }
 
         /// <summary>
@@ -113,29 +115,28 @@
         /// <param name="data">数据集</param>
         /// <param name="selector">字段取值委托</param>
         /// <returns>首尾差值；无数据/有效数据少于2个返回 null</returns>
-        public static decimal? CalculateFirstLastDifference<T>(IEnumerable<T> data, Func<T, decimal?> selector)
+        public static decimal? CalculateFirstLastDifference<T>(
+                                               IEnumerable<T> data,
+                                               Func<T, decimal?> selector)
         {
-            if (data == null || !data.Any())
-                return null;
+            if (data == null) return null;
 
-            decimal firstValue = 0m;
-            decimal lastValue = 0m;
+            decimal? firstValue = null;
+            decimal? lastValue = null;
             int validCount = 0;
 
             foreach (var item in data)
             {
-                decimal? nullable = selector(item);
-                if (nullable.HasValue)
+                var value = selector(item);
+                if (value.HasValue)
                 {
                     if (validCount == 0)
-                        firstValue = nullable.GetValueOrDefault();
-
-                    lastValue = nullable.GetValueOrDefault();
+                        firstValue = value;
+                    lastValue = value;
                     validCount++;
                 }
             }
-
-            return validCount >= 2 ? lastValue - firstValue : null;
+            return validCount >= 2 ? lastValue.Value - firstValue.Value : null;
         }
 
         /// <summary>
@@ -234,6 +235,56 @@
             decimal t_s = t_h * 3600m;
 
             return t_s;//保留两位小数
+        }
+        /// <summary>
+        /// 求和除法，计算 (sumA / sumB)，自动忽略 null 值，且当 sumB 为 0 或 null 时返回 null，避免除零异常
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="selectA"></param>
+        /// <param name="selectB"></param>
+        /// <returns></returns>
+
+        public static decimal? CalculateSumDivLinq<T>(
+                                                    IEnumerable<T> data,
+                                                    Func<T, decimal?> selectA,
+                                                    Func<T, decimal?> selectB)
+        {
+            if (data == null || !data.Any())
+                return null;
+
+            decimal? sumA = data.Select(selectA).Sum();
+            decimal? sumB = data.Select(selectB).Sum();
+
+            // decimal?可直接与0比较，无需.Value
+            if (sumA.HasValue && sumB.HasValue && sumB != 0m)
+                return sumA.Value / sumB.Value;
+
+            return null;
+        }
+        /// <summary>
+        ///  求和除法，计算 (sumA / sumB)，自动忽略 null 值，且当 sumB 为 0 或 null 时返回 null，避免除零异常
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="selectA"></param>
+        /// <param name="selectB"></param>
+        /// <returns></returns>
+        public static float? CalculateSumDivLinq<T>(
+                                    IEnumerable<T> data,
+                                    Func<T, float?> selectA,
+                                    Func<T, float?> selectB)
+        {
+            if (data == null || !data.Any())
+                return null;
+
+            float? sumA = data.Select(selectA).Sum();
+            float? sumB = data.Select(selectB).Sum();
+
+            if (sumA.HasValue && sumB.HasValue && sumB != 0f)
+                return sumA.Value / sumB.Value;
+
+            return null;
         }
         //public static decimal CalculateWeighted(
         //                                        List<DailyProductionReport> dataList,

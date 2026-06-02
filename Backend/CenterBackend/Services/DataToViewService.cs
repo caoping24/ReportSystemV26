@@ -411,32 +411,35 @@ namespace CenterBackend.Services
         private static void MoveDataDayAnalysis(DayWorkBook dayWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
             DayAnalysis target = dayWorkBook.DayAnalysis;
+            DateTime reportedDate = dayWorkBook.ReportedTime.Date; // 缓存日期
+            DateTime firstDay = reportedDate.AddHours(8);
+            DateTime startTime = firstDay;
+            DateTime endTime = startTime.AddDays(1).AddHours(1);
+            int daysBetween = (endTime.Date - startTime.Date).Days;
 
-            DateTime startTime = dayWorkBook.ReportedTime.Date.AddHours(8);
-            DateTime endTime = startTime.AddHours(25);
+            var RangeData = CalculateDailyProductionReportRange(startTime, endTime, sourceDatas, operatorInputDatas);
+            List<decimal?> WeekRangeYield = RangeData == null
+                            ? new List<decimal?>() // 集合为null时返回空列表，避免空引用异常
+                            : RangeData.Select(report => report?.Cell2).ToList();
+            var Materialcollection = new MaterialDataRangeCollection(startTime, daysBetween, WeekRangeYield, sourceDatas, operatorInputDatas);//获取daysBetween天的数据
 
-            var dayData = new DailyProductionReport(startTime, sourceDatas, operatorInputDatas);
-            var dayYield = dayData?.Cell2 ?? 0;
-            var Materialcollection = new MaterialDailyCollection(startTime, dayYield, sourceDatas, operatorInputDatas);
-
-            target.Cell1 = dayData?.Cell1 ?? 0; //计算本日收率
-            target.Cell2 = Materialcollection.MaterialDatas[0].Specific;     //羟基单耗
-            target.Cell3 = Materialcollection.MaterialDatas[1].Specific;     //氨单耗
-            target.Cell4 = Materialcollection.MaterialDatas[2].Specific;     //稀硫酸单耗
-            target.Cell5 = Materialcollection.MaterialDatas[3].Specific;     //羟基浓度 
-            target.Cell6 = Materialcollection.MaterialDatas[4].Specific;     //氨腈摩尔比
+            target.Cell1 = CalculateRangeYield(Materialcollection);
+            target.Cell2 = Materialcollection.RangeCollections[0];     //羟基单耗
+            target.Cell3 = Materialcollection.RangeCollections[1];     //氨单耗
+            target.Cell4 = Materialcollection.RangeCollections[2];     //稀硫酸单耗
+            target.Cell5 = Materialcollection.RangeCollections[3];     //羟基浓度 
+            target.Cell6 = Materialcollection.RangeCollections[4];     //氨腈摩尔比
             target.Cell7 = MathTools.ResidenceTimeSeconds(15, 22, 300m);  // 反应时间 固定值
-            target.Cell8 = Materialcollection.MaterialDatas[6].Specific;     // 反应压力
-            target.Cell9 = Materialcollection.MaterialDatas[7].Specific;     //羟基加热温度
-            target.Cell10 = Materialcollection.MaterialDatas[8].Specific;     //氨汽混合温度
-            target.Cell11 = Materialcollection.MaterialDatas[9].Specific;        //管反热点温度
-            target.Cell12 = Materialcollection.MaterialDatas[10].Specific;        //预冷器结晶温度
-            target.Cell13 = Materialcollection.MaterialDatas[11].Specific;       //一次结晶温度
-            target.Cell14 = Materialcollection.MaterialDatas[12].Specific;       //降膜蒸发温度
-            target.Cell15 = Materialcollection.MaterialDatas[13].Specific;       //二次结晶温度
-                                                                                 //Materialcollection.RangeCollections[14]        //脱盐水
-            target.Cell21 = Materialcollection.MaterialDatas[15].Specific;       //废液排放
-
+            target.Cell8 = Materialcollection.RangeCollections[6];     // 反应压力
+            target.Cell9 = Materialcollection.RangeCollections[7];     //羟基加热温度
+            target.Cell10 = Materialcollection.RangeCollections[8];     //氨汽混合温度
+            target.Cell11 = Materialcollection.RangeCollections[9];        //管反热点温度
+            target.Cell12 = Materialcollection.RangeCollections[10];        //预冷器结晶温度
+            target.Cell13 = Materialcollection.RangeCollections[11];       //一次结晶温度
+            target.Cell14 = Materialcollection.RangeCollections[12];       //降膜蒸发温度
+            target.Cell15 = Materialcollection.RangeCollections[13];       //二次结晶温度
+                                                                           //Materialcollection.RangeCollections[14]        //脱盐水
+            target.Cell21 = Materialcollection.RangeCollections[15];       //废液排放
             if (operatorInputDatas != null)
             {
                 var operatorInputData = operatorInputDatas.Where(x => x.ReportedTime >= startTime && x.ReportedTime < endTime).ToList();
@@ -457,7 +460,6 @@ namespace CenterBackend.Services
         }
         private static void MoveDataMonthAnalysis(MonthWorkBook monthWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
         {
-            //MonthAnalysis target = monthWorkBook.MonthAnalysis;
             monthWorkBook.MonthAnalysis = Enumerable.Range(1, 1).Select(_ => new MonthAnalysis()).ToList();
             var target = monthWorkBook.MonthAnalysis[0];
             DateTime reportedDate = monthWorkBook.ReportedTime.Date; // 缓存日期

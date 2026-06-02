@@ -57,8 +57,8 @@ namespace CenterBackend.Models.CalculateData
                 // 按配置自动聚合
                 switch (config.AggregationType)
                 {
-                    case AggregationType.Sum:
-                        RangeCollections[config.Index] = dayValues.Sum() ?? 0;
+                    case AggregationType.SumDiv:
+                        RangeCollections[config.Index] = dayValues.Sum() / DailyCollections.Sum(x=>x.Yield) ?? 0;
                         break;
                     case AggregationType.Average:
                         RangeCollections[config.Index] = dayValues.Count != 0 ? (dayValues.Where(x => x != 0).Average() ?? 0) : 0;

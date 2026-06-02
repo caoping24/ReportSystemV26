@@ -62,7 +62,7 @@ namespace CenterBackend.Services
                 if (i >= dataList.Count) break;
                 var data = dataList[i];
                 if (data == null) continue; // 如果 data 为空则跳过
-                int colOffSet = 1;
+                int colOffSet = 2;
 
                 int targeRow = 5 + i;
                 BatchWriteDataToExcel(data, srcSheet, targeRow, colOffSet, 1, 50);
@@ -85,7 +85,7 @@ namespace CenterBackend.Services
                 if (i >= dataList.Count) break;
                 var data = dataList[i];
                 if (data == null) continue; // 如果 data 为空则跳过
-                int colOffSet = 1;
+                int colOffSet = 2;
 
                 int targeRow = 5 + i;
                 BatchWriteDataToExcel(data, srcSheet, targeRow, colOffSet, 1, 50);

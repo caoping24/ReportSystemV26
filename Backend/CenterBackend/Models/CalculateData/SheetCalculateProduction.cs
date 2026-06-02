@@ -50,7 +50,7 @@ namespace CenterBackend.Models.CalculateData
             decimal b = batch1.Cell4;
             decimal c = batch2.Cell2;
             decimal d = batch2.Cell4;
-            decimal e = batch1.Cell5;
+            decimal e = (batch1.Cell5 + batch2.Cell5)/2;
 
             decimal denominator = b + d;
             if (denominator == 0 || e == 0) return 0;

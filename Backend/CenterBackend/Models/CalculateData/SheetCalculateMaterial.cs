@@ -48,40 +48,20 @@ namespace CenterBackend.Models.CalculateData
                 eachItem.Index = config.Index;
                 eachItem.CalculationType = config.CalculationType;
                 eachItem.UsageOrAverage = value * config.Mul ?? 0; // 使用乘数修正单位
-                eachItem.Specific = RecalculateSpecific(eachItem);
+                eachItem.Specific = eachItem.UsageOrAverage;
 
-
-                if (config.Index == 0) Usage = eachItem.UsageOrAverage;//获取羟基用量
+                if (config.Index == 0) 
+                    Usage = eachItem.UsageOrAverage;//获取羟基用量
                 if (config.Index == 3)
                 {
                     Rate = eachItem.UsageOrAverage;//获取羟基含量
-                    MaterialDatas[0].Specific *= Rate * 1000;//还要计算一下羟基的单耗,需要将Rate乘上
+                    MaterialDatas[0].Specific = MaterialDatas[0].Specific * Rate * 1000;//还要计算一下羟基的单耗,需要将Rate乘上(相当于单位是kg)
                 }
             }
         }
+}
 
-        private decimal RecalculateSpecific(MaterialData item)//计算每个属性的单耗或者平均值
-        {
-            decimal temp;
-            if (item.CalculationType == CalculationType.FirstLastDifference)
-            {
-                if (item.UsageOrAverage.HasValue && Yield.HasValue && Yield.Value != 0)
-                {
-                    temp = item.UsageOrAverage.Value / Yield.Value;
-                }
-
-                else
-                    temp = 0;
-            }
-            else
-            {
-                temp = item.UsageOrAverage ?? 0;
-            }
-            return temp;
-        }
-    }
-
-    public class MaterialData
+public class MaterialData
     {
         public int Index { get; set; }
         public CalculationType CalculationType { get; set; }
@@ -91,7 +71,7 @@ namespace CenterBackend.Models.CalculateData
     }
     // 枚举定义（统一复用）
     public enum DataSourceType { DCS, Operator }
-    public enum AggregationType { Sum, Average }// 周聚合类型（Sum/Average）
+    public enum AggregationType { SumDiv, Average }// 周聚合类型（Sum/Average）
     public enum CalculationType { FirstLastDifference, Average }//数据收集类型  如果收集类型是  FirstLastDifference 每日统计要做单耗计算 如果是Average 则计算Average
     public class MaterialItemConfig
     {
@@ -112,7 +92,7 @@ namespace CenterBackend.Models.CalculateData
             {
                 Index = 0,
                 Name = "羟基乙腈",
-                AggregationType = AggregationType.Average,
+                AggregationType = AggregationType.SumDiv,
                 DataSourceType = DataSourceType.DCS,
                 CalculationType = CalculationType.FirstLastDifference,
                 DcsSelector = x => x.Cell20, //用配后流量 可以方便和配后浓度一起计算单耗
@@ -123,7 +103,7 @@ namespace CenterBackend.Models.CalculateData
             {
                 Index = 1,
                 Name = "液氨",
-                AggregationType = AggregationType.Sum,
+                AggregationType = AggregationType.SumDiv,
                 DataSourceType = DataSourceType.DCS,
                 CalculationType = CalculationType.FirstLastDifference,
                 DcsSelector = x => x.Cell8,
@@ -133,7 +113,7 @@ namespace CenterBackend.Models.CalculateData
             {
                 Index = 2,
                 Name = "稀硫酸",
-                AggregationType = AggregationType.Sum,
+                AggregationType = AggregationType.SumDiv,
                 DataSourceType = DataSourceType.DCS,
                 CalculationType = CalculationType.FirstLastDifference,
                 DcsSelector = x => x.Cell37,
@@ -253,7 +233,7 @@ namespace CenterBackend.Models.CalculateData
             {
                 Index = 14,
                 Name = "脱盐水消耗",
-                AggregationType = AggregationType.Average,
+                AggregationType = AggregationType.SumDiv,
                 DataSourceType = DataSourceType.DCS,
                 CalculationType = CalculationType.FirstLastDifference,
                 DcsSelector = x => x.Cell143,
@@ -263,7 +243,7 @@ namespace CenterBackend.Models.CalculateData
             {
                 Index = 15,
                 Name = "废液排放",
-                AggregationType = AggregationType.Sum,
+                AggregationType = AggregationType.SumDiv,
                 DataSourceType = DataSourceType.DCS,
                 CalculationType = CalculationType.FirstLastDifference,
                 DcsSelector = x => x.Cell134,
@@ -273,7 +253,7 @@ namespace CenterBackend.Models.CalculateData
             {
                 Index = 16,
                 Name = "低压蒸汽",
-                AggregationType = AggregationType.Sum,
+                AggregationType = AggregationType.SumDiv,
                 DataSourceType = DataSourceType.Operator,
                 CalculationType = CalculationType.FirstLastDifference,
                 OperatorSelector = x => x.Cell71,
@@ -283,7 +263,7 @@ namespace CenterBackend.Models.CalculateData
             {
                 Index = 17,
                 Name = "中压蒸汽",
-                AggregationType = AggregationType.Sum,
+                AggregationType = AggregationType.SumDiv,
                 DataSourceType = DataSourceType.Operator,
                 CalculationType = CalculationType.FirstLastDifference,
                 OperatorSelector = x => x.Cell72,
@@ -293,7 +273,7 @@ namespace CenterBackend.Models.CalculateData
             {
                 Index = 18,
                 Name = "电能消耗",
-                AggregationType = AggregationType.Sum,
+                AggregationType = AggregationType.SumDiv,
                 DataSourceType = DataSourceType.Operator,
                 CalculationType = CalculationType.FirstLastDifference,
                 OperatorSelector = x => x.Cell73,
