@@ -192,11 +192,11 @@ public class MaterialData
             new MaterialItemConfig
             {
                 Index = 10,
-                Name = "预冷器结晶温度",
+                Name = "闪发器温度",
                 AggregationType = AggregationType.Average,
                 DataSourceType = DataSourceType.DCS,
                 CalculationType = CalculationType.Average,
-                DcsSelector = x => x.Cell62,
+                DcsSelector = x => x.Cell39,
                 Mul = 1,
             },
             new MaterialItemConfig

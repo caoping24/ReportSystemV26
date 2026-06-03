@@ -42,6 +42,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Report\" />
 	  <Folder Include="wwwroot\Log\" />
 	</ItemGroup>
 	<ItemGroup>
