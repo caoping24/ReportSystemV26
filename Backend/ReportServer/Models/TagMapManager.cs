@@ -93,7 +93,7 @@ namespace ReportServer.Models
             AddTagMap("FT05411/MonAnalog.PV_Out#Value", "cell36");
             AddTagMap("FT05411/FQ.Out#Value", "cell37");
             AddTagMap("LT05417/MonAnalog.PV_Out#Value", "cell38");
-            AddTagMap("TT05324/MonAnalog.PV_Out#Value", "cell39");
+            AddTagMap("TT05352/MonAnalog.PV_Out#Value", "cell39");//闪发器温度
             AddTagMap("PT05327/MonAnalog.PV_Out#Value", "cell40");
             AddTagMap("FT05323/MonAnalog.PV_Out#Value", "cell41");
             AddTagMap("FT05323/FQ.Out#Value", "cell42");
