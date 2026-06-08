@@ -134,7 +134,7 @@ namespace CenterBackend.Controllers
         {
             new GroupHeader
             {
-                Props = new List<string> { "Cell1", "Cell2", "Cell3", "Cell4", "Cell5" },
+                Props = new List<string> { "Cell1", "Cell2", "Cell3", "Cell4", "Cell5", "Cell6" },
                 Label = "闪发器冷凝液成分检测",
                 Unit = ""
             }
@@ -148,6 +148,7 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell3", Label = "NH3-N氨氮(mg/L)", Unit = "mg/L" },
             new TableHeaderDto { Prop = "Cell4", Label = "HCHO甲醛(mg/L)", Unit = "mg/L" },
             new TableHeaderDto { Prop = "Cell5", Label = "闪发器冷凝液pH", Unit = "" },
+            new TableHeaderDto { Prop = "Cell6", Label = "羟基乙腈含量(g/l)", Unit = "g/l" },//2026年7月7日增加
         }
     },
  
@@ -314,7 +315,7 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell74", "Cell75", "Cell76", "Cell77", "Cell78", "Cell79", "Cell80" },
-                Label = "废液检测数据",
+                Label = "二次母液检测数据",//Label = "废液检测数据",//2026年7月7日 改名
                 Unit = ""
             }
         },
@@ -328,6 +329,26 @@ namespace CenterBackend.Controllers
             new TableHeaderDto { Prop = "Cell78", Label = "三乙腈(%)", Unit = "" },
             new TableHeaderDto { Prop = "Cell79", Label = "其它(%)", Unit = "" },
             new TableHeaderDto { Prop = "Cell80", Label = "水分(%)", Unit = "" },
+        }
+    }, 
+     // 表8：降膜蒸发  2026年7月7日增加 使用Cell65~cell70
+    new TableHeaderMainDto
+    {
+        groupHeaders = new List<GroupHeader>
+        {
+            new GroupHeader
+            {
+                Props = new List<string> { "Cell65", "Cell66", "Cell67"},
+                Label = "降膜蒸发检测",
+                Unit = ""
+            }
+        },
+        tableHeaders = new List<TableHeaderDto>
+        {
+            new TableHeaderDto { Prop = "hour", Label = "小时", Unit = "" },
+            new TableHeaderDto { Prop = "Cell65", Label = "二乙睛含量(%)", Unit = "" },
+            new TableHeaderDto { Prop = "Cell66", Label = "羟基乙腈含量（g/L)", Unit = "" },
+            new TableHeaderDto { Prop = "Cell67", Label = "硫铵含量(g/L)", Unit = "" },
         }
     }
 

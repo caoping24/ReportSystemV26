@@ -18,7 +18,7 @@
         {{ dayjs(record.reportedTime).format("YYYY-MM-DD") }}
       </template>
       <template v-else-if="column.dataIndex === 'createTime'">
-        {{ dayjs(record.createdtime).format("YYYY-MM-DD HH:mm:ss") }}
+        {{ dayjs(record.lastChange).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
       <template v-if="column.key === 'description'">
         {{ record.description }}

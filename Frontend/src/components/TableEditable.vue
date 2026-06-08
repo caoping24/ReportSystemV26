@@ -90,7 +90,8 @@ const tablePages: EditableTab[] = [
   { key: "4", tab: "一次母液", componentPage: 4, type: 4 },
   { key: "5", tab: "母液脱色前后", componentPage: 5, type: 5 },
   { key: "6", tab: "能源消耗", componentPage: 6, type: 6 },
-  { key: "7", tab: "废液", componentPage: 6, type: 7 },
+  { key: "7", tab: "二次母液", componentPage: 6, type: 7 },
+  { key: "8", tab: "降膜蒸发", componentPage: 8, type: 8 },
 ];
 
 const activeKey = ref<string>("1");
