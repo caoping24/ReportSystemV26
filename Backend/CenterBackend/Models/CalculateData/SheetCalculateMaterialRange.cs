@@ -58,7 +58,11 @@ namespace CenterBackend.Models.CalculateData
                 switch (config.AggregationType)
                 {
                     case AggregationType.SumDiv:
-                        RangeCollections[config.Index] = dayValues.Sum() / DailyCollections.Sum(x=>x.Yield) ?? 0;
+                        var sumYield = DailyCollections.Sum(x => x.Yield) ?? 0m;
+                        if (sumYield != 0m)
+                            RangeCollections[config.Index] = (dayValues.Sum() ?? 0m) / sumYield;
+                        else
+                            RangeCollections[config.Index] = 0m;
                         break;
                     case AggregationType.Average:
                         RangeCollections[config.Index] = dayValues.Count != 0 ? (dayValues.Where(x => x != 0).Average() ?? 0) : 0;
