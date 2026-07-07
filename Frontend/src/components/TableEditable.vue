@@ -86,7 +86,7 @@ interface EditableTab {
 const tablePages: EditableTab[] = [
   { key: "1", tab: "闪发器冷凝液", componentPage: 1, type: 1 },
   { key: "2", tab: "反应液", componentPage: 2, type: 2 },
-  { key: "3", tab: "一次/二次结晶物/产品", componentPage: 3, type: 3 },
+  { key: "3", tab: "结晶物/产品", componentPage: 3, type: 3 },
   { key: "4", tab: "一次母液", componentPage: 4, type: 4 },
   { key: "5", tab: "母液脱色前后", componentPage: 5, type: 5 },
   { key: "6", tab: "能源消耗", componentPage: 6, type: 6 },

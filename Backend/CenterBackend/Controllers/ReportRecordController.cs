@@ -315,7 +315,7 @@ namespace CenterBackend.Controllers
             new GroupHeader
             {
                 Props = new List<string> { "Cell74", "Cell75", "Cell76", "Cell77", "Cell78", "Cell79", "Cell80" },
-                Label = "二次母液检测数据",//Label = "废液检测数据",//2026年7月7日 改名
+                Label = "二次母液检测",//Label = "废液检测数据",//2026年7月7日 改名
                 Unit = ""
             }
         },

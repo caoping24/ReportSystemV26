@@ -41,6 +41,7 @@ import {
   DashboardOutlined,
   FileTextOutlined,
   EditOutlined,
+  ControlOutlined,
 } from "@ant-design/icons-vue";
 import { userLogout } from "@/api/user";
 
@@ -68,6 +69,13 @@ const items = ref<MenuProps["items"]>([
     title: "数据录入",
     // 2. 核心修改：将 DashboardOutlined 替换为 EditOutlined（手动填写的新图标）
     icon: () => h(EditOutlined),
+  },
+  // 2026-07-08 新增第四项
+  {
+    key: "/app/components/filter-config",
+    label: "筛选配置",
+    title: "筛选配置",
+    icon: () => h(ControlOutlined), // 你可以选择一个合适的图标
   },
 ]);
 

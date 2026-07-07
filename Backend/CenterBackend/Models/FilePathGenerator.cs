@@ -93,7 +93,7 @@
                 Type = 4,
                 Directory = Path.Combine(_rootDirectory, "周报表", $"{weekBelongYear}-{weekBelongMonth:00}"),
                 FileName = $"周报表-{weekBelongYear}年{weekNumberInYear:00}周.xlsx",
-
+                ReportedTime = weekFirstDay,
                 ModFilePath = Path.Combine(_modelFileDirectory, modelFileNameWeek),
             };
             return pathAndName;

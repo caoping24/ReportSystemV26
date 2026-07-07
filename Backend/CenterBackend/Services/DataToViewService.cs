@@ -8,17 +8,18 @@ using Masuit.Tools;
 
 namespace CenterBackend.Services
 {
-    public class DataToViewService(IReportRepository<SourceData> sourceData, IReportRepository<OperatorInputData> operatorInputData) : IDataToViewService
+    public class DataToViewService(IReportRepository<SourceData> sourceData, IReportRepository<OperatorInputData> operatorInputData, IFilterConfigService filterConfigService) : IDataToViewService
     {
         private readonly IReportRepository<SourceData> _sourceData = sourceData;
         private readonly IReportRepository<OperatorInputData> _operatorInputData = operatorInputData;
-
+        private readonly IFilterConfigService _filterConfigService = filterConfigService;
         public async Task<bool> DayGetMapDataAsync(DayWorkBook dayWorkBook)
         {
             DateTime startTime = dayWorkBook.ReportedTime.Date.AddHours(8);
             DateTime endTime = startTime.AddHours(25);
             var sourceData = await _sourceData.GetByDateTimeRangeAsync(startTime, endTime);
             if (sourceData == null || sourceData.Count == 0) return false;//未查到数据
+            sourceData = _filterConfigService.GetFilteredData(sourceData);  //筛选数据
             var operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startTime, endTime);
             MoveDataShifts(dayWorkBook, sourceData, operatorInputData);
             MoveDataShiftsAnalysis(dayWorkBook, sourceData, operatorInputData);
@@ -32,7 +33,7 @@ namespace CenterBackend.Services
 
             List<SourceData> sourceData = await _sourceData.GetByDateTimeRangeAsync(startDay, endDay);
             List<OperatorInputData> operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startDay, endDay);
-
+            sourceData = _filterConfigService.GetFilteredData(sourceData);  //筛选数据
             MoveDataMonthAnalysis(monthWorkBook, sourceData, operatorInputData);
             return true;
         }
@@ -43,6 +44,7 @@ namespace CenterBackend.Services
 
             List<SourceData> sourceData = await _sourceData.GetByDateTimeRangeAsync(startDay, endDay);
             List<OperatorInputData> operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startDay, endDay);
+            sourceData = _filterConfigService.GetFilteredData(sourceData);  //筛选数据
             MoveDataYearAnalysis(yearWorkBook, sourceData, operatorInputData);
             return true;
         }
@@ -53,6 +55,7 @@ namespace CenterBackend.Services
 
             List<SourceData> sourceData = await _sourceData.GetByDateTimeRangeAsync(startDay, endDay);
             List<OperatorInputData> operatorInputData = await _operatorInputData.GetByDateTimeRangeAsync(startDay, endDay);
+            sourceData = _filterConfigService.GetFilteredData(sourceData);  //筛选数据
             WeekMoveDataSheet1Async(weekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet2Async(weekWorkBook, sourceData, operatorInputData);
             WeekMoveDataSheet3Async(weekWorkBook, sourceData, operatorInputData);

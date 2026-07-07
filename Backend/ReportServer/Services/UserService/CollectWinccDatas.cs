@@ -120,18 +120,18 @@ namespace ReportServer.Services.UserService
         private static string GetYearWeekString(DateTime now)
         {
             DayOfWeek day = now.DayOfWeek;
-            int days = day - DayOfWeek.Monday;
+            int days = day - DayOfWeek.Thursday;
             if (days < 0) days += 7;
 
-            DateTime monday = now.AddDays(-days);// 取当前周一
+            DateTime Thursday = now.AddDays(-days);// 取当前周一
             var culture = System.Globalization.CultureInfo.InvariantCulture;// 计算 ISO 标准周数
             var calendar = culture.Calendar;
             int weekNum = calendar.GetWeekOfYear(
-                monday,
+                Thursday,
                 System.Globalization.CalendarWeekRule.FirstFourDayWeek,
-                DayOfWeek.Monday
+                DayOfWeek.Thursday
             );
-            int year = monday.Year;
+            int year = Thursday.Year;
             return $"{year}年第{weekNum}周";
         }
     }

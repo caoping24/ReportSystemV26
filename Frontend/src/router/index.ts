@@ -65,6 +65,13 @@ const routes: Array<RouteRecordRaw> = [
         component: TableEditable,
         meta: { title: "手动填写" },
       },
+      // 2026-07-08 新增第四项
+      {
+        path: "components/filter-config",
+        name: "FilterConfig",
+        component: () => import("@/components/FilterConfigPage.vue"),
+        meta: { title: "筛选配置" },
+      },
     ],
   },
   // 404页面

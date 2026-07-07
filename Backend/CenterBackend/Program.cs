@@ -79,6 +79,10 @@ namespace CenterBackend
             // 注册日志服务(单例)，FileLogger 会使用 IWebHostEnvironment.ContentRootPath 定位到 wwwroot/log
             builder.Services.AddSingleton<IAppLogger, FileLogger>();
 
+            // 2026年7月8日新增 —— 筛选配置服务
+            builder.Services.AddSingleton<IFilterConfigService, FilterConfigService>();
+            builder.Services.AddScoped<DataFilterService>();
+
             // 显式注册控制器所在的程序集，确保在 ReportServer 进程内也能发现控制器
             builder.Services.AddControllers()
                 .AddApplicationPart(typeof(Program).Assembly) // 确保包含 CenterBackend 的控制器
@@ -151,6 +155,12 @@ namespace CenterBackend
 
             var app = builder.Build();
 
+            //加载筛选配置
+            using (var initScope = app.Services.CreateScope())
+            {
+                var configService = initScope.ServiceProvider.GetRequiredService<IFilterConfigService>();
+                configService.ReloadAsync().GetAwaiter().GetResult();
+            }
 
             //启动定时任务
             // 启动定时任务(用 DI API，避免 JobStorage.Current 未初始化)
