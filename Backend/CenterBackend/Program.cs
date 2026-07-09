@@ -141,6 +141,7 @@ namespace CenterBackend
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "报表系统API", Version = "v1" });
+
             });
 
             // Kestrel 绑定到 loopback(本机)，避免 ListenAnyIP 导致防火墙弹窗
@@ -207,6 +208,7 @@ namespace CenterBackend
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "报表系统API v1");
                     c.RoutePrefix = "swagger";
+                    c.HeadContent = "<a href='/' style='position:absolute;top:14px;left:16px;color:white;'>返回首页</a>";
                 });
             }
             string useHangfireDashboard = configuration.GetValue<string>("UseHangfireDashboard:ON") ?? string.Empty;
