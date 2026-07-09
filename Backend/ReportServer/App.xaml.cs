@@ -187,7 +187,7 @@ namespace ReportServer
                 string webApiProjectDir = Path.GetDirectoryName(typeof(CenterBackend.Program).Assembly.Location) ?? AppContext.BaseDirectory;
                 string contentRootPath = Path.GetFullPath(webApiProjectDir);
                 int port = 5260;
-                var app = CenterBackend.Program.BuildWebApplication(Array.Empty<string>(), contentRootPath, port);// 传入正确的 contentRootPath
+                var app = await CenterBackend.Program.BuildWebApplicationAsync(Array.Empty<string>(), contentRootPath, port);// 传入正确的 contentRootPath
                 await app.StartAsync();
                 lock (_apiLock) _apiApp = app;
                 UpdateMenuState();

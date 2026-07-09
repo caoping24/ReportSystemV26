@@ -11,12 +11,14 @@ namespace CenterBackend.Services
     public class BackGroundServices(IReportRepository<SourceData> sourceData,
                                     IReportRepository<OperatorInputData> operatorInputData,
                                     IReportRepository<ComToSiemens> comToSiemens,
-                                    IReportUnitOfWork reportUnitOfWork) : IBackGroundServices
+                                    IReportUnitOfWork reportUnitOfWork,
+                                    IFilterConfigService filterConfigService) : IBackGroundServices
     {
         private readonly IReportRepository<SourceData> _sourceData = sourceData;
         private readonly IReportRepository<OperatorInputData> _operatorInputData = operatorInputData;
         private readonly IReportRepository<ComToSiemens> _comToSiemens = comToSiemens;
         private readonly IReportUnitOfWork _reportUnitOfWork = reportUnitOfWork;
+        private readonly IFilterConfigService _filterConfigService = filterConfigService;
 
         public async Task Daily0810()
         {
@@ -24,6 +26,7 @@ namespace CenterBackend.Services
             DateTime end = start.AddHours(25); //25条数据
             List<SourceData> sourceDatas = await _sourceData.GetByDateTimeRangeAsync(start, end);
             List<OperatorInputData> operatorInputDatas = await _operatorInputData.GetByDateTimeRangeAsync(start, end);
+            sourceDatas = _filterConfigService.GetFilteredData(sourceDatas);  //筛选数据
             var data = await CalDataAsync(1, start, end, sourceDatas, operatorInputDatas);
             if (data != null)
             {
@@ -42,6 +45,7 @@ namespace CenterBackend.Services
             //end = start.AddDays(7).AddHours(1);
             List<SourceData> sourceDatas = await _sourceData.GetByDateTimeRangeAsync(start, end);
             List<OperatorInputData> operatorInputDatas = await _operatorInputData.GetByDateTimeRangeAsync(start, end);
+            sourceDatas = _filterConfigService.GetFilteredData(sourceDatas);  //筛选数据
             var data = await CalDataAsync(2, start, end, sourceDatas, operatorInputDatas);
             if (data != null)
             {
@@ -58,6 +62,7 @@ namespace CenterBackend.Services
             DateTime end = start.AddMonths(1).AddHours(9);
             List<SourceData> sourceDatas = await _sourceData.GetByDateTimeRangeAsync(start, end);
             List<OperatorInputData> operatorInputDatas = await _operatorInputData.GetByDateTimeRangeAsync(start, end);
+            sourceDatas = _filterConfigService.GetFilteredData(sourceDatas);  //筛选数据
             var data = await CalDataAsync(3, start, end, sourceDatas, operatorInputDatas);
             if (data != null)
             {

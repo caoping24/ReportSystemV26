@@ -19,7 +19,7 @@ namespace CenterBackend.Models.ExcelDataView
                 int weekOfYear = calendar.GetWeekOfYear(
                     this.ReportedTime.Date,
                     CalendarWeekRule.FirstDay,    // 周规则
-                    DayOfWeek.Monday              // 一周起始日(周一)
+                    DayOfWeek.Thursday              // 
                 );
                 var temp = $"{ReportedTime.Year}年{weekOfYear}周";
                 return temp;

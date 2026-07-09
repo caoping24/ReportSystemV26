@@ -19,16 +19,15 @@ namespace CenterBackend
 {
     public class Program
     {
-        // 保持原有 Main 行为，单独运行时不变
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var app = BuildWebApplication(args);
+            var app = await BuildWebApplicationAsync(args);
             app.Run();
         }
 
         // 对外提供的工厂方法：构建 WebApplication(但不 Run)
         // contentRootPath 可用于在外部(如 WPF)指定静态文件所在的目录
-        public static WebApplication BuildWebApplication(string[]? args = null, string? contentRootPath = null, int port = 5260)
+        public static async Task<WebApplication> BuildWebApplicationAsync(string[]? args = null, string? contentRootPath = null, int port = 5260)
         {
             var builder = WebApplication.CreateBuilder(args ?? Array.Empty<string>());
 
@@ -56,7 +55,7 @@ namespace CenterBackend
                    .UseSqlServerStorage(defaultConnection, new SqlServerStorageOptions
                    {
                        PrepareSchemaIfNecessary = true,
-                       SchemaName = "hangfire" // 可选
+                       SchemaName = "hangfire"
                    });
             });
 
@@ -85,7 +84,7 @@ namespace CenterBackend
 
             // 显式注册控制器所在的程序集，确保在 ReportServer 进程内也能发现控制器
             builder.Services.AddControllers()
-                .AddApplicationPart(typeof(Program).Assembly) // 确保包含 CenterBackend 的控制器
+                .AddApplicationPart(typeof(Program).Assembly)
                 .AddControllersAsServices();
 
             builder.Services.AddSpaStaticFiles(spaConfig =>
@@ -100,23 +99,38 @@ namespace CenterBackend
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.None;
-                options.Cookie.Name = "ReportSystem_SessionId";
+                options.Cookie.SameSite = SameSiteMode.Lax;
             });
 
-            var allowedOrigins = configuration["CorsPolicy:AllowedOrigins"]?.Split(',') ?? Array.Empty<string>();
+            // CORS
+            var corsPolicy = configuration.GetSection("CorsPolicy");
+            var allowedOrigins = corsPolicy.GetValue<string>("AllowedOrigins") ?? "";
+            var origins = allowedOrigins
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct()
+                .ToArray();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("Policy", policy =>
                 {
-                    policy.WithOrigins(allowedOrigins)
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials()
-                          .WithExposedHeaders("Content-Disposition");// 标准：暴露非简单响应头，前端才能读取 Content-Disposition
+                    if (origins.Length > 0)
+                        policy.WithOrigins(origins)
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials();
+                    else
+                        policy.AllowAnyOrigin()
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
                 });
             });
+
+            // 添加响应压缩
+            builder.Services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+            });
+
             builder.Services.AddAuthentication("CookieAuth")
                 .AddCookie("CookieAuth", options =>
                 {
@@ -147,8 +161,7 @@ namespace CenterBackend
             // Kestrel 绑定到 loopback(本机)，避免 ListenAnyIP 导致防火墙弹窗
             builder.WebHost.UseKestrel(options =>
             {
-                // 【核心修正】从 ListenLocalhost 改为 ListenAnyIP，允许局域网访问
-                options.ListenAnyIP(port); // 替换原 options.ListenLocalhost(port);
+                options.ListenAnyIP(port);
                 options.Limits.MaxConcurrentConnections = 1000;
                 options.AllowSynchronousIO = true;
                 options.Limits.MaxConcurrentUpgradedConnections = 1000;
@@ -156,15 +169,14 @@ namespace CenterBackend
 
             var app = builder.Build();
 
-            //加载筛选配置
+            // 加载筛选配置
             using (var initScope = app.Services.CreateScope())
             {
                 var configService = initScope.ServiceProvider.GetRequiredService<IFilterConfigService>();
-                configService.ReloadAsync().GetAwaiter().GetResult();
+                await configService.ReloadAsync();
             }
 
-            //启动定时任务
-            // 启动定时任务(用 DI API，避免 JobStorage.Current 未初始化)
+            // 启动定时任务
             var tz = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
             var opt = new RecurringJobOptions { TimeZone = tz };
 
@@ -191,9 +203,7 @@ namespace CenterBackend
                     opt);
             }
 
-
-
-            // 临时请求日志(便于确认请求是否到达服务器；可上线前移除)
+            // 临时请求日志
             app.Use(async (ctx, next) =>
             {
                 Console.WriteLine($"[REQ] {ctx.Request.Method} {ctx.Request.Path}");
@@ -227,7 +237,6 @@ namespace CenterBackend
             app.MapControllers();
             app.MapFallbackToFile("dist/index.html");
 
-            // 返回构建好的 app，调用方负责 StartAsync / StopAsync / Run
             return app;
         }
     }

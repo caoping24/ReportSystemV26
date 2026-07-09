@@ -114,8 +114,8 @@ namespace ReportServer.Services.UserService
         private static bool IsMonthly(DateTime time) => time.Day == 1 && time.Hour == 9;
         // 判断时间=1月1号9点
         private static bool IsYearly(DateTime time) => time.Month == 1 && time.Day == 1 && time.Hour == 9;
-        // 判断时间=周一9点
-        private static bool IsWeekly(DateTime time) => time.DayOfWeek == DayOfWeek.Monday && time.Hour == 9;
+        // 判断时间=周四9点
+        private static bool IsWeekly(DateTime time) => time.DayOfWeek == DayOfWeek.Thursday && time.Hour == 9;
         // 获取日期所在周数
         private static string GetYearWeekString(DateTime now)
         {
@@ -123,7 +123,7 @@ namespace ReportServer.Services.UserService
             int days = day - DayOfWeek.Thursday;
             if (days < 0) days += 7;
 
-            DateTime Thursday = now.AddDays(-days);// 取当前周一
+            DateTime Thursday = now.AddDays(-days);// 
             var culture = System.Globalization.CultureInfo.InvariantCulture;// 计算 ISO 标准周数
             var calendar = culture.Calendar;
             int weekNum = calendar.GetWeekOfYear(
