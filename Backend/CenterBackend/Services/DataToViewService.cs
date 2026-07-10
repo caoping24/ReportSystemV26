@@ -452,13 +452,13 @@ namespace CenterBackend.Services
                 target.Cell19 = MathTools.CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
                 target.Cell20 = MathTools.CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
 
-                target.Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
-                target.Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
-                target.Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
-                target.Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
-                target.Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
-                target.Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
-                target.Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
+                target.Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74) / 12.40m;  //	羟基乙腈
+                target.Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75) / 12.40m;  //	硫铵
+                target.Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76) ;           //	二乙腈
+                target.Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77) / 12.40m;  //	甘氨腈
+                target.Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78) / 12.40m;  //	三乙腈
+                //target.Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
+                //target.Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
             }
         }
         private static void MoveDataMonthAnalysis(MonthWorkBook monthWorkBook, List<SourceData> sourceDatas, List<OperatorInputData> operatorInputDatas)
@@ -503,13 +503,13 @@ namespace CenterBackend.Services
                 target.Cell19 = MathTools.CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
                 target.Cell20 = MathTools.CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
 
-                target.Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
-                target.Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
-                target.Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
-                target.Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
-                target.Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
-                target.Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
-                target.Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
+                target.Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74) / 12.40m;  //	羟基乙腈
+                target.Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75) / 12.40m;  //	硫铵
+                target.Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76) ;           //	二乙腈
+                target.Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77) / 12.40m;  //	甘氨腈
+                target.Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78) / 12.40m;  //	三乙腈
+                //target.Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
+                //target.Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
             }
 
         }
@@ -556,13 +556,13 @@ namespace CenterBackend.Services
                 target.Cell19 = MathTools.CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
                 target.Cell20 = MathTools.CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
 
-                target.Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
-                target.Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
-                target.Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
-                target.Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
-                target.Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
-                target.Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
-                target.Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
+                target.Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74) / 12.40m;  //	羟基乙腈
+                target.Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75) / 12.40m;  //	硫铵
+                target.Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76) ;           //	二乙腈
+                target.Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77) / 12.40m;  //	甘氨腈
+                target.Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78) / 12.40m;  //	三乙腈
+                //target.Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
+                //target.Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
             }
 
         }
@@ -606,13 +606,13 @@ namespace CenterBackend.Services
                 WeekWorkBook.WorkSheet1[i].Cell19 = MathTools.CalculateAverage(operatorInputData, x => x.Cell15);  //	甘氨腈
                 WeekWorkBook.WorkSheet1[i].Cell20 = MathTools.CalculateAverage(operatorInputData, x => x.Cell16);  //	三乙腈
 
-                WeekWorkBook.WorkSheet1[i].Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74);  //	羟基乙腈
-                WeekWorkBook.WorkSheet1[i].Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75);  //	硫铵
-                WeekWorkBook.WorkSheet1[i].Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76);  //	二乙腈
-                WeekWorkBook.WorkSheet1[i].Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77);  //	甘氨腈
-                WeekWorkBook.WorkSheet1[i].Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78);  //	三乙腈
-                WeekWorkBook.WorkSheet1[i].Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
-                WeekWorkBook.WorkSheet1[i].Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
+                WeekWorkBook.WorkSheet1[i].Cell22 = MathTools.CalculateAverage(operatorInputData, x => x.Cell74) / 12.40m;  //	羟基乙腈
+                WeekWorkBook.WorkSheet1[i].Cell23 = MathTools.CalculateAverage(operatorInputData, x => x.Cell75) / 12.40m;  //	硫铵
+                WeekWorkBook.WorkSheet1[i].Cell24 = MathTools.CalculateAverage(operatorInputData, x => x.Cell76) ;           //	二乙腈
+                WeekWorkBook.WorkSheet1[i].Cell25 = MathTools.CalculateAverage(operatorInputData, x => x.Cell77) / 12.40m;  //	甘氨腈
+                WeekWorkBook.WorkSheet1[i].Cell26 = MathTools.CalculateAverage(operatorInputData, x => x.Cell78) / 12.40m;  //	三乙腈
+                //WeekWorkBook.WorkSheet1[i].Cell27 = MathTools.CalculateAverage(operatorInputData, x => x.Cell79); //	其它
+                //WeekWorkBook.WorkSheet1[i].Cell28 = MathTools.CalculateAverage(operatorInputData, x => x.Cell80);	//	水分
             }
             WeekWorkBook.WorkSheet9 = Materialcollection;
             return true;
